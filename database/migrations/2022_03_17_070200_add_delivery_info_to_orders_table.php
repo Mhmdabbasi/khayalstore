@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddDeliveryInfoToOrdersTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -33,4 +33,4 @@ class AddDeliveryInfoToOrdersTable extends Migration
             $table->dropColumn('third_party_delivery_tracking_id');
         });
     }
-}
+};

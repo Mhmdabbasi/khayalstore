@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddDeliverymansColumnsToChattingsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -43,4 +43,4 @@ class AddDeliverymansColumnsToChattingsTable extends Migration
             $table->dropColumn('seen_by_admin');
         });
     }
-}
+};
