@@ -41,7 +41,7 @@ class AttributeController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Attribute',
+                    ['translationable_type' => \App\Model\Attribute::class,
                         'translationable_id' => $attribute->id,
                         'locale' => $key,
                         'key' => 'name', ],
@@ -70,7 +70,7 @@ class AttributeController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Attribute',
+                    ['translationable_type' => \App\Model\Attribute::class,
                         'translationable_id' => $attribute->id,
                         'locale' => $key,
                         'key' => 'name', ],
@@ -85,7 +85,7 @@ class AttributeController extends Controller
 
     public function delete(Request $request)
     {
-        $translation = Translation::where('translationable_type', 'App\Model\Attribute')
+        $translation = Translation::where('translationable_type', \App\Model\Attribute::class)
                                     ->where('translationable_id', $request->id);
         $translation->delete();
         Attribute::destroy($request->id);

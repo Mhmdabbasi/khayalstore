@@ -59,7 +59,7 @@ class CategoryController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 array_push($data, [
-                    'translationable_type' => 'App\Model\Category',
+                    'translationable_type' => \App\Model\Category::class,
                     'translationable_id' => $category->id,
                     'locale' => $key,
                     'key' => 'name',
@@ -97,7 +97,7 @@ class CategoryController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Category',
+                    ['translationable_type' => \App\Model\Category::class,
                         'translationable_id' => $category->id,
                         'locale' => $key,
                         'key' => 'name', ],
@@ -119,19 +119,19 @@ class CategoryController extends Controller
                 $categories1 = Category::where('parent_id', $category->id)->get();
                 if (! empty($categories1)) {
                     foreach ($categories1 as $category1) {
-                        $translation = Translation::where('translationable_type', 'App\Model\Category')
+                        $translation = Translation::where('translationable_type', \App\Model\Category::class)
                                     ->where('translationable_id', $category1->id);
                         $translation->delete();
                         Category::destroy($category1->id);
                     }
                 }
-                $translation = Translation::where('translationable_type', 'App\Model\Category')
+                $translation = Translation::where('translationable_type', \App\Model\Category::class)
                                     ->where('translationable_id', $category->id);
                 $translation->delete();
                 Category::destroy($category->id);
             }
         }
-        $translation = Translation::where('translationable_type', 'App\Model\Category')
+        $translation = Translation::where('translationable_type', \App\Model\Category::class)
                                     ->where('translationable_id', $request->id);
         $translation->delete();
         Category::destroy($request->id);

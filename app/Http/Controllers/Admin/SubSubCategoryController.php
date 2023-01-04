@@ -52,7 +52,7 @@ class SubSubCategoryController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Category',
+                    ['translationable_type' => \App\Model\Category::class,
                         'translationable_id' => $category->id,
                         'locale' => $key,
                         'key' => 'name', ],
@@ -95,7 +95,7 @@ class SubSubCategoryController extends Controller
 
     public function delete(Request $request)
     {
-        $translation = Translation::where('translationable_type', 'App\Model\Category')
+        $translation = Translation::where('translationable_type', \App\Model\Category::class)
                                     ->where('translationable_id', $request->id);
         $translation->delete();
         Category::destroy($request->id);

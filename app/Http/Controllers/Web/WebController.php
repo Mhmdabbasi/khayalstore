@@ -709,7 +709,7 @@ class WebController extends Controller
             })->pluck('id');
 
             if ($product_ids->count() == 0) {
-                $product_ids = Translation::where('translationable_type', 'App\Model\Product')
+                $product_ids = Translation::where('translationable_type', \App\Model\Product::class)
                     ->where('key', 'name')
                     ->where(function ($q) use ($key) {
                         foreach ($key as $value) {

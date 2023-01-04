@@ -282,7 +282,7 @@ class ProductController extends BaseController
             foreach ($request->lang as $index => $key) {
                 if ($request->name[$index] && $key != 'en') {
                     array_push($data, [
-                        'translationable_type' => 'App\Model\Product',
+                        'translationable_type' => \App\Model\Product::class,
                         'translationable_id' => $p->id,
                         'locale' => $key,
                         'key' => 'name',
@@ -291,7 +291,7 @@ class ProductController extends BaseController
                 }
                 if ($request->description[$index] && $key != 'en') {
                     array_push($data, [
-                        'translationable_type' => 'App\Model\Product',
+                        'translationable_type' => \App\Model\Product::class,
                         'translationable_id' => $p->id,
                         'locale' => $key,
                         'key' => 'description',
@@ -818,7 +818,7 @@ class ProductController extends BaseController
             foreach ($request->lang as $index => $key) {
                 if ($request->name[$index] && $key != 'en') {
                     Translation::updateOrInsert(
-                        ['translationable_type' => 'App\Model\Product',
+                        ['translationable_type' => \App\Model\Product::class,
                             'translationable_id' => $product->id,
                             'locale' => $key,
                             'key' => 'name', ],
@@ -827,7 +827,7 @@ class ProductController extends BaseController
                 }
                 if ($request->description[$index] && $key != 'en') {
                     Translation::updateOrInsert(
-                        ['translationable_type' => 'App\Model\Product',
+                        ['translationable_type' => \App\Model\Product::class,
                             'translationable_id' => $product->id,
                             'locale' => $key,
                             'key' => 'description', ],
@@ -868,7 +868,7 @@ class ProductController extends BaseController
     {
         $product = Product::find($id);
 
-        $translation = Translation::where('translationable_type', 'App\Model\Product')
+        $translation = Translation::where('translationable_type', \App\Model\Product::class)
             ->where('translationable_id', $id);
         $translation->delete();
 

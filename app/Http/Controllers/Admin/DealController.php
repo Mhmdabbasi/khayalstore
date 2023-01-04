@@ -61,7 +61,7 @@ class DealController extends Controller
             foreach ($request->lang as $index => $key) {
                 if ($request->title[$index] && $key != 'en') {
                     Translation::updateOrInsert(
-                        ['translationable_type' => 'App\Model\FlashDeal',
+                        ['translationable_type' => \App\Model\FlashDeal::class,
                             'translationable_id' => $flash_deal_id,
                             'locale' => $key,
                             'key' => 'title', ],
@@ -115,7 +115,7 @@ class DealController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->title[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\FlashDeal',
+                    ['translationable_type' => \App\Model\FlashDeal::class,
                         'translationable_id' => $deal_id,
                         'locale' => $key,
                         'key' => 'title', ],
@@ -269,7 +269,7 @@ class DealController extends Controller
             foreach ($request->lang as $index => $key) {
                 if ($request->title[$index] && $key != 'en') {
                     Translation::updateOrInsert(
-                        ['translationable_type' => 'App\Model\DealOfTheDay',
+                        ['translationable_type' => \App\Model\DealOfTheDay::class,
                             'translationable_id' => $deal_id,
                             'locale' => $key,
                             'key' => 'title', ],
@@ -318,7 +318,7 @@ class DealController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->title[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\DealOfTheDay',
+                    ['translationable_type' => \App\Model\DealOfTheDay::class,
                         'translationable_id' => $deal_id,
                         'locale' => $key,
                         'key' => 'title', ],

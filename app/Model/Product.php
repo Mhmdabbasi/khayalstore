@@ -37,7 +37,7 @@ class Product extends Model
 
     public function translations()
     {
-        return $this->morphMany('App\Model\Translation', 'translationable');
+        return $this->morphMany(\App\Model\Translation::class, 'translationable');
     }
 
     public function scopeActive($query)

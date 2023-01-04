@@ -41,7 +41,7 @@ class BrandController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Brand',
+                    ['translationable_type' => \App\Model\Brand::class,
                         'translationable_id' => $brand->id,
                         'locale' => $key,
                         'key' => 'name', ],
@@ -135,7 +135,7 @@ class BrandController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Brand',
+                    ['translationable_type' => \App\Model\Brand::class,
                         'translationable_id' => $brand->id,
                         'locale' => $key,
                         'key' => 'name', ],
@@ -167,7 +167,7 @@ class BrandController extends Controller
 
     public function delete(Request $request)
     {
-        $translation = Translation::where('translationable_type', 'App\Model\Brand')
+        $translation = Translation::where('translationable_type', \App\Model\Brand::class)
                                     ->where('translationable_id', $request->id);
         $translation->delete();
         $brand = Brand::find($request->id);

@@ -148,7 +148,7 @@ class ProductManager
     public static function translated_product_search($name, $limit = 10, $offset = 1)
     {
         $name = base64_decode($name);
-        $product_ids = Translation::where('translationable_type', 'App\Model\Product')
+        $product_ids = Translation::where('translationable_type', \App\Model\Product::class)
             ->where('key', 'name')
             ->where('value', 'like', "%{$name}%")
             ->pluck('translationable_id');
@@ -166,7 +166,7 @@ class ProductManager
     public static function translated_product_search_web($name, $limit = 10, $offset = 1)
     {
         $key = explode(' ', $name);
-        $product_ids = Translation::where('translationable_type', 'App\Model\Product')
+        $product_ids = Translation::where('translationable_type', \App\Model\Product::class)
             ->where('key', 'name')
             ->where(function ($q) use ($key) {
                 foreach ($key as $value) {

@@ -319,7 +319,7 @@ class ProductController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != Helpers::default_lang()) {
                 array_push($data, [
-                    'translationable_type' => 'App\Model\Product',
+                    'translationable_type' => \App\Model\Product::class,
                     'translationable_id' => $product->id,
                     'locale' => $key,
                     'key' => 'name',
@@ -328,7 +328,7 @@ class ProductController extends Controller
             }
             if ($request->description[$index] && $key != Helpers::default_lang()) {
                 array_push($data, [
-                    'translationable_type' => 'App\Model\Product',
+                    'translationable_type' => \App\Model\Product::class,
                     'translationable_id' => $product->id,
                     'locale' => $key,
                     'key' => 'description',
@@ -587,7 +587,7 @@ class ProductController extends Controller
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
                     [
-                        'translationable_type' => 'App\Model\Product',
+                        'translationable_type' => \App\Model\Product::class,
                         'translationable_id' => $product->id,
                         'locale' => $key,
                         'key' => 'name',
@@ -598,7 +598,7 @@ class ProductController extends Controller
             if ($request->description[$index] && $key != 'en') {
                 Translation::updateOrInsert(
                     [
-                        'translationable_type' => 'App\Model\Product',
+                        'translationable_type' => \App\Model\Product::class,
                         'translationable_id' => $product->id,
                         'locale' => $key,
                         'key' => 'description',
