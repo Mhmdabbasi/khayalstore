@@ -1,0 +1,30 @@
+[21-Aug-2022 23:24:24 Asia/Dhaka] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [1045] Access denied for user 'succewb0_khadmin'@'localhost' (using password: YES) in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:70
+Stack trace:
+#0 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(70): PDO->__construct('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#1 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(46): Illuminate\Database\Connectors\Connector->createPdoConnection('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#2 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\Database\Connectors\Connector->createConnection('mysql:host=loca...', Array, Array)
+#3 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Dat in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 712
+[22-Aug-2022 00:24:13 Asia/Dhaka] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [1045] Access denied for user 'succewb0_khadmin'@'localhost' (using password: YES) in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:70
+Stack trace:
+#0 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(70): PDO->__construct('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#1 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(46): Illuminate\Database\Connectors\Connector->createPdoConnection('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#2 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\Database\Connectors\Connector->createConnection('mysql:host=loca...', Array, Array)
+#3 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Dat in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 712
+[22-Aug-2022 15:21:38 Asia/Dhaka] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [1045] Access denied for user 'succewb0_khadmin'@'localhost' (using password: YES) in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:70
+Stack trace:
+#0 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(70): PDO->__construct('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#1 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(46): Illuminate\Database\Connectors\Connector->createPdoConnection('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#2 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\Database\Connectors\Connector->createConnection('mysql:host=loca...', Array, Array)
+#3 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Dat in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 712
+[22-Aug-2022 15:21:44 Asia/Dhaka] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [1045] Access denied for user 'succewb0_khadmin'@'localhost' (using password: YES) in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:70
+Stack trace:
+#0 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(70): PDO->__construct('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#1 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(46): Illuminate\Database\Connectors\Connector->createPdoConnection('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#2 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\Database\Connectors\Connector->createConnection('mysql:host=loca...', Array, Array)
+#3 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Dat in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 712
+[22-Aug-2022 15:22:23 Asia/Dhaka] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [1045] Access denied for user 'succewb0_khadmin'@'localhost' (using password: YES) in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:70
+Stack trace:
+#0 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(70): PDO->__construct('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#1 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php(46): Illuminate\Database\Connectors\Connector->createPdoConnection('mysql:host=loca...', 'succewb0_khadmi...', 'Integer&382350', Array)
+#2 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connectors/MySqlConnector.php(24): Illuminate\Database\Connectors\Connector->createConnection('mysql:host=loca...', Array, Array)
+#3 /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Dat in /home3/succewb0/public_html/khayaladmin/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 712
