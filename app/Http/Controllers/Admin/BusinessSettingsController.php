@@ -20,10 +20,10 @@ class BusinessSettingsController extends Controller
     public function about_us()
     {
         $about_us = BusinessSetting::where('type', 'about_us')->first();
+
         return view('admin-views.business-settings.about-us', [
             'about_us' => $about_us,
         ]);
-
     }
 
     public function about_usUpdate(Request $data)
@@ -33,6 +33,7 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::where('type', 'about_us')->update(['value' => $data->about_us]);
         Toastr::success('About Us updated successfully!');
+
         return back();
     }
 
@@ -53,7 +54,8 @@ class BusinessSettingsController extends Controller
                 'updated_at' => now(),
             ]);
         }
-        return response()->json(['message' => 'Symbol position is ' . $side]);
+
+        return response()->json(['message' => 'Symbol position is '.$side]);
     }
 
     public function business_mode_settings($mode)
@@ -73,8 +75,10 @@ class BusinessSettingsController extends Controller
                 'updated_at' => now(),
             ]);
         }
-        return response()->json(['message' => 'Business Mode is changed to ' . $mode. ' vendor']);
+
+        return response()->json(['message' => 'Business Mode is changed to '.$mode.' vendor']);
     }
+
     // Social Media
     public function social_media()
     {
@@ -86,6 +90,7 @@ class BusinessSettingsController extends Controller
     {
         if ($request->ajax()) {
             $data = SocialMedia::where('status', 1)->orderBy('id', 'desc')->get();
+
             return response()->json($data);
         }
     }
@@ -121,6 +126,7 @@ class BusinessSettingsController extends Controller
         $social_media->link = $request->link;
         $social_media->icon = $icon;
         $social_media->save();
+
         return response()->json([
             'success' => 1,
         ]);
@@ -129,6 +135,7 @@ class BusinessSettingsController extends Controller
     public function social_media_edit(Request $request)
     {
         $data = SocialMedia::where('id', $request->id)->first();
+
         return response()->json($data);
     }
 
@@ -138,6 +145,7 @@ class BusinessSettingsController extends Controller
         $social_media->name = $request->name;
         $social_media->link = $request->link;
         $social_media->save();
+
         return response()->json();
     }
 
@@ -145,6 +153,7 @@ class BusinessSettingsController extends Controller
     {
         $br = SocialMedia::find($request->id);
         $br->delete();
+
         return response()->json();
     }
 
@@ -153,6 +162,7 @@ class BusinessSettingsController extends Controller
         SocialMedia::where(['id' => $request['id']])->update([
             'active_status' => $request['status'],
         ]);
+
         return response()->json([
             'success' => 1,
         ], 200);
@@ -161,6 +171,7 @@ class BusinessSettingsController extends Controller
     public function terms_condition()
     {
         $terms_condition = BusinessSetting::where('type', 'terms_condition')->first();
+
         return view('admin-views.business-settings.terms-condition', compact('terms_condition'));
     }
 
@@ -171,12 +182,14 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::where('type', 'terms_condition')->update(['value' => $data->value]);
         Toastr::success('Terms and Condition Updated successfully!');
+
         return redirect()->back();
     }
 
     public function privacy_policy()
     {
         $privacy_policy = BusinessSetting::where('type', 'privacy_policy')->first();
+
         return view('admin-views.business-settings.privacy-policy', compact('privacy_policy'));
     }
 
@@ -187,6 +200,7 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::where('type', 'privacy_policy')->update(['value' => $data->value]);
         Toastr::success('Privacy policy Updated successfully!');
+
         return redirect()->back();
     }
 
@@ -195,6 +209,7 @@ class BusinessSettingsController extends Controller
         $company_name = BusinessSetting::where('type', 'company_name')->first();
         $company_email = BusinessSetting::where('type', 'company_email')->first();
         $company_phone = BusinessSetting::where('type', 'company_phone')->first();
+
         return view('admin-views.business-settings.website-info', [
             'company_name' => $company_name,
             'company_email' => $company_email,
@@ -207,10 +222,10 @@ class BusinessSettingsController extends Controller
         $company_name = BusinessSetting::where('type', 'company_name')->first();
         $company_email = BusinessSetting::where('type', 'company_email')->first();
         $company_phone = BusinessSetting::where('type', 'company_phone')->first();
-        $digital_product = \App\Model\BusinessSetting::where('type','digital_product')->first()->value;
-        $brand = \App\Model\BusinessSetting::where('type','product_brand')->first()->value;
+        $digital_product = \App\Model\BusinessSetting::where('type', 'digital_product')->first()->value;
+        $brand = \App\Model\BusinessSetting::where('type', 'product_brand')->first()->value;
 
-        return view('admin-views.business-settings.product-settings', compact('company_name','company_email','company_phone','digital_product','brand'));
+        return view('admin-views.business-settings.product-settings', compact('company_name', 'company_email', 'company_phone', 'digital_product', 'brand'));
     }
 
     public function updateInfo(Request $request)
@@ -226,57 +241,56 @@ class BusinessSettingsController extends Controller
         if ($request->has('shop_banner')) {
             $imgBanner = ImageManager::update('shop/', $imgBanner, 'png', $request->file('shop_banner'));
             DB::table('business_settings')->updateOrInsert(['type' => 'shop_banner'], [
-                'value' => $imgBanner
+                'value' => $imgBanner,
             ]);
         }
         // comapny name
         DB::table('business_settings')->updateOrInsert(['type' => 'company_name'], [
-            'value' => $request['company_name']
+            'value' => $request['company_name'],
         ]);
         // company email
         DB::table('business_settings')->updateOrInsert(['type' => 'company_email'], [
-            'value' => $request['company_email']
+            'value' => $request['company_email'],
         ]);
         // company Phone
         DB::table('business_settings')->updateOrInsert(['type' => 'company_phone'], [
-            'value' => $request['company_phone']
+            'value' => $request['company_phone'],
         ]);
         //company copy right text
         DB::table('business_settings')->updateOrInsert(['type' => 'company_copyright_text'], [
-            'value' => $request['company_copyright_text']
+            'value' => $request['company_copyright_text'],
         ]);
         //company time zone
         DB::table('business_settings')->updateOrInsert(['type' => 'timezone'], [
-            'value' => $request['timezone']
+            'value' => $request['timezone'],
         ]);
         //country
         DB::table('business_settings')->updateOrInsert(['type' => 'country_code'], [
-            'value' => $request['country']
+            'value' => $request['country'],
         ]);
         //phone verification
         DB::table('business_settings')->updateOrInsert(['type' => 'phone_verification'], [
-            'value' => $request['phone_verification']
+            'value' => $request['phone_verification'],
         ]);
         //email verification
         DB::table('business_settings')->updateOrInsert(['type' => 'email_verification'], [
-            'value' => $request['email_verification']
+            'value' => $request['email_verification'],
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'order_verification'], [
-            'value' => $request['order_verification']
+            'value' => $request['order_verification'],
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'forgot_password_verification'], [
-            'value' => $request['forgot_password_verification']
+            'value' => $request['forgot_password_verification'],
         ]);
         DB::table('business_settings')->updateOrInsert(['type' => 'decimal_point_settings'], [
-            'value' => $request['decimal_point_settings']
+            'value' => $request['decimal_point_settings'],
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'shop_address'], [
-            'value' => $request['shop_address']
+            'value' => $request['shop_address'],
         ]);
-
 
         //web logo
         $webLogo = BusinessSetting::where(['type' => 'company_web_logo'])->first();
@@ -343,7 +357,7 @@ class BusinessSettingsController extends Controller
 
         DB::table('business_settings')->updateOrInsert(['type' => 'default_location'], [
             'value' => json_encode(
-                [   'lat' => $request['latitude'],
+                ['lat' => $request['latitude'],
                     'lng' => $request['longitude'],
                 ]),
         ]);
@@ -357,12 +371,14 @@ class BusinessSettingsController extends Controller
         ]);
 
         Toastr::success('Updated successfully');
+
         return back();
     }
 
     public function announcement()
     {
-        $announcement=\App\CPU\Helpers::get_business_settings('announcement');
+        $announcement = \App\CPU\Helpers::get_business_settings('announcement');
+
         return view('admin-views.business-settings.website-announcement', compact('announcement'));
     }
 
@@ -370,7 +386,7 @@ class BusinessSettingsController extends Controller
     {
         DB::table('business_settings')->updateOrInsert(['type' => 'announcement'], [
             'value' => json_encode(
-                [   'status' => $request['announcement_status'],
+                ['status' => $request['announcement_status'],
                     'color' => $request['announcement_color'],
                     'text_color' => $request['text_color'],
                     'announcement' => $request['announcement'],
@@ -378,6 +394,7 @@ class BusinessSettingsController extends Controller
         ]);
 
         Toastr::success('Announcement Updated successfully!');
+
         return back();
     }
 
@@ -388,6 +405,7 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::where('type', 'company_name')->update(['value' => $data->company_name]);
         Toastr::success('Company Updated successfully!');
+
         return redirect()->back();
     }
 
@@ -398,6 +416,7 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::where('type', 'company_email')->update(['value' => $data->company_email]);
         Toastr::success('Company Email Updated successfully!');
+
         return redirect()->back();
     }
 
@@ -408,6 +427,7 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::where('type', 'company_copyright_text')->update(['value' => $data->company_copyright_text]);
         Toastr::success('Company Copy Right Updated successfully!');
+
         return redirect()->back();
     }
 
@@ -426,6 +446,7 @@ class BusinessSettingsController extends Controller
                 'value' => $img,
             ]);
         }
+
         return back();
     }
 
@@ -436,7 +457,6 @@ class BusinessSettingsController extends Controller
 
     public function update(Request $request, $name)
     {
-
         if ($name == 'download_app_apple_stroe') {
             $download_app_store = BusinessSetting::where('type', 'download_app_apple_stroe')->first();
             if (isset($download_app_store) == false) {
@@ -498,6 +518,7 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::where('type', 'company_phone')->update(['value' => $data->company_phone]);
         Toastr::success('Company Phone Updated successfully!');
+
         return redirect()->back();
     }
 
@@ -511,6 +532,7 @@ class BusinessSettingsController extends Controller
         BusinessSetting::where(['type' => 'company_web_logo'])->update([
             'value' => $img,
         ]);
+
         return back();
     }
 
@@ -525,8 +547,8 @@ class BusinessSettingsController extends Controller
             'value' => $img,
         ]);
         Toastr::success('Footer Logo updated successfully!');
-        return back();
 
+        return back();
     }
 
     public function uploadFavIcon(Request $data)
@@ -541,8 +563,8 @@ class BusinessSettingsController extends Controller
             'value' => $img,
         ]);
         Toastr::success('Fav Icon updated successfully!');
-        return back();
 
+        return back();
     }
 
     public function uploadMobileLogo(Request $data)
@@ -554,6 +576,7 @@ class BusinessSettingsController extends Controller
         BusinessSetting::where(['type' => 'company_mobile_logo'])->update([
             'value' => $img,
         ]);
+
         return back();
     }
 
@@ -579,6 +602,7 @@ class BusinessSettingsController extends Controller
             ]);
         }
         Toastr::success('Color  updated!');
+
         return back();
     }
 
@@ -598,6 +622,7 @@ class BusinessSettingsController extends Controller
         ]);
 
         Toastr::success('Settings updated!');
+
         return back();
     }
 
@@ -645,7 +670,6 @@ class BusinessSettingsController extends Controller
             ]),
         ]);
 
-
         DB::table('business_settings')->updateOrInsert(['type' => 'order_failed_message'], [
             'value' => json_encode([
                 'status' => $request['failed_status'],
@@ -689,18 +713,19 @@ class BusinessSettingsController extends Controller
         ]);
 
         Toastr::success('Message updated!');
+
         return back();
     }
 
     public function seller_settings()
     {
         $sales_commission = BusinessSetting::where('type', 'sales_commission')->first();
-        if (!isset($sales_commission)) {
+        if (! isset($sales_commission)) {
             DB::table('business_settings')->insert(['type' => 'sales_commission', 'value' => 0]);
         }
 
         $seller_registration = BusinessSetting::where('type', 'seller_registration')->first();
-        if (!isset($seller_registration)) {
+        if (! isset($seller_registration)) {
             DB::table('business_settings')->insert(['type' => 'seller_registration', 'value' => 1]);
         }
 
@@ -721,6 +746,7 @@ class BusinessSettingsController extends Controller
         }
 
         Toastr::success('Sales commission Updated successfully!');
+
         return redirect()->back();
     }
 
@@ -733,13 +759,15 @@ class BusinessSettingsController extends Controller
             DB::table('business_settings')->insert([
                 'type' => 'seller_registration',
                 'value' => $data->seller_registration,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
         Toastr::success('Seller registration Updated successfully!');
+
         return redirect()->back();
     }
+
     public function seller_pos_settings(Request $request)
     {
         $seller_pos = BusinessSetting::where('type', 'seller_pos')->first();
@@ -749,24 +777,25 @@ class BusinessSettingsController extends Controller
             DB::table('business_settings')->insert([
                 'type' => 'seller_pos',
                 'value' => $request->seller_pos,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
         Toastr::success('Seller pos permission Updated successfully!');
+
         return redirect()->back();
     }
 
     public function product_approval(Request $request)
     {
-
         DB::table('business_settings')->updateOrInsert(['type' => 'new_product_approval'], [
-            'value' => $request->new_product_approval == 'on'?1:0
+            'value' => $request->new_product_approval == 'on' ? 1 : 0,
         ]);
         DB::table('business_settings')->updateOrInsert(['type' => 'product_wise_shipping_cost_approval'], [
-            'value' => $request->product_wise_shipping_cost_approval == 'on'?1:0
+            'value' => $request->product_wise_shipping_cost_approval == 'on' ? 1 : 0,
         ]);
         Toastr::success(\App\CPU\translate('admin_approval_for_products_updated_successfully!'));
+
         return redirect()->back();
     }
 
@@ -782,6 +811,7 @@ class BusinessSettingsController extends Controller
             'value' => json_encode($languages),
         ]);
         Toastr::success('Language  updated!');
+
         return back();
     }
 
@@ -808,10 +838,11 @@ class BusinessSettingsController extends Controller
             }
         }
         BusinessSetting::where('type', 'social_login')->update([
-            'value' => $credential_array
+            'value' => $credential_array,
         ]);
 
-        Toastr::success($service . ' credentials  updated!');
+        Toastr::success($service.' credentials  updated!');
+
         return redirect()->back();
     }
 
@@ -820,6 +851,7 @@ class BusinessSettingsController extends Controller
     {
         return view('admin-views.business-settings.recaptcha-index');
     }
+
     public function recaptcha_update(Request $request)
     {
         DB::table('business_settings')->updateOrInsert(['type' => 'recaptcha'], [
@@ -827,16 +859,17 @@ class BusinessSettingsController extends Controller
             'value' => json_encode([
                 'status' => $request['status'],
                 'site_key' => $request['site_key'],
-                'secret_key' => $request['secret_key']
+                'secret_key' => $request['secret_key'],
             ]),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-
         Toastr::success('Updated Successfully');
+
         return back();
     }
+
     public function map_api()
     {
         return view('admin-views.business-settings.map-api.index');
@@ -845,14 +878,15 @@ class BusinessSettingsController extends Controller
     public function map_api_update(Request $request)
     {
         DB::table('business_settings')->updateOrInsert(['type' => 'map_api_key'], [
-            'value' => $request['map_api_key']
+            'value' => $request['map_api_key'],
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'map_api_key_server'], [
-            'value' => $request['map_api_key_server']
+            'value' => $request['map_api_key_server'],
         ]);
 
         Toastr::success(\App\CPU\translate('config_data_updated'));
+
         return back();
     }
 
@@ -860,36 +894,43 @@ class BusinessSettingsController extends Controller
     {
         return view('admin-views.business-settings.analytics.index');
     }
+
     public function analytics_update(Request $request)
     {
         DB::table('business_settings')->updateOrInsert(['type' => 'pixel_analytics'], [
-            'value' => $request['pixel_analytics']
+            'value' => $request['pixel_analytics'],
         ]);
 
         Toastr::success(\App\CPU\translate('config_data_updated'));
+
         return back();
     }
+
     public function google_tag_analytics_update(Request $request)
     {
         DB::table('business_settings')->updateOrInsert(['type' => 'google_tag_manager_id'], [
-            'value' => $request['google_tag_manager_id']
+            'value' => $request['google_tag_manager_id'],
         ]);
 
         Toastr::success(\App\CPU\translate('google_tag_manager_id_updated'));
+
         return back();
     }
 
     // stock limit
-    public function stock_limit_warning(Request $request){
+    public function stock_limit_warning(Request $request)
+    {
         DB::table('business_settings')->updateOrInsert(['type' => 'stock_limit'], [
-            'value' => $request['stock_limit']
+            'value' => $request['stock_limit'],
         ]);
 
         Toastr::success('Updated successfully');
+
         return back();
     }
 
-    public function updateDigitalProduct(Request $request){
+    public function updateDigitalProduct(Request $request)
+    {
         $digital_product = BusinessSetting::where('type', 'digital_product')->first();
         if (isset($digital_product)) {
             BusinessSetting::where(['type' => 'digital_product'])->update(['value' => $request->digital_product]);
@@ -897,15 +938,17 @@ class BusinessSettingsController extends Controller
             DB::table('business_settings')->insert([
                 'type' => 'digital_product',
                 'value' => $request->digital_product,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
         Toastr::success(\App\CPU\translate('digital_product_updated'));
+
         return back();
     }
 
-    public function updateProductBrand(Request $request){
+    public function updateProductBrand(Request $request)
+    {
         $product_brand = BusinessSetting::where('type', 'product_brand')->first();
         if (isset($product_brand)) {
             BusinessSetting::where(['type' => 'product_brand'])->update(['value' => $request->product_brand]);
@@ -913,16 +956,17 @@ class BusinessSettingsController extends Controller
             DB::table('business_settings')->insert([
                 'type' => 'product_brand',
                 'value' => $request->product_brand,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
         Toastr::success(\App\CPU\translate('product_brand_updated'));
+
         return back();
     }
 
-    public function countryRestrictionStatusChange(Request $request){
-
+    public function countryRestrictionStatusChange(Request $request)
+    {
         $delivery_country_restriction_status = BusinessSetting::where('type', 'delivery_country_restriction')->first();
 
         if (isset($delivery_country_restriction_status)) {
@@ -931,17 +975,18 @@ class BusinessSettingsController extends Controller
             BusinessSetting::insert([
                 'type' => 'delivery_country_restriction',
                 'value' => $request->status,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
+
         return [
-            'message' =>\App\CPU\translate('delivery_country_restriction_status_changed_successfully'),
-            'status' => true
+            'message' => \App\CPU\translate('delivery_country_restriction_status_changed_successfully'),
+            'status' => true,
         ];
     }
 
-    public function zipcodeRestrictionStatusChange(Request $request){
-
+    public function zipcodeRestrictionStatusChange(Request $request)
+    {
         $zip_code_area_restriction_status = BusinessSetting::where('type', 'delivery_zip_code_area_restriction')->first();
 
         if (isset($zip_code_area_restriction_status)) {
@@ -950,14 +995,13 @@ class BusinessSettingsController extends Controller
             BusinessSetting::insert([
                 'type' => 'delivery_zip_code_area_restriction',
                 'value' => $request->status,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
+
         return [
             'message' => \App\CPU\translate('delivery_zip_code_restriction_status_changed_successfully'),
             'status' => true,
         ];
     }
-
-
 }

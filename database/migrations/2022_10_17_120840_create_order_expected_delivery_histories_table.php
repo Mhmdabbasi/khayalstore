@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrderExpectedDeliveryHistoriesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -33,4 +33,4 @@ class CreateOrderExpectedDeliveryHistoriesTable extends Migration
     {
         Schema::dropIfExists('order_expected_delivery_histories');
     }
-}
+};

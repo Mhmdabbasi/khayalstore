@@ -2,9 +2,9 @@
 
 namespace App\Model;
 
+use App\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\User;
 
 class LoyaltyPointTransaction extends Model
 {
@@ -14,8 +14,8 @@ class LoyaltyPointTransaction extends Model
         'user_id' => 'integer',
         'credit' => 'float',
         'debit' => 'float',
-        'balance'=>'float',
-        'reference'=>'string'
+        'balance' => 'float',
+        'reference' => 'string',
     ];
 
     public function user()

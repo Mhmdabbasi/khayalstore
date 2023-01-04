@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\CPU\BackEndHelper;
 use App\Http\Controllers\Controller;
 use App\Model\AdminRole;
 use App\Model\Product;
@@ -23,6 +22,7 @@ class CustomRoleController extends Controller
                     $query->where('name', 'like', "%{$value}%");
                 }
             })->latest()->get();
+
         return view('admin-views.custom-role.create', compact('rl', 'search'));
     }
 
@@ -31,7 +31,7 @@ class CustomRoleController extends Controller
         $request->validate([
             'name' => 'required|unique:admin_roles',
         ], [
-            'name.required' => 'Role name is required!'
+            'name.required' => 'Role name is required!',
         ]);
 
         DB::table('admin_roles')->insert([
@@ -39,16 +39,18 @@ class CustomRoleController extends Controller
             'module_access' => json_encode($request['modules']),
             'status' => 1,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         Toastr::success('Role added successfully!');
+
         return back();
     }
 
     public function edit($id)
     {
         $role = AdminRole::where(['id' => $id])->first(['id', 'name', 'module_access']);
+
         return view('admin-views.custom-role.edit', compact('role'));
     }
 
@@ -57,17 +59,18 @@ class CustomRoleController extends Controller
         $request->validate([
             'name' => 'required',
         ], [
-            'name.required' => 'Role name is required!'
+            'name.required' => 'Role name is required!',
         ]);
 
         DB::table('admin_roles')->where(['id' => $id])->update([
             'name' => $request->name,
             'module_access' => json_encode($request['modules']),
             'status' => 1,
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         Toastr::success('Role updated successfully!');
+
         return back();
     }
 
@@ -80,16 +83,16 @@ class CustomRoleController extends Controller
         return response()->json([
             'success' => 1,
         ], 200);
-
     }
-
 
     /**
      * Export product list by excel
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @param $type
      */
-    public function export(Request $request){
+    public function export(Request $request)
+    {
         $key = explode(' ', $request['search']);
         $rl = AdminRole::whereNotIn('id', [1])
             ->when($request['search'] != null, function ($query) use ($key) {
@@ -105,6 +108,7 @@ class CustomRoleController extends Controller
     {
         $role = AdminRole::find($request->id);
         $role->delete();
+
         return response()->json();
     }
 }

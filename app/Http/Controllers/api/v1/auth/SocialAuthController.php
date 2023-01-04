@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\api\v1\auth;
 
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
+use App\Model\BusinessSetting;
 use App\User;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use function App\CPU\translate;
-use App\Model\BusinessSetting;
 
 class SocialAuthController extends Controller
 {
@@ -34,10 +34,10 @@ class SocialAuthController extends Controller
 
         try {
             if ($request['medium'] == 'google') {
-                $res = $client->request('GET', 'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' . $token);
+                $res = $client->request('GET', 'https://www.googleapis.com/oauth2/v1/userinfo?access_token='.$token);
                 $data = json_decode($res->getBody()->getContents(), true);
             } elseif ($request['medium'] == 'facebook') {
-                $res = $client->request('GET', 'https://graph.facebook.com/' . $unique_id . '?access_token=' . $token . '&&fields=name,email');
+                $res = $client->request('GET', 'https://graph.facebook.com/'.$unique_id.'?access_token='.$token.'&&fields=name,email');
                 $data = json_decode($res->getBody()->getContents(), true);
             }
         } catch (\Exception $exception) {
@@ -47,10 +47,10 @@ class SocialAuthController extends Controller
         if (strcmp($email, $data['email']) === 0) {
             $name = explode(' ', $data['name']);
             if (count($name) > 1) {
-                $fast_name = implode(" ", array_slice($name, 0, -1));
+                $fast_name = implode(' ', array_slice($name, 0, -1));
                 $last_name = end($name);
             } else {
-                $fast_name = implode(" ", $name);
+                $fast_name = implode(' ', $name);
                 $last_name = '';
             }
             $user = User::where('email', $email)->first();
@@ -66,23 +66,23 @@ class SocialAuthController extends Controller
                     'social_id' => $data['id'],
                     'is_phone_verified' => 0,
                     'is_email_verified' => 1,
-                    'temporary_token' => Str::random(40)
+                    'temporary_token' => Str::random(40),
                 ]);
             } else {
                 $user->temporary_token = Str::random(40);
                 $user->save();
             }
-            if(!isset($user->phone))
-            {
+            if (! isset($user->phone)) {
                 return response()->json([
                     'token_type' => 'update phone number',
-                    'temporary_token' => $user->temporary_token ]);
+                    'temporary_token' => $user->temporary_token, ]);
             }
 
             $token = self::login_process_passport($user, $user->email, $data['id']);
             if ($token != null) {
                 return response()->json(['token' => $token]);
             }
+
             return response()->json(['error_message' => translate('Customer_not_found_or_Account_has_been_suspended')]);
         }
 
@@ -93,7 +93,7 @@ class SocialAuthController extends Controller
     {
         $data = [
             'email' => $email,
-            'password' => $password
+            'password' => $password,
         ];
 
         if (isset($user) && $user->is_active && auth()->attempt($data)) {
@@ -104,11 +104,12 @@ class SocialAuthController extends Controller
 
         return $token;
     }
+
     public function update_phone(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'temporary_token' => 'required',
-            'phone' => 'required|min:11|max:14'
+            'phone' => 'required|min:11|max:14',
         ]);
 
         if ($validator->fails()) {
@@ -118,20 +119,16 @@ class SocialAuthController extends Controller
         $user = User::where(['temporary_token' => $request->temporary_token])->first();
         $user->phone = $request->phone;
         $user->save();
-        
 
         $phone_verification = BusinessSetting::where('type', 'phone_verification')->first();
-        
-        if($phone_verification->value == 1)
-        {
+
+        if ($phone_verification->value == 1) {
             return response()->json([
                 'token_type' => 'phone verification on',
-                'temporary_token' => $request->temporary_token
+                'temporary_token' => $request->temporary_token,
             ]);
-
-        }else{
-            return response()->json(['message' =>'Phone number updated successfully']);
+        } else {
+            return response()->json(['message' => 'Phone number updated successfully']);
         }
     }
-
 }

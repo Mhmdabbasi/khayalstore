@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'f_name', 'l_name', 'name', 'email', 'password', 'phone', 'image', 'login_medium','is_active','social_id','is_phone_verified','temporary_token'
+        'f_name', 'l_name', 'name', 'email', 'password', 'phone', 'image', 'login_medium', 'is_active', 'social_id', 'is_phone_verified', 'temporary_token',
     ];
 
     /**
@@ -39,10 +39,10 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active' => 'integer',
-        'is_phone_verified'=>'integer',
+        'is_phone_verified' => 'integer',
         'is_email_verified' => 'integer',
-        'wallet_balance'=>'float',
-        'loyalty_point'=>'float'
+        'wallet_balance' => 'float',
+        'loyalty_point' => 'float',
     ];
 
     public function wish_list()
@@ -64,5 +64,4 @@ class User extends Authenticatable
     {
         return $this->belongsTo(ShippingAddress::class, 'shipping_address');
     }
-
 }

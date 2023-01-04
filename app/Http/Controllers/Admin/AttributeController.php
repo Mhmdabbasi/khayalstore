@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
 use App\Model\Attribute;
-use Illuminate\Http\Request;
 use App\Model\Translation;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Http\Request;
 
 class AttributeController extends Controller
 {
@@ -16,21 +16,21 @@ class AttributeController extends Controller
         $query_param = [];
         $search = $request['search'];
 
-        if ($request->has('search'))
-        {
+        if ($request->has('search')) {
             $key = explode(' ', $request['search']);
             $attributes = Attribute::where(function ($q) use ($key) {
                 foreach ($key as $value) {
                     $q->Where('name', 'like', "%{$value}%");
                 }
             });
-            
+
             $query_param = ['search' => $request['search']];
-        }else{
+        } else {
             $attributes = new Attribute();
         }
         $attributes = $attributes->latest()->paginate(Helpers::pagination_limit())->appends($query_param);
-        return view('admin-views.attribute.view',compact('attributes','search'));
+
+        return view('admin-views.attribute.view', compact('attributes', 'search'));
     }
 
     public function store(Request $request)
@@ -41,21 +41,23 @@ class AttributeController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Attribute',
+                    ['translationable_type' => \App\Model\Attribute::class,
                         'translationable_id' => $attribute->id,
                         'locale' => $key,
-                        'key' => 'name'],
+                        'key' => 'name', ],
                     ['value' => $request->name[$index]]
                 );
             }
         }
         Toastr::success('Attribute added successfully!');
+
         return back();
     }
 
     public function edit($id)
     {
         $attribute = Attribute::withoutGlobalScope('translate')->where('id', $id)->first();
+
         return view('admin-views.attribute.edit', compact('attribute'));
     }
 
@@ -68,24 +70,26 @@ class AttributeController extends Controller
         foreach ($request->lang as $index => $key) {
             if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Model\Attribute',
+                    ['translationable_type' => \App\Model\Attribute::class,
                         'translationable_id' => $attribute->id,
                         'locale' => $key,
-                        'key' => 'name'],
+                        'key' => 'name', ],
                     ['value' => $request->name[$index]]
                 );
             }
         }
         Toastr::success('Attribute updated successfully!');
+
         return back();
     }
 
     public function delete(Request $request)
     {
-        $translation = Translation::where('translationable_type','App\Model\Attribute')
-                                    ->where('translationable_id',$request->id);
+        $translation = Translation::where('translationable_type', \App\Model\Attribute::class)
+                                    ->where('translationable_id', $request->id);
         $translation->delete();
         Attribute::destroy($request->id);
+
         return response()->json();
     }
 
@@ -93,6 +97,7 @@ class AttributeController extends Controller
     {
         if ($request->ajax()) {
             $data = Attribute::orderBy('id', 'desc')->get();
+
             return response()->json($data);
         }
     }

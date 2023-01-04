@@ -12,24 +12,24 @@ use Illuminate\Support\Str;
 
 class SubCategoryController extends Controller
 {
-    public function index( Request $request )
+    public function index(Request $request)
     {
         $query_param = [];
         $search = $request['search'];
-        if($request->has('search'))
-        {
+        if ($request->has('search')) {
             $key = explode(' ', $request['search']);
-            $categories = Category::where(['position'=>1])->where(function ($q) use ($key) {
+            $categories = Category::where(['position' => 1])->where(function ($q) use ($key) {
                 foreach ($key as $value) {
                     $q->orWhere('name', 'like', "%{$value}%");
                 }
             });
             $query_param = ['search' => $request['search']];
-        }else{
-            $categories=Category::where(['position'=>1]);
+        } else {
+            $categories = Category::where(['position' => 1]);
         }
         $categories = $categories->latest()->paginate(Helpers::pagination_limit())->appends($query_param);
-        return view('admin-views.category.sub-category-view',compact('categories','search'));
+
+        return view('admin-views.category.sub-category-view', compact('categories', 'search'));
     }
 
     public function store(Request $request)
@@ -42,20 +42,19 @@ class SubCategoryController extends Controller
         $category->priority = $request->priority;
         $category->save();
 
-        foreach($request->lang as $index=>$key)
-        {
-            if($request->name[$index] && $key != 'en')
-            {
+        foreach ($request->lang as $index => $key) {
+            if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type'  => 'App\Model\Category',
-                        'translationable_id'    => $category->id,
-                        'locale'                => $key,
-                        'key'                   => 'name'],
-                    ['value'                 => $request->name[$index]]
+                    ['translationable_type' => \App\Model\Category::class,
+                        'translationable_id' => $category->id,
+                        'locale' => $key,
+                        'key' => 'name', ],
+                    ['value' => $request->name[$index]]
                 );
             }
         }
         Toastr::success('Category updated successfully!');
+
         return back();
     }
 
@@ -75,25 +74,26 @@ class SubCategoryController extends Controller
         $category->position = 1;
         $category->priority = $request->priority;
         $category->save();
+
         return response()->json();
     }
 
     public function delete(Request $request)
     {
         $categories = Category::where('parent_id', $request->id)->get();
-        if (!empty($categories)) {
-
+        if (! empty($categories)) {
             foreach ($categories as $category) {
-                $translation = Translation::where('translationable_type','App\Model\Category')
-                                    ->where('translationable_id',$category->id);
+                $translation = Translation::where('translationable_type', \App\Model\Category::class)
+                                    ->where('translationable_id', $category->id);
                 $translation->delete();
                 Category::destroy($category->id);
             }
         }
-        $translation = Translation::where('translationable_type','App\Model\Category')
-                                    ->where('translationable_id',$request->id);
+        $translation = Translation::where('translationable_type', \App\Model\Category::class)
+                                    ->where('translationable_id', $request->id);
         $translation->delete();
         Category::destroy($request->id);
+
         return response()->json();
     }
 
@@ -101,6 +101,7 @@ class SubCategoryController extends Controller
     {
         if ($request->ajax()) {
             $data = Category::where('position', 1)->orderBy('id', 'desc')->get();
+
             return response()->json($data);
         }
     }

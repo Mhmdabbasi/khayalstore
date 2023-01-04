@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Seller;
 
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Chatting;
 use App\Model\DeliveryMan;
-use App\Model\Seller;
 use App\Model\Shop;
 use App\User;
-use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use function App\CPU\translate;
 
 class ChattingController extends Controller
 {
@@ -31,8 +28,8 @@ class ChattingController extends Controller
                 ->first();
 
             if (isset($last_chat)) {
-                Chatting::where(['seller_id'=> auth('seller')->id(), 'delivery_man_id'=> $last_chat->delivery_man_id])->update([
-                    'seen_by_seller' => 1
+                Chatting::where(['seller_id' => auth('seller')->id(), 'delivery_man_id' => $last_chat->delivery_man_id])->update([
+                    'seen_by_seller' => 1,
                 ]);
 
                 $chattings = Chatting::join('delivery_men', 'delivery_men.id', '=', 'chattings.delivery_man_id')
@@ -51,8 +48,7 @@ class ChattingController extends Controller
 
                 return view('seller-views.chatting.chat', compact('chattings', 'chattings_user', 'last_chat', 'shop'));
             }
-
-        }elseif($type == 'customer'){
+        } elseif ($type == 'customer') {
             $last_chat = Chatting::where('shop_id', $shop_id)
                 ->whereNotNull(['user_id', 'seller_id'])
                 ->orderBy('created_at', 'DESC')
@@ -60,7 +56,7 @@ class ChattingController extends Controller
 
             if (isset($last_chat)) {
                 Chatting::where(['shop_id' => $shop_id, 'user_id' => $last_chat->user_id])->update([
-                    'seen_by_seller' => 1
+                    'seen_by_seller' => 1,
                 ]);
 
                 $chattings = Chatting::join('users', 'users.id', '=', 'chattings.user_id')
@@ -92,7 +88,7 @@ class ChattingController extends Controller
         if ($request->has('delivery_man_id')) {
             Chatting::where(['seller_id' => auth('seller')->id(), 'delivery_man_id' => $request->delivery_man_id])
                 ->update([
-                    'seen_by_seller' => 1
+                    'seen_by_seller' => 1,
                 ]);
 
             $sellers = Chatting::join('delivery_men', 'delivery_men.id', '=', 'chattings.delivery_man_id')
@@ -101,14 +97,12 @@ class ChattingController extends Controller
                 ->where('chattings.delivery_man_id', $request->delivery_man_id)
                 ->orderBy('created_at', 'ASC')
                 ->get();
-
-        }
-        elseif ($request->has('user_id')) {
+        } elseif ($request->has('user_id')) {
             $shop_id = Shop::where('seller_id', auth('seller')->id())->first()->id;
 
             Chatting::where(['seller_id' => auth('seller')->id(), 'user_id' => $request->user_id])
                 ->update([
-                    'seen_by_seller' => 1
+                    'seen_by_seller' => 1,
                 ]);
 
             $sellers = Chatting::join('users', 'users.id', '=', 'chattings.user_id')
@@ -117,7 +111,6 @@ class ChattingController extends Controller
                 ->where('chattings.user_id', $request->user_id)
                 ->orderBy('created_at', 'ASC')
                 ->get();
-
         }
 
         return response()->json($sellers);
@@ -138,7 +131,6 @@ class ChattingController extends Controller
         $time = now();
 
         if ($request->has('delivery_man_id')) {
-
             Chatting::create([
                 'delivery_man_id' => $request->delivery_man_id,
                 'seller_id' => auth('seller')->id(),
@@ -150,7 +142,7 @@ class ChattingController extends Controller
             ]);
 
             $dm = DeliveryMan::find($request->delivery_man_id);
-            if(!empty($dm->fcm_token)) {
+            if (! empty($dm->fcm_token)) {
                 $data = [
                     'title' => translate('message'),
                     'description' => $request->message,
@@ -159,8 +151,7 @@ class ChattingController extends Controller
                 ];
                 Helpers::send_push_notif_to_device($dm->fcm_token, $data);
             }
-
-        }elseif ($request->has('user_id')) {
+        } elseif ($request->has('user_id')) {
             Chatting::create([
                 'user_id' => $request->user_id,
                 'seller_id' => auth('seller')->id(),
@@ -178,12 +169,11 @@ class ChattingController extends Controller
                 'order_id' => '',
                 'image' => '',
             ];
-            if(!empty($dm->cm_firebase_token)) {
+            if (! empty($dm->cm_firebase_token)) {
                 Helpers::send_push_notif_to_device($dm->cm_firebase_token, $data);
             }
         }
 
         return response()->json(['message' => $message, 'time' => $time]);
     }
-
 }

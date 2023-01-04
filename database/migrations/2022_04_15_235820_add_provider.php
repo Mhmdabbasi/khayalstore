@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddProvider extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class AddProvider extends Migration
      */
     public function up()
     {
-        if (!Schema::hasColumn('oauth_clients', 'provider')) {
+        if (! Schema::hasColumn('oauth_clients', 'provider')) {
             Schema::table('oauth_clients', function (Blueprint $table) {
                 $table->string('provider')->nullable();
             });
@@ -31,4 +31,4 @@ class AddProvider extends Migration
             //
         });
     }
-}
+};

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\v2\seller\auth;
 
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Seller;
 use App\Model\SellerWallet;
@@ -10,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use function App\CPU\translate;
 
 class LoginController extends Controller
 {
@@ -18,7 +18,7 @@ class LoginController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6',
         ]);
 
         if ($validator->fails()) {
@@ -27,7 +27,7 @@ class LoginController extends Controller
 
         $data = [
             'email' => $request->email,
-            'password' => $request->password
+            'password' => $request->password,
         ];
 
         $seller = Seller::where(['email' => $request['email']])->first();
@@ -47,12 +47,14 @@ class LoginController extends Controller
                     'updated_at' => now(),
                 ]);
             }
+
             return response()->json(['token' => $token], 200);
         } else {
             $errors = [];
             array_push($errors, ['code' => 'auth-001', 'message' => translate('Invalid credential or account no verified yet')]);
+
             return response()->json([
-                'errors' => $errors
+                'errors' => $errors,
             ], 401);
         }
     }

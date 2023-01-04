@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Seller;
 
-use App\User;
 use App\CPU\Helpers;
-use App\Model\Review;
-use App\Model\Product;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Brian2694\Toastr\Facades\Toastr;
-use Rap2hpoutre\FastExcel\FastExcel;
 use App\CPU\ProductManager;
+use App\Http\Controllers\Controller;
+use App\Model\Product;
+use App\Model\Review;
+use App\User;
+use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Http\Request;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class ReviewsController extends Controller
 {
@@ -35,17 +35,16 @@ class ReviewsController extends Controller
                 }
             })->pluck('id')->toArray();
 
-            $reviews = Review::whereHas('product', function($query) use($sellerId){
-                    $query->where('added_by', 'seller')->where('user_id', $sellerId);
-                })
+            $reviews = Review::whereHas('product', function ($query) use ($sellerId) {
+                $query->where('added_by', 'seller')->where('user_id', $sellerId);
+            })
                 ->with(['product'])
-                ->where(function($q) use($product_id, $customer_id){
+                ->where(function ($q) use ($product_id, $customer_id) {
                     $q->whereIn('product_id', $product_id)->orWhereIn('customer_id', $customer_id);
                 });
 
             $query_param = ['search' => $request['search']];
-        } else
-        {
+        } else {
             $reviews = Review::with(['product'])->whereHas('product', function ($query) use ($sellerId) {
                 $query->where('user_id', $sellerId)->where('added_by', 'seller');
             })
@@ -59,13 +58,13 @@ class ReviewsController extends Controller
                     $query->where('status', request('status'));
                 })
                 ->when($request->from && $request->to, function ($query) use ($request) {
-                    $query->whereBetween('created_at', [$request->from . ' 00:00:00', $request->to . ' 23:59:59']);
+                    $query->whereBetween('created_at', [$request->from.' 00:00:00', $request->to.' 23:59:59']);
                 });
         }
 
         $reviews = $reviews->latest()->paginate(Helpers::pagination_limit())->appends($query_param);
-        $products = Product::whereNotIn('request_status',[0])->select('id', 'name')->where('user_id', $sellerId)->get();
-        $customers = User::whereNotIn('id',[0])->select('id', 'name', 'f_name', 'l_name')->get();
+        $products = Product::whereNotIn('request_status', [0])->select('id', 'name')->where('user_id', $sellerId)->get();
+        $customers = User::whereNotIn('id', [0])->select('id', 'name', 'f_name', 'l_name')->get();
         $customer_id = $request['customer_id'];
         $product_id = $request['product_id'];
         $status = $request['status'];
@@ -96,21 +95,25 @@ class ReviewsController extends Controller
                 $q->where('status', $request['status']);
             })
             ->when($to != null && $from != null, function ($query) use ($from, $to) {
-                $query->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
+                $query->whereBetween('created_at', [$from.' 00:00:00', $to.' 23:59:59']);
             })
             ->get();
         if ($data->count() == 0) {
             Toastr::warning('No data found for export!');
+
             return back();
         }
-        return (new FastExcel(ProductManager::export_product_reviews($data)))->download('Review' . date('d_M_Y') . '.xlsx');
+
+        return (new FastExcel(ProductManager::export_product_reviews($data)))->download('Review'.date('d_M_Y').'.xlsx');
     }
+
     public function status(Request $request)
     {
         $review = Review::find($request->id);
         $review->status = $request->status;
         $review->save();
         Toastr::success('Review status updated!');
+
         return back();
     }
 }

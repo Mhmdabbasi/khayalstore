@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddDeliverymanChargeAndExpectedDeliveryDate extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddDeliverymanChargeAndExpectedDeliveryDate extends Migration
     public function up()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->double('deliveryman_charge',50)->default(0)->after('delivery_man_id');
+            $table->double('deliveryman_charge', 50)->default(0)->after('delivery_man_id');
             $table->date('expected_delivery_date')->nullable()->after('deliveryman_charge');
         });
     }
@@ -31,4 +31,4 @@ class AddDeliverymanChargeAndExpectedDeliveryDate extends Migration
             $table->dropColumn('expected_delivery_date');
         });
     }
-}
+};

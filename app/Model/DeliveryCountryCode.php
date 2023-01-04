@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class DeliveryCountryCode extends Model
 {
     use HasFactory;
-    protected $fillable = ['country_code'];
 
+    protected $fillable = ['country_code'];
 }

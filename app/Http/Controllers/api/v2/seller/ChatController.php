@@ -3,19 +3,17 @@
 namespace App\Http\Controllers\api\v2\seller;
 
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Chatting;
 use App\Model\DeliveryMan;
 use App\Model\Shop;
 use App\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use function App\CPU\translate;
 
 class ChatController extends Controller
 {
-
     public function list(Request $request, $type)
     {
         $data = Helpers::get_seller_by_token($request);
@@ -24,7 +22,7 @@ class ChatController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -51,7 +49,7 @@ class ChatController extends Controller
             ->distinct()
             ->paginate($request->limit, ['*'], 'page', $request->offset);
 
-        $chats = array();
+        $chats = [];
         if ($unique_chat_ids) {
             foreach ($unique_chat_ids as $unique_chat_id) {
                 $chats[] = Chatting::with([$with_param])
@@ -62,7 +60,7 @@ class ChatController extends Controller
             }
         }
 
-        $data = array();
+        $data = [];
         $data['total_size'] = $total_size;
         $data['limit'] = $request->limit;
         $data['offset'] = $request->offset;
@@ -79,30 +77,29 @@ class ChatController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
-        $terms = explode(" ", $request->input('search'));
+        $terms = explode(' ', $request->input('search'));
         if ($type == 'customer') {
             $with_param = 'customer';
             $id_param = 'user_id';
             $users = User::where('id', '!=', 0)
                 ->when($request->search, function ($query) use ($terms) {
                     foreach ($terms as $term) {
-                        $query->where('f_name', 'like', '%' . $term . '%')
-                            ->orWhere('l_name', 'like', '%' . $term . '%');
+                        $query->where('f_name', 'like', '%'.$term.'%')
+                            ->orWhere('l_name', 'like', '%'.$term.'%');
                     }
                 })->pluck('id')->toArray();
-
         } elseif ($type == 'delivery-man') {
             $with_param = 'delivery_man';
             $id_param = 'delivery_man_id';
             $users = DeliveryMan::where(['seller_id' => $seller['id']])
                 ->when($request->search, function ($query) use ($terms) {
                     foreach ($terms as $term) {
-                        $query->where('f_name', 'like', '%' . $term . '%')
-                            ->orWhere('l_name', 'like', '%' . $term . '%');
+                        $query->where('f_name', 'like', '%'.$term.'%')
+                            ->orWhere('l_name', 'like', '%'.$term.'%');
                     }
                 })->pluck('id')->toArray();
         } else {
@@ -117,7 +114,7 @@ class ChatController extends Controller
             ->toArray();
         $unique_chat_ids = call_user_func_array('array_merge', $unique_chat_ids);
 
-        $chats = array();
+        $chats = [];
         if ($unique_chat_ids) {
             foreach ($unique_chat_ids as $unique_chat_id) {
                 $chats[] = Chatting::with([$with_param])
@@ -146,7 +143,7 @@ class ChatController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -158,14 +155,13 @@ class ChatController extends Controller
             $id_param = 'delivery_man_id';
             $sent_by = 'sent_by_delivery_man';
             $with = 'delivery_man';
-
         } else {
             return response()->json(['message' => translate('Invalid Chatting Type!')], 403);
         }
 
         $query = Chatting::with($with)->where(['seller_id' => $seller['id'], $id_param => $id])->latest();
 
-        if (!empty($query->get())) {
+        if (! empty($query->get())) {
             $message = $query->paginate($request->limit, ['*'], 'page', $request->offset);
 
             if ($query->where($sent_by, 1)->latest()->first()) {
@@ -173,15 +169,16 @@ class ChatController extends Controller
                     ->update(['seen_by_seller' => 1]);
             }
 
-            $data = array();
+            $data = [];
             $data['total_size'] = $message->total();
             $data['limit'] = $request->limit;
             $data['offset'] = $request->offset;
             $data['message'] = $message->items();
+
             return response()->json($data, 200);
         }
-        return response()->json(['message' => translate('no messages found!')], 200);
 
+        return response()->json(['message' => translate('no messages found!')], 200);
     }
 
     public function send_message(Request $request, $type)
@@ -190,7 +187,7 @@ class ChatController extends Controller
             'id' => 'required',
             'message' => 'required',
         ], [
-            'message.required' => translate('type something!')
+            'message.required' => translate('type something!'),
         ]);
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
@@ -201,10 +198,9 @@ class ChatController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
-
 
         $shop_id = Shop::where('seller_id', $seller['id'])->first()->id;
 
@@ -232,8 +228,7 @@ class ChatController extends Controller
         }
 
         if ($chatting->save()) {
-
-            if (!empty($fcm_token)) {
+            if (! empty($fcm_token)) {
                 $data = [
                     'title' => translate('message'),
                     'description' => $request->message,

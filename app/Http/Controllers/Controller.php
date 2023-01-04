@@ -16,8 +16,7 @@ class Controller extends BaseController
     {
         try {
             Helpers::currency_load();
-        }catch (\Exception $exception){
-
+        } catch (\Exception $exception) {
         }
     }
 }

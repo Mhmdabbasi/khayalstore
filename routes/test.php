@@ -11,14 +11,13 @@
 |
 */
 
+use App\CPU\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use LaravelQRCode\Facades\QRCode;
-use Madnest\Madzipper\Facades\Madzipper;
-
 /*Route::get('zip-extract', function () {
     Madzipper::make('test-zip.zip')->extractTo('public');
 });*/
@@ -27,32 +26,36 @@ use Madnest\Madzipper\Facades\Madzipper;
     view('welcome');
 });*/
 
-
 /*Route::get('qr-code', function () {
     return QRCode::text('Laravel QR Code Generator!')
         ->setOutfile('storage/app/public/deal/2021-10-30-617d68a9a7e8b.png')
         ->png();
 });*/
 
-use App\CPU\Helpers;
+use Madnest\Madzipper\Facades\Madzipper;
+
 Route::get('aws-data', function () {
-    return "bdsb";
+    return 'bdsb';
+
     return view('installation.step5');
     $mail_config = Helpers::get_business_settings('mail_config');
-     return $mail_config['status']??0;
+
+    return $mail_config['status'] ?? 0;
+
     return view('welcome');
 });
-Route::get('order-email',function(){
+Route::get('order-email', function () {
     //Mail::to('safayet2218@gmail.com')->send(new \App\Mail\OrderPlaced(100206));
     $id = 100207;
-    return view('email-templates.order-placed-v2',compact('id'));
+
+    return view('email-templates.order-placed-v2', compact('id'));
 });
 Route::post('aws-upload', function (Request $request) {
     $request->validate([
         'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
     ]);
 
-    $imageName = time() . '.' . $request->image->extension();
+    $imageName = time().'.'.$request->image->extension();
 
     $path = Storage::disk('s3')->put('images', $request->image);
     $path = Storage::disk('s3')->url($path);

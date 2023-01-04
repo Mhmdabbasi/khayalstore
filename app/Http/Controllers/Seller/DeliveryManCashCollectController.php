@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Seller;
 
 use App\CPU\BackEndHelper;
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\DeliveryMan;
 use App\Model\DeliveryManTransaction;
 use App\Model\DeliverymanWallet;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use function App\CPU\translate;
 
 class DeliveryManCashCollectController extends Controller
 {
@@ -30,25 +30,28 @@ class DeliveryManCashCollectController extends Controller
 
         $wallet = DeliverymanWallet::where('delivery_man_id', $id)->first();
 
-        if (empty($wallet) || BackEndHelper::currency_to_usd($request->input('amount'))  > $wallet->cash_in_hand) {
+        if (empty($wallet) || BackEndHelper::currency_to_usd($request->input('amount')) > $wallet->cash_in_hand) {
             Toastr::warning(translate('receive_amount_can_not_be_more_than_cash_in_hand!'));
+
             return back();
         }
 
         $wallet->cash_in_hand -= $request->input('amount');
         DeliveryManTransaction::create([
             'delivery_man_id' => $id,
-            'user_id'         => auth('seller')->user()->id,
-            'user_type'       => 'seller',
-            'credit'           => BackEndHelper::currency_to_usd($request->input('amount')),
-            'transaction_type' => 'cash_in_hand'
+            'user_id' => auth('seller')->user()->id,
+            'user_type' => 'seller',
+            'credit' => BackEndHelper::currency_to_usd($request->input('amount')),
+            'transaction_type' => 'cash_in_hand',
         ]);
 
         if ($wallet->save()) {
             Toastr::success(translate('Amount_receive_successfully!'));
+
             return back();
         }
         Toastr::error(translate('Amount_receive_failed!'));
+
         return back();
     }
 }

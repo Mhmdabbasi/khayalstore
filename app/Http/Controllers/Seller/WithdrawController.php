@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Seller;
 
-use App\CPU\BackEndHelper;
 use App\CPU\Convert;
 use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
@@ -24,16 +23,18 @@ class WithdrawController extends Controller
                 'transaction_note' => null,
                 'approved' => 0,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
             $wallet->total_earning -= Convert::usd($request['amount']);
             $wallet->pending_withdraw += Convert::usd($request['amount']);
             $wallet->save();
             Toastr::success('Withdraw request has been sent.');
+
             return redirect()->back();
         }
 
         Toastr::error('invalid request.!');
+
         return redirect()->back();
     }
 
@@ -41,7 +42,7 @@ class WithdrawController extends Controller
     {
         $withdraw_request = WithdrawRequest::find($id);
         $wallet = SellerWallet::where('seller_id', auth()->guard('seller')->user()->id)->first();
-        
+
         if (isset($withdraw_request) && isset($wallet) && $withdraw_request->approved == 0) {
             $wallet->total_earning += Convert::usd($withdraw_request['amount']);
             $wallet->pending_withdraw -= Convert::usd($withdraw_request['amount']);
@@ -58,6 +59,7 @@ class WithdrawController extends Controller
     public function status_filter(Request $request)
     {
         session()->put('withdraw_status_filter', $request['withdraw_status_filter']);
+
         return response()->json(session('withdraw_status_filter'));
     }
 
@@ -69,7 +71,7 @@ class WithdrawController extends Controller
         $pending = session()->has('withdraw_status_filter') && session('withdraw_status_filter') == 'pending' ? 1 : 0;
 
         $withdraw_requests = WithdrawRequest::with(['seller'])
-            ->where(['seller_id'=>auth('seller')->id()])
+            ->where(['seller_id' => auth('seller')->id()])
             ->when($all, function ($query) {
                 return $query;
             })

@@ -10,14 +10,18 @@ use Illuminate\Http\Request;
 class BkashPaymentController extends Controller
 {
     private $base_url;
+
     private $app_key;
+
     private $app_secret;
+
     private $username;
+
     private $password;
 
     public function __construct()
     {
-        $config=\App\CPU\Helpers::get_business_settings('bkash');
+        $config = \App\CPU\Helpers::get_business_settings('bkash');
         // You can import it from your Database
         $bkash_app_key = $config['api_key']; // bKash Merchant API APP KEY
         $bkash_app_secret = $config['api_secret']; // bKash Merchant API APP SECRET
@@ -36,21 +40,21 @@ class BkashPaymentController extends Controller
     {
         session()->forget('bkash_token');
 
-        $post_token = array(
+        $post_token = [
             'app_key' => $this->app_key,
-            'app_secret' => $this->app_secret
-        );
+            'app_secret' => $this->app_secret,
+        ];
 
         $url = curl_init("$this->base_url/checkout/token/grant");
         $post_token = json_encode($post_token);
-        $header = array(
+        $header = [
             'Content-Type:application/json',
             "password:$this->password",
-            "username:$this->username"
-        );
+            "username:$this->username",
+        ];
 
         curl_setopt($url, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($url, CURLOPT_POSTFIELDS, $post_token);
         curl_setopt($url, CURLOPT_FOLLOWLOCATION, 1);
@@ -73,10 +77,10 @@ class BkashPaymentController extends Controller
         $discount = session()->has('coupon_discount') ? session('coupon_discount') : 0;
         $value = CartManager::cart_grand_total() - $discount;
 
-        if (((string)$request->amount != (string) round(Convert::usdTobdt($value),2))) {
+        if (((string) $request->amount != (string) round(Convert::usdTobdt($value), 2))) {
             return response()->json([
                 'errorMessage' => 'Amount Mismatch',
-                'errorCode' => 2006
+                'errorCode' => 2006,
             ], 422);
         }
 
@@ -88,20 +92,21 @@ class BkashPaymentController extends Controller
 
         $url = curl_init("$this->base_url/checkout/payment/create");
         $request_data_json = json_encode($request->all());
-        $header = array(
+        $header = [
             'Content-Type:application/json',
             "authorization: $token",
-            "x-app-key: $this->app_key"
-        );
+            "x-app-key: $this->app_key",
+        ];
 
         curl_setopt($url, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($url, CURLOPT_POSTFIELDS, $request_data_json);
         curl_setopt($url, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($url, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         $resultdata = curl_exec($url);
         curl_close($url);
+
         return json_decode($resultdata, true);
     }
 
@@ -110,19 +115,20 @@ class BkashPaymentController extends Controller
         $token = session()->get('bkash_token');
 
         $paymentID = $request->paymentID;
-        $url = curl_init("$this->base_url/checkout/payment/execute/" . $paymentID);
-        $header = array(
+        $url = curl_init("$this->base_url/checkout/payment/execute/".$paymentID);
+        $header = [
             'Content-Type:application/json',
             "authorization:$token",
-            "x-app-key:$this->app_key"
-        );
+            "x-app-key:$this->app_key",
+        ];
 
         curl_setopt($url, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($url, CURLOPT_FOLLOWLOCATION, 1);
         $resultdata = curl_exec($url);
         curl_close($url);
+
         return json_decode($resultdata, true);
     }
 
@@ -131,19 +137,20 @@ class BkashPaymentController extends Controller
         $token = session()->get('bkash_token');
         $paymentID = $request->payment_info['payment_id'];
 
-        $url = curl_init("$this->base_url/checkout/payment/query/" . $paymentID);
-        $header = array(
+        $url = curl_init("$this->base_url/checkout/payment/query/".$paymentID);
+        $header = [
             'Content-Type:application/json',
             "authorization:$token",
-            "x-app-key:$this->app_key"
-        );
+            "x-app-key:$this->app_key",
+        ];
 
         curl_setopt($url, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, 'GET');
         curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($url, CURLOPT_FOLLOWLOCATION, 1);
         $resultdata = curl_exec($url);
         curl_close($url);
+
         return json_decode($resultdata, true);
     }
 
@@ -158,13 +165,13 @@ class BkashPaymentController extends Controller
                 'payment_status' => 'paid',
                 'transaction_ref' => $request['trxID'],
                 'order_group_id' => $unique_id,
-                'cart_group_id' => $group_id
+                'cart_group_id' => $group_id,
             ];
             $order_id = OrderManager::generate_order($data);
             array_push($order_ids, $order_id);
         }
         CartManager::cart_clean();
+
         return response()->json(['status' => true]);
     }
 }
-

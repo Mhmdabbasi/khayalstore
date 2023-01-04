@@ -8,8 +8,8 @@ class Shop extends Model
 {
     protected $casts = [
         'seller_id ' => 'integer',
-        'created_at'  => 'datetime',
-        'updated_at'  => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function seller()
@@ -17,7 +17,8 @@ class Shop extends Model
         return $this->belongsTo(Seller::class, 'seller_id');
     }
 
-    public function scopeActive($query){
+    public function scopeActive($query)
+    {
         return $query->whereHas('seller', function ($query) {
             $query->where(['status' => 'approved']);
         });

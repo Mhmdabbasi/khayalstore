@@ -12,8 +12,8 @@ class CategoryShippingCost extends Model
     protected $casts = [
         'seller_id' => 'integer',
         'category_id' => 'integer',
-        'cost'=>'float',
-        'multiply_qty'=>'integer'
+        'cost' => 'float',
+        'multiply_qty' => 'integer',
     ];
 
     public function category()

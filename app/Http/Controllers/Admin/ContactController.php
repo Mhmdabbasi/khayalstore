@@ -39,8 +39,7 @@ class ContactController extends Controller
     {
         $query_param = [];
         $search = $request['search'];
-        if ($request->has('search'))
-        {
+        if ($request->has('search')) {
             $key = explode(' ', $request['search']);
             $contacts = Contact::where(function ($q) use ($key) {
                 foreach ($key as $value) {
@@ -50,17 +49,18 @@ class ContactController extends Controller
                 }
             });
             $query_param = ['search' => $request['search']];
-        }else{
+        } else {
             $contacts = new Contact();
         }
         $contacts = $contacts->latest()->paginate(Helpers::pagination_limit())->appends($query_param);
-        return view('admin-views.contacts.list', compact('contacts','search'));
 
+        return view('admin-views.contacts.list', compact('contacts', 'search'));
     }
 
     public function view($id)
     {
         $contact = Contact::findOrFail($id);
+
         return view('admin-views.contacts.view', compact('contact'));
     }
 
@@ -71,6 +71,7 @@ class ContactController extends Controller
         $contact->seen = 1;
         $contact->update();
         Toastr::success('Feedback  Update successfully!');
+
         return redirect()->route('admin.contact.list');
     }
 
@@ -85,7 +86,7 @@ class ContactController extends Controller
     public function send_mail(Request $request, $id)
     {
         $contact = Contact::findOrFail($id);
-        $data = array('body' => $request['mail_body']);
+        $data = ['body' => $request['mail_body']];
         Mail::send('email-templates.customer-message', $data, function ($message) use ($contact, $request) {
             $message->to($contact['email'], BusinessSetting::where(['type' => 'company_name'])->first()->value)
                 ->subject($request['subject']);
@@ -94,11 +95,12 @@ class ContactController extends Controller
         Contact::where(['id' => $id])->update([
             'reply' => json_encode([
                 'subject' => $request['subject'],
-                'body' => $request['mail_body']
-            ])
+                'body' => $request['mail_body'],
+            ]),
         ]);
 
         Toastr::success('Mail sent successfully!');
+
         return back();
     }
 }

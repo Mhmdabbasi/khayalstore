@@ -3,18 +3,19 @@
 namespace App\Http\Controllers\Seller;
 
 use App\CPU\ImageManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Seller;
 use App\Model\Shop;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use function App\CPU\translate;
 
 class ProfileController extends Controller
 {
     public function view()
     {
         $data = Seller::where('id', auth('seller')->id())->first();
+
         return view('seller-views.profile.view', compact('data'));
     }
 
@@ -22,11 +23,12 @@ class ProfileController extends Controller
     {
         if (auth('seller')->id() != $id) {
             Toastr::warning(translate('you_can_not_change_others_profile'));
+
             return back();
         }
         $data = Seller::where('id', auth('seller')->id())->first();
         $shop_banner = Shop::select('banner')->where('seller_id', auth('seller')->id())->first()->banner;
-        
+
         return view('seller-views.profile.edit', compact('data', 'shop_banner'));
     }
 
@@ -35,7 +37,7 @@ class ProfileController extends Controller
         $request->validate([
             'f_name' => 'required',
             'l_name' => 'required',
-            'phone' => 'required'
+            'phone' => 'required',
         ], [
             'f_name.required' => 'First name is required!',
             'l_name.required' => 'Last name is required!',
@@ -52,6 +54,7 @@ class ProfileController extends Controller
         $seller->save();
 
         Toastr::info('Profile updated successfully!');
+
         return back();
     }
 
@@ -66,6 +69,7 @@ class ProfileController extends Controller
         $seller->password = bcrypt($request['password']);
         $seller->save();
         Toastr::success('Seller password updated successfully!');
+
         return back();
     }
 
@@ -78,6 +82,7 @@ class ProfileController extends Controller
         $bank->account_no = $request->account_no;
         $bank->save();
         Toastr::success('Bank Info updated');
+
         return redirect()->route('seller.profile.view');
     }
 
@@ -85,10 +90,11 @@ class ProfileController extends Controller
     {
         if (auth('seller')->id() != $id) {
             Toastr::warning(translate('you_can_not_change_others_info'));
+
             return back();
         }
         $data = Seller::where('id', auth('seller')->id())->first();
+
         return view('seller-views.profile.bankEdit', compact('data'));
     }
-
 }

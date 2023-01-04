@@ -6,11 +6,9 @@ use App\CPU\Helpers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 
 class Brand extends Model
 {
-
     protected $casts = [
         'status' => 'integer',
         'brand_products_count' => 'integer',
@@ -18,8 +16,9 @@ class Brand extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function scopeActive(){
-        return $this->where('status',1);
+    public function scopeActive()
+    {
+        return $this->where('status', 1);
     }
 
     public function brandProducts()
@@ -27,13 +26,14 @@ class Brand extends Model
         return $this->hasMany(Product::class)->active();
     }
 
-    public function brandAllProducts(){
+    public function brandAllProducts()
+    {
         return $this->hasMany(Product::class);
     }
 
     public function translations()
     {
-        return $this->morphMany('App\Model\Translation', 'translationable');
+        return $this->morphMany(\App\Model\Translation::class, 'translationable');
     }
 
     public function getNameAttribute($name)
@@ -42,7 +42,7 @@ class Brand extends Model
             return $name;
         }
 
-        return $this->translations[0]->value??$name;
+        return $this->translations[0]->value ?? $name;
     }
 
     protected static function boot()
@@ -50,9 +50,9 @@ class Brand extends Model
         parent::boot();
         static::addGlobalScope('translate', function (Builder $builder) {
             $builder->with(['translations' => function ($query) {
-                if (strpos(url()->current(), '/api')){
+                if (strpos(url()->current(), '/api')) {
                     return $query->where('locale', App::getLocale());
-                }else{
+                } else {
                     return $query->where('locale', Helpers::default_lang());
                 }
             }]);

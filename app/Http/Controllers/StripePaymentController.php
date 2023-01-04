@@ -7,13 +7,7 @@ use App\CPU\Helpers;
 use App\CPU\OrderManager;
 use App\Model\BusinessSetting;
 use App\Model\Currency;
-use App\Model\Order;
-use App\Model\Product;
 use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use PHPUnit\Exception;
-use Stripe\Charge;
 use Stripe\Stripe;
 
 class StripePaymentController extends Controller
@@ -43,7 +37,7 @@ class StripePaymentController extends Controller
         foreach (CartManager::get_cart() as $detail) {
             array_push($products, [
                 'name' => $detail->product['name'],
-                'image' => 'def.png'
+                'image' => 'def.png',
             ]);
         }
 
@@ -55,13 +49,13 @@ class StripePaymentController extends Controller
                     'unit_amount' => round($value, 2) * 100,
                     'product_data' => [
                         'name' => BusinessSetting::where(['type' => 'company_name'])->first()->value,
-                        'images' => [asset('storage/app/public/company') . '/' . Helpers::get_business_settings('company_web_logo')],
+                        'images' => [asset('storage/app/public/company').'/'.Helpers::get_business_settings('company_web_logo')],
                     ],
                 ],
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            'success_url' => $YOUR_DOMAIN . '/pay-stripe/success',
+            'success_url' => $YOUR_DOMAIN.'/pay-stripe/success',
             'cancel_url' => url()->previous(),
         ]);
 
@@ -79,7 +73,7 @@ class StripePaymentController extends Controller
                 'payment_status' => 'paid',
                 'transaction_ref' => session('transaction_ref'),
                 'order_group_id' => $unique_id,
-                'cart_group_id' => $group_id
+                'cart_group_id' => $group_id,
             ];
             $order_id = OrderManager::generate_order($data);
             array_push($order_ids, $order_id);
@@ -87,8 +81,10 @@ class StripePaymentController extends Controller
         CartManager::cart_clean();
         if (auth('customer')->check()) {
             Toastr::success('Payment success.');
+
             return view('web-views.checkout-complete');
         }
+
         return response()->json(['message' => 'Payment succeeded'], 200);
     }
 
@@ -96,8 +92,10 @@ class StripePaymentController extends Controller
     {
         if (auth('customer')->check()) {
             Toastr::error('Payment failed.');
+
             return redirect('/account-order');
         }
+
         return response()->json(['message' => 'Payment failed'], 403);
     }
 }

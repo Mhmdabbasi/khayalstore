@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\CentralLogics\Helpers;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
@@ -43,7 +42,7 @@ class UpdatePackage extends Command
         $routes = base_path('app/Providers/RouteServiceProvider.php');
         $new_routes = base_path('installation/activate_update_routes.txt');
         copy($new_routes, $routes);
+
         return 0;
     }
-
 }

@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\User;
 use App\CPU\Helpers;
-use App\Model\Review;
-use App\Model\Product;
 use App\CPU\ProductManager;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Model\Product;
+use App\Model\Review;
+use App\User;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Http\Request;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class ReviewsController extends Controller
 {
-    function list(Request $request)
+    public function list(Request $request)
     {
         $query_param = [];
-        if (!empty($request->from) && empty($request->to)) {
+        if (! empty($request->from) && empty($request->to)) {
             Toastr::warning('Please select to date!');
         }
         $search = $request['search'];
@@ -34,7 +34,7 @@ class ReviewsController extends Controller
                         ->orWhere('l_name', 'like', "%{$value}%");
                 }
             })->pluck('id')->toArray();
-            $reviews = Review::WhereIn('product_id',  $product_id)->orWhereIn('customer_id', $customer_id);
+            $reviews = Review::WhereIn('product_id', $product_id)->orWhereIn('customer_id', $customer_id);
             $query_param = ['search' => $request['search']];
         } else {
             $reviews = Review::with(['product', 'customer'])
@@ -45,12 +45,12 @@ class ReviewsController extends Controller
                 })->when($request->status != null, function ($q) {
                     $q->where('status', request('status'));
                 })->when($request->from && $request->to, function ($q) use ($request) {
-                    $q->whereBetween('created_at', [$request->from . ' 00:00:00', $request->to . ' 23:59:59']);
+                    $q->whereBetween('created_at', [$request->from.' 00:00:00', $request->to.' 23:59:59']);
                 });
         }
         $reviews = $reviews->latest()->paginate(Helpers::pagination_limit());
-        $products = Product::whereNotIn('request_status',[0])->select('id', 'name')->get();
-        $customers = User::whereNotIn('id',[0])->select('id', 'name', 'f_name', 'l_name')->get();
+        $products = Product::whereNotIn('request_status', [0])->select('id', 'name')->get();
+        $customers = User::whereNotIn('id', [0])->select('id', 'name', 'f_name', 'l_name')->get();
         $customer_id = $request['customer_id'];
         $product_id = $request['product_id'];
         $status = $request['status'];
@@ -59,49 +59,46 @@ class ReviewsController extends Controller
 
         return view('admin-views.reviews.list', compact('reviews', 'search', 'products', 'customers', 'from', 'to', 'customer_id', 'product_id', 'status'));
     }
+
     public function export(Request $request)
     {
-
         $product_id = $request['product_id'];
         $customer_id = $request['customer_id'];
         $status = $request['status'];
         $from = $request['from'];
         $to = $request['to'];
 
-
-
         $data = Review::with(['product', 'customer'])
             ->when($product_id != null, function ($q) use ($request) {
                 $q->where('product_id', $request['product_id']);
             })
             ->when($customer_id != null, function ($q) use ($request) {
-                    $q->where('customer_id', $request['customer_id']);
+                $q->where('customer_id', $request['customer_id']);
             })
             ->when($status != null, function ($q) use ($request) {
-                    $q->where('status', $request['status']);
+                $q->where('status', $request['status']);
             })
             ->when($to != null && $from != null, function ($query) use ($from, $to) {
-                $query->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
+                $query->whereBetween('created_at', [$from.' 00:00:00', $to.' 23:59:59']);
             })
             ->get();
 
-
-
-        if($data->count()==0){
-
+        if ($data->count() == 0) {
             Toastr::warning('No data found for export!');
-            return back();
 
+            return back();
         }
 
-        return (new FastExcel(ProductManager::export_product_reviews($data)))->download('Review' . date('d_M_Y') . '.xlsx');
+        return (new FastExcel(ProductManager::export_product_reviews($data)))->download('Review'.date('d_M_Y').'.xlsx');
     }
+
     public function status(Request $request)
     {
         $review = Review::find($request->id);
         $review->status = $request->status;
         $review->save();
         Toastr::success('Review status updated!');
+
         return back();
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\api\v2\delivery_man;
 use App\CPU\BackEndHelper;
 use App\CPU\Helpers;
 use App\CPU\ImageManager;
+use App\CPU\OrderManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\DeliveryHistory;
 use App\Model\DeliveryMan;
@@ -17,13 +19,11 @@ use App\Model\OrderDetail;
 use App\Model\Review;
 use App\Traits\CommonTrait;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use function App\CPU\translate;
-use App\CPU\OrderManager;
-use Carbon\Carbon;
 
 class DeliveryManController extends Controller
 {
@@ -51,7 +51,7 @@ class DeliveryManController extends Controller
         $request['delivery_man']['pending_delivery'] = $pending_delivery;
         $request['delivery_man']['total_delivery'] = $order->count();
         $request['delivery_man']['total_deposit'] = $total_deposit;
-        $request['delivery_man']['average_rating'] = count($delivery_man->rating)>0?number_format($delivery_man->rating[0]->average, 2, '.', ' '):0;
+        $request['delivery_man']['average_rating'] = count($delivery_man->rating) > 0 ? number_format($delivery_man->rating[0]->average, 2, '.', ' ') : 0;
 
         return response()->json($request['delivery_man'], 200);
     }
@@ -64,6 +64,7 @@ class DeliveryManController extends Controller
             ->where(['delivery_man_id' => $d_man['id']])
             ->orderBy('expected_delivery_date', 'asc')
             ->get();
+
         return response()->json($orders, 200);
     }
 
@@ -89,21 +90,23 @@ class DeliveryManController extends Controller
             'time' => now(),
             'location' => $request['location'],
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
+
         return response()->json(['message' => 'location recorded'], 200);
     }
 
     public function get_order_history(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'order_id' => 'required'
+            'order_id' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $d_man = $request['delivery_man'];
         $history = DeliveryHistory::where(['order_id' => $request['order_id'], 'deliveryman_id' => $d_man['id']])->get();
+
         return response()->json($history, 200);
     }
 
@@ -111,7 +114,7 @@ class DeliveryManController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
-            'status' => 'required|in:delivered,canceled,returned,out_for_delivery'
+            'status' => 'required|in:delivered,canceled,returned,out_for_delivery',
         ]);
 
         if ($validator->fails()) {
@@ -132,7 +135,7 @@ class DeliveryManController extends Controller
 
         Order::where(['id' => $request['order_id'], 'delivery_man_id' => $d_man['id']])->update([
             'order_status' => $request['status'],
-            'cause' => $cause
+            'cause' => $cause,
         ]);
 
         if (isset($d_man['id']) && $request['status'] == 'delivered') {
@@ -162,7 +165,7 @@ class DeliveryManController extends Controller
                 $value = Helpers::order_status_update_message('delivered');
             }
 
-            if ($value && !empty($fcm_token)) {
+            if ($value && ! empty($fcm_token)) {
                 $data = [
                     'title' => translate('order'),
                     'description' => $value,
@@ -189,10 +192,11 @@ class DeliveryManController extends Controller
         return response()->json(['message' => 'Order status updated successfully!'], 200);
     }
 
-    public function update_expected_delivery(Request $request){
+    public function update_expected_delivery(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
-            'expected_delivery_date' => 'required'
+            'expected_delivery_date' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -214,10 +218,11 @@ class DeliveryManController extends Controller
         return response()->json(['message' => 'Order status updated successfully!'], 200);
     }
 
-    public function order_update_is_pause(Request $request){
+    public function order_update_is_pause(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
-            'is_pause' => 'required'
+            'is_pause' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -247,6 +252,7 @@ class DeliveryManController extends Controller
             $det['variation'] = json_decode($det['variation']);
             $det['product_details'] = Helpers::product_data_formatting(json_decode($det['product_details'], true));
         }
+
         return response()->json($details, 200);
     }
 
@@ -255,27 +261,27 @@ class DeliveryManController extends Controller
         $delivery_man = $request['delivery_man'];
 
         $orders = Order::with(['shippingAddress', 'customer', 'seller.shop'])
-            ->when(!empty($request->search), function($query) use($request){
+            ->when(! empty($request->search), function ($query) use ($request) {
                 $query->where('id', 'like', "%{$request->search}%")
-                ->orWhere(function ($query) use($request){
-                    $query->whereHas('customer', function($query) use($request){
+                ->orWhere(function ($query) use ($request) {
+                    $query->whereHas('customer', function ($query) use ($request) {
                         $query->where('phone', 'like', "%{$request->search}%");
                     });
                 });
             })
-            ->when(!empty($request->status), function ($query)use($request){
+            ->when(! empty($request->status), function ($query) use ($request) {
                 $query->where('order_status', $request['status']);
             })
-            ->when(!empty($request->is_pause), function ($query)use($request){
+            ->when(! empty($request->is_pause), function ($query) use ($request) {
                 $query->where('is_pause', $request['is_pause']);
             })
-            ->when(!empty($request->start_date) && !empty($request->end_date), function ($query) use($request){
+            ->when(! empty($request->start_date) && ! empty($request->end_date), function ($query) use ($request) {
                 $start_date = Carbon::parse($request['start_date'])->format('Y-m-d 00:00:00');
                 $end_data = Carbon::parse($request['end_date'])->format('Y-m-d 23:59:59');
 
                 $query->whereBetween('created_at', [$start_date, $end_data]);
             })
-            ->where(['delivery_man_id'=> $delivery_man->id, 'seller_is'=> $delivery_man->seller_id == 0 ? 'admin':'seller'])
+            ->where(['delivery_man_id' => $delivery_man->id, 'seller_is' => $delivery_man->seller_id == 0 ? 'admin' : 'seller'])
             ->latest()->get();
 
         return response()->json($orders, 200);
@@ -284,13 +290,14 @@ class DeliveryManController extends Controller
     public function get_last_location(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'order_id' => 'required'
+            'order_id' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
         $last_data = DeliveryHistory::where(['order_id' => $request['order_id']])->latest()->first();
+
         return response()->json($last_data, 200);
     }
 
@@ -298,7 +305,7 @@ class DeliveryManController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
-            'payment_status' => 'required|in:paid'
+            'payment_status' => 'required|in:paid',
         ]);
 
         if ($validator->fails()) {
@@ -307,23 +314,24 @@ class DeliveryManController extends Controller
 
         $d_man = $request['delivery_man'];
         $order = Order::where(['delivery_man_id' => $d_man['id'], 'id' => $request['order_id']])->first();
-        if (!empty($order)) {
+        if (! empty($order)) {
             $order->payment_status = $request['payment_status'];
             $order->save();
 
             return response()->json(['message' => translate('Payment status updated')], 200);
         }
+
         return response()->json([
             'errors' => [
-                ['code' => 'order', 'message' => translate('not found!')]
-            ]
+                ['code' => 'order', 'message' => translate('not found!')],
+            ],
         ], 404);
     }
 
     public function update_fcm_token(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'fcm_token' => 'required'
+            'fcm_token' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -332,7 +340,7 @@ class DeliveryManController extends Controller
 
         $d_man = $request['delivery_man'];
         DeliveryMan::where(['id' => $d_man['id']])->update([
-            'fcm_token' => $request['fcm_token']
+            'fcm_token' => $request['fcm_token'],
         ]);
 
         return response()->json(['message' => 'successfully updated!'], 200);
@@ -382,37 +390,36 @@ class DeliveryManController extends Controller
         $data['limit'] = $request['limit'];
         $data['offset'] = $request['offset'];
         $data['orders'] = $orders->items();
-        return response()->json($data, 200);
 
+        return response()->json($data, 200);
     }
 
     public function search(Request $request)
     {
-
         $delivery_man = $request['delivery_man'];
-        $order = Order::where('id', 'like', '%' . $request->input('search') . '%')
+        $order = Order::where('id', 'like', '%'.$request->input('search').'%')
             ->where('delivery_man_id', $delivery_man->id)->get();
 
         if (empty(json_decode($order))) {
-            $terms = explode(" ", $request->input('search'));
+            $terms = explode(' ', $request->input('search'));
 
             $users = User::where(function ($query) use ($terms) {
                 foreach ($terms as $term) {
-                    $query->orWhere('f_name', 'like', '%' . $term . '%')
-                        ->orWhere('l_name', 'like', '%' . $term . '%');
+                    $query->orWhere('f_name', 'like', '%'.$term.'%')
+                        ->orWhere('l_name', 'like', '%'.$term.'%');
                 }
             })->pluck('id');
 
             $order = Order::whereIn('customer_id', $users)->where('delivery_man_id', $delivery_man->id)->get();
 
-            if (!empty(json_decode($order))) {
+            if (! empty(json_decode($order))) {
                 return response()->json($order, 200);
             }
+
             return response()->json('No Result Found', 400);
         }
 
         return response()->json($order, 200);
-
     }
 
     public function profile_dashboard_counts(Request $request)
@@ -423,13 +430,14 @@ class DeliveryManController extends Controller
 
         $data['total_delivery_count'] = $orders->count();
         $data['delivered_orders'] = $orders->where('order_status', 'delivered')->count();
+
         return response()->json($data);
     }
 
     public function change_status(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'status' => 'required'
+            'status' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
@@ -451,10 +459,10 @@ class DeliveryManController extends Controller
             'f_name' => 'required',
             'l_name' => 'required',
             'password' => 'nullable|same:confirm_password|min:8',
-            ],
+        ],
             [
                 'f_name.required' => 'The first name field is required.',
-                'l_name.required' => 'The last name field is required.'
+                'l_name.required' => 'The last name field is required.',
             ]);
 
         if ($validator->errors()->count() > 0) {
@@ -473,7 +481,7 @@ class DeliveryManController extends Controller
         $delivery_man->l_name = $request['l_name'];
         $delivery_man->address = $request['address'];
         $delivery_man->image = $imageName;
-        if(!empty($request->password)){
+        if (! empty($request->password)) {
             $delivery_man->password = bcrypt(str_replace(' ', '', $request['password']));
         }
 
@@ -539,7 +547,7 @@ class DeliveryManController extends Controller
         }
         $collect_cash_history = $collect_cash_history->latest()->paginate($request['limit'], ['*'], 'page', $request['offset']);
 
-        $data = array();
+        $data = [];
         $data['total_size'] = $collect_cash_history->total();
         $data['limit'] = $request['limit'];
         $data['offset'] = $request['offset'];
@@ -550,9 +558,8 @@ class DeliveryManController extends Controller
 
     public function emergency_contact_list(Request $request)
     {
-
-        $list = EmergencyContact::where(['user_id'=> $request['delivery_man']->seller_id, 'status'=>1])->get();
-        $data = array();
+        $list = EmergencyContact::where(['user_id' => $request['delivery_man']->seller_id, 'status' => 1])->get();
+        $data = [];
         $data['contact_list'] = $list;
 
         return response()->json($data, 200);
@@ -562,15 +569,15 @@ class DeliveryManController extends Controller
     {
         $dm = $request['delivery_man'];
 
-        $reviews = Review::with('customer','order')
-            ->when($request->is_saved, function ($query) use($request){
+        $reviews = Review::with('customer', 'order')
+            ->when($request->is_saved, function ($query) {
                 $query->where('is_saved', 1);
             })
-            ->where('delivery_man_id',$dm->id)
+            ->where('delivery_man_id', $dm->id)
             ->latest('updated_at')
             ->paginate($request['limit'], ['*'], 'page', $request['offset']);
 
-        $data = array();
+        $data = [];
         $data['total_size'] = $reviews->total();
         $data['limit'] = $request['limit'];
         $data['offset'] = $request['offset'];
@@ -579,31 +586,34 @@ class DeliveryManController extends Controller
         return response()->json($data, 200);
     }
 
-    public function is_online(Request $request){
+    public function is_online(Request $request)
+    {
         $dm = $request['delivery_man'];
         $delivery_man = '';
-        if($request->is_online == '0') {
+        if ($request->is_online == '0') {
             $delivery_man = DeliveryMan::whereHas('orders', function ($query) {
                 $query->where(['order_status' => 'out_for_delivery', 'is_pause' => 0]);
             })->find($request['delivery_man']->id);
         }
 
-        if($request->is_online =='0' && $delivery_man) {
-            return response()->json(["message" => translate("You have ongoing order. You can't go offline now!")], 403);
-        }else{
+        if ($request->is_online == '0' && $delivery_man) {
+            return response()->json(['message' => translate("You have ongoing order. You can't go offline now!")], 403);
+        } else {
             $dm->is_online = $request->is_online;
             $dm->save();
-            return response()->json(["message" => translate("update successfully!")], 200);
+
+            return response()->json(['message' => translate('update successfully!')], 200);
         }
     }
 
-    public function get_all_notification(Request $request){
+    public function get_all_notification(Request $request)
+    {
         $notifications = DeliverymanNotification::with('order')
-            ->where(['delivery_man_id'=>$request['delivery_man']->id])
+            ->where(['delivery_man_id' => $request['delivery_man']->id])
             ->latest()
             ->paginate($request['limit'], ['*'], 'page', $request['offset']);
 
-        $data = array();
+        $data = [];
         $data['total_size'] = $notifications->total();
         $data['limit'] = $request['limit'];
         $data['offset'] = $request['offset'];
@@ -627,33 +637,33 @@ class DeliveryManController extends Controller
 
         $api_key = Helpers::get_business_settings('map_api_key_server');
 
-        $response = Http::get('https://maps.googleapis.com/maps/api/distancematrix/json?origins=' . $request['origin_lat'] . ',' . $request['origin_lng'] . '&destinations=' . $request['destination_lat'] . ',' . $request['destination_lng'] . '&key=' . $api_key);
+        $response = Http::get('https://maps.googleapis.com/maps/api/distancematrix/json?origins='.$request['origin_lat'].','.$request['origin_lng'].'&destinations='.$request['destination_lat'].','.$request['destination_lng'].'&key='.$api_key);
 
         return response()->json($response->json(), 200);
     }
+
     public function is_saved(Request $request)
     {
         $dm = $request['delivery_man'];
-        $get_review = Review::where(['id'=> $request->review_id, 'delivery_man_id' => $dm->id])->first();
+        $get_review = Review::where(['id' => $request->review_id, 'delivery_man_id' => $dm->id])->first();
 
-        if (!$get_review) {
+        if (! $get_review) {
             return response()->json([
                 'errors' => [[
-                        'code' => 'review',
-                        'message' => translate('not_found!')]
-                ]], 404);
+                    'code' => 'review',
+                    'message' => translate('not_found!'), ],
+                ], ], 404);
         }
         $get_review->is_saved = $request->is_saved;
 
         if ($get_review->save()) {
             return response()->json(['message' => translate('update successfully!')], 200);
-
         }
+
         return response()->json([
             'errors' => [[
                 'code' => 'update',
-                'message' => translate('failed!')]
-            ]], 403);
-
+                'message' => translate('failed!'), ],
+            ], ], 403);
     }
 }

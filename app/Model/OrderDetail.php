@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use App\Model\Order;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderDetail extends Model
@@ -18,7 +17,7 @@ class OrderDetail extends Model
         'seller_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'refund_request'=>'integer',
+        'refund_request' => 'integer',
     ];
 
     public function product()

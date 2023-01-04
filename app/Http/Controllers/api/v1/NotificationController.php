@@ -10,7 +10,7 @@ class NotificationController extends Controller
     public function get_notifications()
     {
         try {
-            return response()->json(Notification::active()->orderBy('id','DESC')->get(), 200);
+            return response()->json(Notification::active()->orderBy('id', 'DESC')->get(), 200);
         } catch (\Exception $e) {
             return response()->json([], 200);
         }

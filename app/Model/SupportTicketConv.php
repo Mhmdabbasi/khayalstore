@@ -8,10 +8,10 @@ class SupportTicketConv extends Model
 {
     protected $casts = [
         'support_ticket_id' => 'integer',
-        'admin_id'          => 'integer',
-        'position'          => 'integer',
+        'admin_id' => 'integer',
+        'position' => 'integer',
 
-        'created_at'        => 'datetime',
-        'updated_at'        => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

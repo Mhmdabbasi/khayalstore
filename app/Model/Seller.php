@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -14,12 +13,12 @@ class Seller extends Authenticatable
         'id' => 'integer',
         'orders_count' => 'integer',
         'product_count' => 'integer',
-        'pos+status' => 'integer'
+        'pos+status' => 'integer',
     ];
 
     public function scopeApproved($query)
     {
-        return $query->where(['status'=>'approved']);
+        return $query->where(['status' => 'approved']);
     }
 
     public function shop()
@@ -39,12 +38,11 @@ class Seller extends Authenticatable
 
     public function product()
     {
-        return $this->hasMany(Product::class, 'user_id')->where(['added_by'=>'seller']);
+        return $this->hasMany(Product::class, 'user_id')->where(['added_by' => 'seller']);
     }
 
     public function wallet()
     {
         return $this->hasOne(SellerWallet::class);
     }
-    
 }

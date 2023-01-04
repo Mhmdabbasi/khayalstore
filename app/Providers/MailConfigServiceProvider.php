@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\CPU\Helpers;
-use App\Model\BusinessSetting;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,21 +31,20 @@ class MailConfigServiceProvider extends ServiceProvider
                 $emailServices_smtp = Helpers::get_business_settings('mail_config_sendgrid');
             }
             if ($emailServices_smtp['status'] == 1) {
-                $config = array(
+                $config = [
                     'driver' => $emailServices_smtp['driver'],
                     'host' => $emailServices_smtp['host'],
                     'port' => $emailServices_smtp['port'],
                     'username' => $emailServices_smtp['username'],
                     'password' => $emailServices_smtp['password'],
                     'encryption' => $emailServices_smtp['encryption'],
-                    'from' => array('address' => $emailServices_smtp['email_id'], 'name' => $emailServices_smtp['name']),
+                    'from' => ['address' => $emailServices_smtp['email_id'], 'name' => $emailServices_smtp['name']],
                     'sendmail' => '/usr/sbin/sendmail -bs',
                     'pretend' => false,
-                );
+                ];
                 Config::set('mail', $config);
             }
         } catch (\Exception $ex) {
-
         }
     }
 }

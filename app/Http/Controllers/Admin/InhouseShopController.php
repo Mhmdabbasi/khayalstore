@@ -42,12 +42,12 @@ class InhouseShopController extends Controller
         if ($request->has('shop_banner')) {
             $imgBanner = ImageManager::update('shop/', $imgBanner, 'png', $request->file('shop_banner'));
             DB::table('business_settings')->updateOrInsert(['type' => 'shop_banner'], [
-                'value' => $imgBanner
+                'value' => $imgBanner,
             ]);
         }
 
         Toastr::success('Updated successfully');
+
         return back();
     }
-
 }

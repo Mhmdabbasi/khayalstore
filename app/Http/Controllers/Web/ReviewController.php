@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Web;
 
 use App\CPU\ImageManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Order;
-use App\Model\OrderDetail;
 use App\Model\Review;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use function App\CPU\translate;
 
 class ReviewController extends Controller
 {
@@ -27,7 +25,7 @@ class ReviewController extends Controller
             [
                 'delivery_man_id' => null,
                 'customer_id' => auth('customer')->id(),
-                'product_id' => $request->product_id
+                'product_id' => $request->product_id,
             ],
             [
                 'customer_id' => auth('customer')->id(),
@@ -39,6 +37,7 @@ class ReviewController extends Controller
         );
 
         Toastr::success(translate('successfully_added_review'));
+
         return redirect()->route('account-order-details', ['id' => $request->order_id]);
     }
 
@@ -46,8 +45,9 @@ class ReviewController extends Controller
     {
         $order = Order::where(['id' => $id, 'customer_id' => auth('customer')->id(), 'payment_status' => 'paid'])->first();
 
-        if (!$order) {
+        if (! $order) {
             Toastr::error(translate('Invalid order!'));
+
             return redirect('/');
         }
 
@@ -56,21 +56,21 @@ class ReviewController extends Controller
 
     public function delivery_man_submit(Request $request)
     {
-
         $order = Order::where([
             'id' => $request->order_id,
             'customer_id' => auth('customer')->id(),
-            'payment_status' => 'paid'])->first();
+            'payment_status' => 'paid', ])->first();
 
-        if (!isset($order->delivery_man_id)) {
+        if (! isset($order->delivery_man_id)) {
             Toastr::error(translate('Invalid review!'));
+
             return redirect('/');
         }
 
         Review::updateOrCreate(
             ['delivery_man_id' => $order->delivery_man_id,
                 'customer_id' => auth('customer')->id(),
-                'order_id' => $request->order_id
+                'order_id' => $request->order_id,
             ],
             [
                 'customer_id' => auth('customer')->id(),
@@ -81,6 +81,7 @@ class ReviewController extends Controller
             ]
         );
         Toastr::success(translate('successfully_added_review'));
+
         return redirect()->route('account-order-details', ['id' => $order->id]);
     }
 }

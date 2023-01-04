@@ -5,25 +5,28 @@ namespace App\Http\Controllers\Seller;
 use App\CPU\BackEndHelper;
 use App\CPU\Convert;
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\DeliverymanWallet;
 use App\Model\WithdrawRequest;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Rap2hpoutre\FastExcel\FastExcel;
-use function App\CPU\translate;
 
 class DeliverymanWithdrawController extends Controller
 {
     private $shippingMethod;
+
     public function __construct()
     {
         $this->shippingMethod = Helpers::get_business_settings('shipping_method');
     }
+
     public function withdraw()
     {
         if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
         $all = session()->has('delivery_withdraw_status_filter') && session('delivery_withdraw_status_filter') == 'all' ? 1 : 0;
@@ -55,12 +58,14 @@ class DeliverymanWithdrawController extends Controller
     public function withdraw_view($withdraw_id)
     {
         $details = WithdrawRequest::with(['delivery_men'])->where('delivery_man_id', '<>', null)->where(['id' => $withdraw_id])->first();
+
         return view('seller-views.delivery-man.withdraw.withdraw-view', compact('details'));
     }
 
     public function status_filter(Request $request)
     {
         session()->put('delivery_withdraw_status_filter', $request['delivery_withdraw_status_filter']);
+
         return response()->json(session('delivery_withdraw_status_filter'));
     }
 
@@ -72,14 +77,14 @@ class DeliverymanWithdrawController extends Controller
 
         $wallet = DeliverymanWallet::where('delivery_man_id', $withdraw->delivery_man_id)->first();
         if ($request->approved == 1) {
-            $wallet->total_withdraw   += Convert::usd($withdraw['amount']);
+            $wallet->total_withdraw += Convert::usd($withdraw['amount']);
             $wallet->pending_withdraw -= Convert::usd($withdraw['amount']);
-            $wallet->current_balance  -= Convert::usd($withdraw['amount']);
+            $wallet->current_balance -= Convert::usd($withdraw['amount']);
             $wallet->save();
 
             $withdraw->save();
             Toastr::success('Delivery man payment has been approved successfully');
-        }else{
+        } else {
             $wallet->pending_withdraw -= Convert::usd($withdraw['amount']);
             $wallet->save();
             $withdraw->save();
@@ -87,8 +92,8 @@ class DeliverymanWithdrawController extends Controller
         }
 
         return redirect()->route('seller.delivery-man.withdraw-list');
-
     }
+
     /**
      * Product wishlist report export by excel
      */
@@ -96,6 +101,7 @@ class DeliverymanWithdrawController extends Controller
     {
         if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
         $all = session()->has('delivery_withdraw_status_filter') && session('delivery_withdraw_status_filter') == 'all' ? 1 : 0;
@@ -123,10 +129,11 @@ class DeliverymanWithdrawController extends Controller
 
         if ($withdraw_req->count() == 0) {
             Toastr::warning(\App\CPU\translate('No_data_available!'));
+
             return back();
         }
 
-        $data = array();
+        $data = [];
 
         foreach ($withdraw_req as $withdraw) {
             $status = '';
@@ -138,13 +145,13 @@ class DeliverymanWithdrawController extends Controller
                 $status = 'Denied';
             }
 
-            $data[] = array(
-                'Name' => $withdraw->delivery_men->f_name . ' ' .$withdraw->delivery_men->l_name,
+            $data[] = [
+                'Name' => $withdraw->delivery_men->f_name.' '.$withdraw->delivery_men->l_name,
                 'Phone' => $withdraw->delivery_men->phone,
                 'Amount' => BackEndHelper::set_symbol(BackEndHelper::usd_to_currency($withdraw->amount)),
                 'Submitted Date' => $withdraw->created_at->format('d/m/y h:i:s A'),
                 'Status' => $status,
-            );
+            ];
         }
 
         return (new FastExcel($data))->download('withdraw_requests_of_delivery_men.xlsx');

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
-ini_set('memory_limit',-1);
+ini_set('memory_limit', -1);
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -31,7 +31,6 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-
     public function boot()
     {
         Paginator::useBootstrap();
@@ -63,19 +62,17 @@ class AppServiceProvider extends ServiceProvider
 
             Schema::defaultStringLength(191);
         } catch (\Exception $ex) {
-
         }
 
         /**
          * Paginate a standard Laravel Collection.
          *
-         * @param int $perPage
-         * @param int $total
-         * @param int $page
-         * @param string $pageName
+         * @param  int  $perPage
+         * @param  int  $total
+         * @param  int  $page
+         * @param  string  $pageName
          * @return array
          */
-
         Collection::macro('paginate', function ($perPage, $total = null, $page = null, $pageName = 'page') {
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
 
@@ -90,6 +87,5 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
         });
-
     }
 }

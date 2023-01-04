@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\api\v2\seller;
 
 use App\CPU\BackEndHelper;
+use App\CPU\Convert;
+use App\CPU\CustomerManager;
 use App\CPU\Helpers;
 use App\CPU\ImageManager;
 use App\CPU\OrderManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\DeliveryManTransaction;
 use App\Model\DeliverymanWallet;
@@ -16,14 +19,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Ramsey\Uuid\Uuid;
-use function App\CPU\translate;
-use App\CPU\CustomerManager;
-use App\CPU\Convert;
-
 
 class OrderController extends Controller
 {
     use CommonTrait;
+
     public function list(Request $request)
     {
         $data = Helpers::get_seller_by_token($request);
@@ -32,14 +32,15 @@ class OrderController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
         $order_ids = OrderDetail::where(['seller_id' => $seller['id']])->pluck('order_id')->toArray();
-        $orders = Order::with(['customer','shipping'])->where(['seller_is'=>'seller'])->whereIn('id', $order_ids)->get();
+        $orders = Order::with(['customer', 'shipping'])->where(['seller_is' => 'seller'])->whereIn('id', $order_ids)->get();
         $orders->map(function ($data) {
             $data['billing_address_data'] = json_decode($data['billing_address_data']);
+
             return $data;
         });
 
@@ -54,7 +55,7 @@ class OrderController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -68,7 +69,6 @@ class OrderController extends Controller
 
     public function assign_delivery_man(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
             'delivery_man_id' => 'required',
@@ -84,7 +84,7 @@ class OrderController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -96,9 +96,9 @@ class OrderController extends Controller
         $order->third_party_delivery_tracking_id = null;
         $order->save();
 
-        $fcm_token = isset($order->delivery_man) ? $order->delivery_man->fcm_token:null;
+        $fcm_token = isset($order->delivery_man) ? $order->delivery_man->fcm_token : null;
         $value = Helpers::order_status_update_message('del_assign');
-        if($value && !empty($fcm_token)) {
+        if ($value && ! empty($fcm_token)) {
             try {
                 $data = [
                     'title' => translate('order'),
@@ -117,20 +117,21 @@ class OrderController extends Controller
         return response()->json(['success' => 1, 'message' => translate('order_deliveryman_assigned_successfully')], 200);
     }
 
-    public function amount_date_update(Request $request){
+    public function amount_date_update(Request $request)
+    {
         $data = Helpers::get_seller_by_token($request);
         if ($data['success'] == 1) {
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
         $deliveryman_charge = $request->deliveryman_charge;
 
         $order = Order::find($request->order_id);
-        $db_expected_date  = $order->expected_delivery_date;
+        $db_expected_date = $order->expected_delivery_date;
 
         $order->deliveryman_charge = $deliveryman_charge;
         $order->expected_delivery_date = $request->expected_delivery_date;
@@ -138,21 +139,22 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            if(!empty($request->expected_delivery_date) && $db_expected_date != $request->expected_delivery_date){
+            if (! empty($request->expected_delivery_date) && $db_expected_date != $request->expected_delivery_date) {
                 CommonTrait::add_expected_delivery_date_history($request->order_id, $seller['id'], $request->expected_delivery_date, 'seller');
             }
             $order->save();
 
             DB::commit();
-        }catch(\Exception $ex){
+        } catch (\Exception $ex) {
             DB::rollback();
+
             return response()->json(['success' => 0, 'message' => translate('Update fail!')], 403);
         }
 
-        if(!empty($request->expected_delivery_date) && $db_expected_date != $request->expected_delivery_date){
-            $fcm_token = isset($order->delivery_man) ? $order->delivery_man->fcm_token:null;
-            $value = Helpers::order_status_update_message('expected_delivery_date') . " ID: " . $order['id'];
-            if($value != null && !empty($fcm_token)) {
+        if (! empty($request->expected_delivery_date) && $db_expected_date != $request->expected_delivery_date) {
+            $fcm_token = isset($order->delivery_man) ? $order->delivery_man->fcm_token : null;
+            $value = Helpers::order_status_update_message('expected_delivery_date').' ID: '.$order['id'];
+            if ($value != null && ! empty($fcm_token)) {
                 try {
                     $data = [
                         'title' => translate('order'),
@@ -185,7 +187,7 @@ class OrderController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -199,12 +201,13 @@ class OrderController extends Controller
         }
 
         $order_details = OrderDetail::find($request->order_id);
-        if($order_details){
+        if ($order_details) {
             $order_details->digital_file_after_sell = ImageManager::update('product/digital-product/', $order_details->digital_file_after_sell, $request->digital_file_after_sell->getClientOriginalExtension(), $request->file('digital_file_after_sell'));
             $order_details->save();
+
             return response()->json(['success' => 1, 'message' => translate('File_upload_successfully')], 200);
-        }else{
-            return response()->json(['success' => 0, 'message' => translate("File_upload_fail!")], 202);
+        } else {
+            return response()->json(['success' => 0, 'message' => translate('File_upload_fail!')], 202);
         }
     }
 
@@ -216,22 +219,20 @@ class OrderController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
         $order = Order::find($request->id);
-        if(empty($order->customer))
-        {
+        if (empty($order->customer)) {
             return response()->json(['success' => 0, 'message' => translate("Customer account has been deleted. you can't update status!")], 202);
         }
 
         $wallet_status = Helpers::get_business_settings('wallet_status');
         $loyalty_point_status = Helpers::get_business_settings('loyalty_point_status');
 
-        if($request->order_status=='delivered' && $order->payment_status !='paid'){
-
-            return response()->json(['success' => 0, 'message' => translate('Before delivered you need to make payment status paid!')],200);
+        if ($request->order_status == 'delivered' && $order->payment_status != 'paid') {
+            return response()->json(['success' => 0, 'message' => translate('Before delivered you need to make payment status paid!')], 200);
         }
 
         if ($order->order_status == 'delivered') {
@@ -256,7 +257,7 @@ class OrderController extends Controller
 
         try {
             $fcm_token_delivery_man = $order->delivery_man->fcm_token;
-            if ($request->order_status == 'canceled' && $value != null && !empty($fcm_token_delivery_man)) {
+            if ($request->order_status == 'canceled' && $value != null && ! empty($fcm_token_delivery_man)) {
                 $data = [
                     'title' => translate('order'),
                     'description' => $value,
@@ -264,7 +265,7 @@ class OrderController extends Controller
                     'image' => '',
                 ];
 
-                if($order->delivery_man_id) {
+                if ($order->delivery_man_id) {
                     self::add_deliveryman_push_notification($data, $order->delivery_man_id);
                 }
                 Helpers::send_push_notif_to_device($fcm_token_delivery_man, $data);
@@ -278,7 +279,7 @@ class OrderController extends Controller
         if ($request->order_status == 'delivered' && $order['seller_id'] != null) {
             OrderManager::wallet_manage_on_order_status_change($order, 'seller');
             OrderDetail::where('order_id', $order->id)->update(
-                ['delivery_status'=>'delivered']
+                ['delivery_status' => 'delivered']
             );
         }
 
@@ -302,22 +303,21 @@ class OrderController extends Controller
                 $dm_wallet->save();
             }
 
-            if($order->deliveryman_charge && $request->order_status == 'delivered'){
+            if ($order->deliveryman_charge && $request->order_status == 'delivered') {
                 DeliveryManTransaction::create([
                     'delivery_man_id' => $order->delivery_man_id,
                     'user_id' => $seller->id,
                     'user_type' => 'seller',
                     'credit' => BackEndHelper::currency_to_usd($order->deliveryman_charge) ?? 0,
                     'transaction_id' => Uuid::uuid4(),
-                    'transaction_type' => 'deliveryman_charge'
+                    'transaction_type' => 'deliveryman_charge',
                 ]);
             }
         }
 
-        if($wallet_status == 1 && $loyalty_point_status == 1)
-        {
-            if($request->order_status == 'delivered' && $order->payment_status =='paid'){
-                CustomerManager::create_loyalty_point_transaction($order->customer_id, $order->id, Convert::default($order->order_amount-$order->shipping_cost), 'order_place');
+        if ($wallet_status == 1 && $loyalty_point_status == 1) {
+            if ($request->order_status == 'delivered' && $order->payment_status == 'paid') {
+                CustomerManager::create_loyalty_point_transaction($order->customer_id, $order->id, Convert::default($order->order_amount - $order->shipping_cost), 'order_place');
             }
         }
 
@@ -328,14 +328,13 @@ class OrderController extends Controller
 
     public function assign_third_party_delivery(Request $request)
     {
-
         $data = Helpers::get_seller_by_token($request);
 
         if ($data['success'] == 1) {
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -368,13 +367,13 @@ class OrderController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
         $validator = Validator::make($request->all(), [
-            'order_id'=>'required',
-            'payment_status' => 'required|in:paid,unpaid'
+            'order_id' => 'required',
+            'payment_status' => 'required|in:paid,unpaid',
         ]);
 
         if ($validator->fails()) {
@@ -383,19 +382,20 @@ class OrderController extends Controller
 
         $order = Order::find($request['order_id']);
         if (isset($order)) {
-            if(empty($order->customer))
-            {
+            if (empty($order->customer)) {
                 return response()->json(['success' => 0, 'message' => translate("Customer account has been deleted. you can't update status!")], 202);
             }
 
             $order->payment_status = $request['payment_status'];
             $order->save();
+
             return response()->json(['message' => translate('Payment status updated')], 200);
         }
+
         return response()->json([
             'errors' => [
-                ['code' => 'order', 'message' => translate('not found!')]
-            ]
+                ['code' => 'order', 'message' => translate('not found!')],
+            ],
         ], 404);
     }
 }

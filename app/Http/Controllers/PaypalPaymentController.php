@@ -7,18 +7,12 @@ use App\CPU\Helpers;
 use App\CPU\OrderManager;
 use App\Model\BusinessSetting;
 use App\Model\Currency;
-use App\Model\Order;
-use App\Model\Product;
-use App\Model\ShippingMethod;
-use App\User;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 use PayPal\Api\Amount;
 use PayPal\Api\Item;
 use PayPal\Api\ItemList;
@@ -28,7 +22,6 @@ use PayPal\Api\PaymentExecution;
 use PayPal\Api\RedirectUrls;
 use PayPal\Api\Transaction;
 use PayPal\Auth\OAuthTokenCredential;
-use PayPal\Common\PayPalModel;
 use PayPal\Rest\ApiContext;
 
 class PaypalPaymentController extends Controller
@@ -91,7 +84,7 @@ class PaypalPaymentController extends Controller
         $payment->setIntent('Sale')
             ->setPayer($payer)
             ->setRedirectUrls($redirect_urls)
-            ->setTransactions(array($transaction));
+            ->setTransactions([$transaction]);
         try {
             $payment->create($this->_api_context);
             foreach ($payment->getLinks() as $link) {
@@ -106,15 +99,15 @@ class PaypalPaymentController extends Controller
             if (isset($redirect_url)) {
                 return Redirect::away($redirect_url);
             }
-
         } catch (\Exception $ex) {
             Toastr::error('Payment process is failed.');
+
             return back();
         }
 
         Session::put('error', 'Unknown error occurred');
-        return back();
 
+        return back();
     }
 
     public function getPaymentStatus(Request $request)
@@ -122,6 +115,7 @@ class PaypalPaymentController extends Controller
         $payment_id = $request['paymentId'];
         if (empty($request['PayerID']) || empty($request['token'])) {
             Session::put('error', 'Payment failed');
+
             return back();
         }
 
@@ -141,7 +135,7 @@ class PaypalPaymentController extends Controller
                     'payment_status' => 'paid',
                     'transaction_ref' => \session('transaction_ref'),
                     'order_group_id' => $unique_id,
-                    'cart_group_id' => $group_id
+                    'cart_group_id' => $group_id,
                 ];
                 $order_id = OrderManager::generate_order($data);
                 array_push($order_ids, $order_id);
@@ -154,6 +148,7 @@ class PaypalPaymentController extends Controller
 
             if (auth('customer')->check()) {
                 Toastr::success('Payment success.');
+
                 return view('web-views.checkout-complete');
             }
         }
@@ -164,6 +159,7 @@ class PaypalPaymentController extends Controller
 
         if (auth('customer')->check()) {
             Toastr::error('Payment failed.');
+
             return back();
         }
     }

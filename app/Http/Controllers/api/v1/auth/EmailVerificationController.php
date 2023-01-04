@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\api\v1\auth;
 
 use App\CPU\Helpers;
-use App\CPU\SMS_module;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\PhoneOrEmailVerification;
 use App\User;
@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use function App\CPU\translate;
 
 class EmailVerificationController extends Controller
 {
@@ -20,14 +18,14 @@ class EmailVerificationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'temporary_token' => 'required',
-            'email' => 'required'
+            'email' => 'required',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        if(User::where('email', $request->email)->first()->temporary_token != $request->temporary_token) {
+        if (User::where('email', $request->email)->first()->temporary_token != $request->temporary_token) {
             return response()->json([
                 'message' => translate('temporary_token_mismatch'),
             ], 200);
@@ -48,13 +46,13 @@ class EmailVerificationController extends Controller
         if ($emailServices_smtp['status'] == 1) {
             Mail::to($request['email'])->send(new \App\Mail\EmailVerification($token));
             $response = translate('check_your_email');
-        }else{
-            $response= translate('email_failed');
+        } else {
+            $response = translate('email_failed');
         }
 
         return response()->json([
             'message' => $response,
-            'token' => 'active'
+            'token' => 'active',
         ], 200);
     }
 
@@ -86,14 +84,15 @@ class EmailVerificationController extends Controller
             }
 
             $token = $user->createToken('LaravelAuthApp')->accessToken;
+
             return response()->json([
                 'message' => translate('otp_verified'),
-                'token' => $token
+                'token' => $token,
             ], 200);
         }
 
         return response()->json(['errors' => [
-            ['code' => 'token', 'message' => translate('invalid_token')]
+            ['code' => 'token', 'message' => translate('invalid_token')],
         ]], 501);
     }
 }

@@ -20,6 +20,7 @@ class InstallController extends Controller
         $permission['curl_enabled'] = function_exists('curl_version');
         $permission['db_file_write_perm'] = is_writable(base_path('.env'));
         $permission['routes_file_write_perm'] = is_writable(base_path('app/Providers/RouteServiceProvider.php'));
+
         return view('installation.step1', compact('permission'));
     }
 
@@ -42,6 +43,7 @@ class InstallController extends Controller
     {
         Artisan::call('config:cache');
         Artisan::call('config:clear');
+
         return view('installation.step5');
     }
 
@@ -64,15 +66,15 @@ class InstallController extends Controller
             'phone' => $request['admin_phone'],
             'status' => 1,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'company_name'], [
-            'value' => $request['company_name']
+            'value' => $request['company_name'],
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'currency_model'], [
-            'value' => $request['currency_model']
+            'value' => $request['currency_model'],
         ]);
 
         DB::table('admin_wallets')->insert([
@@ -87,25 +89,25 @@ class InstallController extends Controller
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'product_brand'], [
-            'value' => 1
+            'value' => 1,
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'digital_product'], [
-            'value' => 1
+            'value' => 1,
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'delivery_boy_expected_delivery_date_message'], [
             'value' => json_encode([
                 'status' => 0,
-                'message' => ''
-            ])
+                'message' => '',
+            ]),
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'order_canceled'], [
             'value' => json_encode([
                 'status' => 0,
-                'message' => ''
-            ])
+                'message' => '',
+            ]),
         ]);
 
         $previousRouteServiceProvier = base_path('app/Providers/RouteServiceProvider.php');
@@ -118,23 +120,22 @@ class InstallController extends Controller
     public function database_installation(Request $request)
     {
         if (self::check_database_connection($request->DB_HOST, $request->DB_DATABASE, $request->DB_USERNAME, $request->DB_PASSWORD)) {
-
             $key = base64_encode(random_bytes(32));
             $output = 'APP_NAME=6valley'.time().'
                     APP_ENV=live
-                    APP_KEY=base64:' . $key . '
+                    APP_KEY=base64:'.$key.'
                     APP_DEBUG=false
                     APP_INSTALL=true
                     APP_LOG_LEVEL=debug
                     APP_MODE=live
-                    APP_URL=' . URL::to('/') . '
+                    APP_URL='.URL::to('/').'
 
                     DB_CONNECTION=mysql
-                    DB_HOST=' . $request->DB_HOST . '
+                    DB_HOST='.$request->DB_HOST.'
                     DB_PORT=3306
-                    DB_DATABASE=' . $request->DB_DATABASE . '
-                    DB_USERNAME=' . $request->DB_USERNAME . '
-                    DB_PASSWORD=' . $request->DB_PASSWORD . '
+                    DB_DATABASE='.$request->DB_DATABASE.'
+                    DB_USERNAME='.$request->DB_USERNAME.'
+                    DB_PASSWORD='.$request->DB_PASSWORD.'
 
                     BROADCAST_DRIVER=log
                     CACHE_DRIVER=file
@@ -157,8 +158,8 @@ class InstallController extends Controller
                     PUSHER_APP_SECRET=
                     PUSHER_APP_CLUSTER=mt1
 
-                    PURCHASE_CODE=' . session('purchase_key') . '
-                    BUYER_USERNAME=' . session('username') . '
+                    PURCHASE_CODE='.session('purchase_key').'
+                    BUYER_USERNAME='.session('username').'
                     SOFTWARE_ID=MzE0NDg1OTc=
 
                     SOFTWARE_VERSION=12.1
@@ -172,10 +173,12 @@ class InstallController extends Controller
                 return redirect('step4');
             } else {
                 session()->flash('error', 'Database error!');
+
                 return redirect('step3');
             }
         } else {
             session()->flash('error', 'Database error!');
+
             return redirect('step3');
         }
     }
@@ -185,9 +188,11 @@ class InstallController extends Controller
         try {
             $sql_path = base_path('installation/backup/database.sql');
             DB::unprepared(file_get_contents($sql_path));
+
             return redirect('step5');
         } catch (\Exception $exception) {
             session()->flash('error', 'Your database is not clean, do you want to clean database then import?');
+
             return back();
         }
     }
@@ -198,16 +203,17 @@ class InstallController extends Controller
             Artisan::call('db:wipe');
             $sql_path = base_path('installation/backup/database.sql');
             DB::unprepared(file_get_contents($sql_path));
+
             return redirect('step5');
         } catch (\Exception $exception) {
             session()->flash('error', 'Check your database permission!');
+
             return back();
         }
     }
 
-    function check_database_connection($db_host = "", $db_name = "", $db_user = "", $db_pass = "")
+    public function check_database_connection($db_host = '', $db_name = '', $db_user = '', $db_pass = '')
     {
-
         if (@mysqli_connect($db_host, $db_user, $db_pass, $db_name)) {
             return true;
         } else {

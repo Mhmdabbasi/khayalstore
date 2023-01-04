@@ -3,22 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Brian2694\Toastr\Facades\Toastr;
-
 
 class DatabaseSettingController extends Controller
 {
     public function db_index()
     {
-
         $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
-        $filter_tables = array('admin_roles','admins','business_settings','colors','currencies',
-                                'failed_jobs','migrations','oauth_access_tokens','oauth_auth_codes',
-                                'oauth_clients','oauth_personal_access_clients','oauth_refresh_tokens',
-                                'password_resets','personal_access_tokens','phone_or_email_verifications',
-                                'social_medias','soft_credentials','users');
+        $filter_tables = ['admin_roles', 'admins', 'business_settings', 'colors', 'currencies',
+            'failed_jobs', 'migrations', 'oauth_access_tokens', 'oauth_auth_codes',
+            'oauth_clients', 'oauth_personal_access_clients', 'oauth_refresh_tokens',
+            'password_resets', 'personal_access_tokens', 'phone_or_email_verifications',
+            'social_medias', 'soft_credentials', 'users', ];
         $tables = array_values(array_diff($tables, $filter_tables));
 
         $rows = [];
@@ -29,12 +27,14 @@ class DatabaseSettingController extends Controller
 
         return view('admin-views.business-settings.db-index', compact('tables', 'rows'));
     }
+
     public function clean_db(Request $request)
     {
-        $tables = (array)$request->tables;
+        $tables = (array) $request->tables;
 
-        if(count($tables) == 0) {
+        if (count($tables) == 0) {
             Toastr::error('No Table Updated');
+
             return back();
         }
 
@@ -46,10 +46,12 @@ class DatabaseSettingController extends Controller
             });
         } catch (\Exception $exception) {
             Toastr::error('Failed to update!');
+
             return back();
         }
 
         Toastr::success('Updated successfully!');
+
         return back();
     }
 }

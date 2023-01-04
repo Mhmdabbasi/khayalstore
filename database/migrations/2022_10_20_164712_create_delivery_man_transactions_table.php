@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDeliveryManTransactionsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -19,8 +19,8 @@ class CreateDeliveryManTransactionsTable extends Migration
             $table->bigInteger('user_id');
             $table->string('user_type', 20);
             $table->uuid('transaction_id');
-            $table->decimal('debit', 50,2)->default(0);
-            $table->decimal('credit', 50,2)->default(0);
+            $table->decimal('debit', 50, 2)->default(0);
+            $table->decimal('credit', 50, 2)->default(0);
             $table->string('transaction_type', 20);
             $table->timestamps();
         });
@@ -35,4 +35,4 @@ class CreateDeliveryManTransactionsTable extends Migration
     {
         Schema::dropIfExists('delivery_man_transactions');
     }
-}
+};

@@ -13,21 +13,21 @@ class FlashDealController extends Controller
     public function get_flash_deal()
     {
         try {
-            $flash_deals = FlashDeal::where('deal_type','flash_deal')
+            $flash_deals = FlashDeal::where('deal_type', 'flash_deal')
                 ->where(['status' => 1])
                 ->whereDate('start_date', '<=', date('Y-m-d'))
                 ->whereDate('end_date', '>=', date('Y-m-d'))->first();
+
             return response()->json($flash_deals, 200);
         } catch (\Exception $e) {
             return response()->json(['errors' => $e], 403);
         }
-
     }
 
     public function get_products($deal_id)
     {
         $p_ids = FlashDealProduct::with(['product'])
-                                    ->whereHas('product',function($q){
+                                    ->whereHas('product', function ($q) {
                                         $q->active();
                                     })
                                     ->where(['flash_deal_id' => $deal_id])

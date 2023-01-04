@@ -11,8 +11,9 @@
 |
 */
 
+use App\Http\Controllers\SharedController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('image-upload', 'SharedController@imageUpload')->name('image-upload');
-Route::get('image-remove/{id}/{folder}', 'SharedController@imageRemove')->name('image-remove');
-Route::get('lang/{locale}', 'SharedController@lang')->name('lang');
+Route::post('image-upload', [SharedController::class, 'imageUpload'])->name('image-upload');
+Route::get('image-remove/{id}/{folder}', [SharedController::class, 'imageRemove'])->name('image-remove');
+Route::get('lang/{locale}', [SharedController::class, 'lang'])->name('lang');

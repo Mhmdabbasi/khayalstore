@@ -16,27 +16,27 @@ class SubSubCategoryController extends Controller
     {
         $query_param = [];
         $search = $request['search'];
-        if($request->has('search'))
-        {
+        if ($request->has('search')) {
             $key = explode(' ', $request['search']);
-            $categories = Category::where(['position'=>2])->where(function ($q) use ($key) {
+            $categories = Category::where(['position' => 2])->where(function ($q) use ($key) {
                 foreach ($key as $value) {
                     $q->orWhere('name', 'like', "%{$value}%");
                 }
             });
             $query_param = ['search' => $request['search']];
-        }else{
-            $categories=Category::where(['position'=>2]);
+        } else {
+            $categories = Category::where(['position' => 2]);
         }
         $categories = $categories->latest()->paginate(Helpers::pagination_limit())->appends($query_param);
-        return view('admin-views.category.sub-sub-category-view',compact('categories','search'));
+
+        return view('admin-views.category.sub-sub-category-view', compact('categories', 'search'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
-            'parent_id' => 'required'
+            'parent_id' => 'required',
         ], [
             'name.required' => 'Category name is required!',
             'parent_id.required' => 'Sub Category field is required!',
@@ -49,33 +49,34 @@ class SubSubCategoryController extends Controller
         $category->position = 2;
         $category->priority = $request->priority;
         $category->save();
-        foreach($request->lang as $index=>$key)
-        {
-            if($request->name[$index] && $key != 'en')
-            {
+        foreach ($request->lang as $index => $key) {
+            if ($request->name[$index] && $key != 'en') {
                 Translation::updateOrInsert(
-                    ['translationable_type'  => 'App\Model\Category',
-                        'translationable_id'    => $category->id,
-                        'locale'                => $key,
-                        'key'                   => 'name'],
-                    ['value'                 => $request->name[$index]]
+                    ['translationable_type' => \App\Model\Category::class,
+                        'translationable_id' => $category->id,
+                        'locale' => $key,
+                        'key' => 'name', ],
+                    ['value' => $request->name[$index]]
                 );
             }
         }
         Toastr::success('Sub Sub Category updated successfully!');
+
         return back();
     }
 
     public function edit(Request $request)
     {
-        $data = Category::where('id',$request->id)->first();
+        $data = Category::where('id', $request->id)->first();
+
         return response()->json($data);
     }
+
     public function update(Request $request)
     {
         $request->validate([
             'name' => 'required',
-            'parent_id' => 'required'
+            'parent_id' => 'required',
         ], [
             'name.required' => 'Category name is required!',
             'parent_id.required' => 'Sub Category field is required!',
@@ -88,30 +89,34 @@ class SubSubCategoryController extends Controller
         $category->position = 2;
         $category->priority = $request->priority;
         $category->save();
+
         return response()->json();
     }
+
     public function delete(Request $request)
     {
-        $translation = Translation::where('translationable_type','App\Model\Category')
-                                    ->where('translationable_id',$request->id);
+        $translation = Translation::where('translationable_type', \App\Model\Category::class)
+                                    ->where('translationable_id', $request->id);
         $translation->delete();
         Category::destroy($request->id);
+
         return response()->json();
     }
-    public function fetch(Request $request){
-        if($request->ajax())
-        {
-            $data = Category::where('position',2)->orderBy('id','desc')->get();
+
+    public function fetch(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Category::where('position', 2)->orderBy('id', 'desc')->get();
+
             return response()->json($data);
         }
     }
 
     public function getSubCategory(Request $request)
     {
-        $data = Category::where("parent_id",$request->id)->get();
-        $output='<option value="" disabled selected>Select main category</option>';
-        foreach($data as $row)
-        {
+        $data = Category::where('parent_id', $request->id)->get();
+        $output = '<option value="" disabled selected>Select main category</option>';
+        foreach ($data as $row) {
             $output .= '<option value="'.$row->id.'">'.$row->name.'</option>';
         }
         echo $output;
@@ -119,7 +124,8 @@ class SubSubCategoryController extends Controller
 
     public function getCategoryId(Request $request)
     {
-        $data= Category::where('id',$request->id)->first();
+        $data = Category::where('id', $request->id)->first();
+
         return response()->json($data);
     }
 }

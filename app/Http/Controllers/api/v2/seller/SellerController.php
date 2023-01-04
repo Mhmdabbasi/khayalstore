@@ -6,6 +6,7 @@ use App\CPU\BackEndHelper;
 use App\CPU\Convert;
 use App\CPU\Helpers;
 use App\CPU\ImageManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\DeliveryMan;
 use App\Model\OrderTransaction;
@@ -18,9 +19,8 @@ use App\Model\WithdrawRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use function App\CPU\translate;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class SellerController extends Controller
 {
@@ -36,7 +36,7 @@ class SellerController extends Controller
             $shop['rating_count'] = Review::whereIn('product_id', $product_ids)->count();
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -51,7 +51,7 @@ class SellerController extends Controller
             $delivery_men = DeliveryMan::where(['seller_id' => $seller['id']])->get();
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -68,11 +68,12 @@ class SellerController extends Controller
             $reviews = Review::whereIn('product_id', $product_ids)->with(['product', 'customer'])->get();
             $reviews->map(function ($data) {
                 $data['attachment'] = json_decode($data['attachment'], true);
+
                 return $data;
             });
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -87,10 +88,11 @@ class SellerController extends Controller
             $reviews = Review::find($request->id);
             $reviews->status = $request->status;
             $reviews->save();
-            return response()->json(['message'=>translate('status updated successfully!!')],200);
+
+            return response()->json(['message' => translate('status updated successfully!!')], 200);
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
     }
@@ -103,7 +105,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -118,7 +120,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -135,7 +137,7 @@ class SellerController extends Controller
             'address' => $request['address'],
             'contact' => $request['contact'],
             'image' => $imageName,
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         return response()->json(translate('Shop info updated successfully!'), 200);
@@ -149,7 +151,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -168,15 +170,15 @@ class SellerController extends Controller
             'branch' => $request['branch'],
             'account_no' => $request['account_no'],
             'holder_name' => $request['holder_name'],
-            'phone'=> $request['phone'],
+            'phone' => $request['phone'],
             'password' => $request['password'] != null ? bcrypt($request['password']) : Seller::where(['id' => $seller['id']])->first()->password,
             'image' => $imageName,
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         if ($request['password'] != null) {
             Seller::where(['id' => $seller['id']])->update([
-                'auth_token' => Str::random('50')
+                'auth_token' => Str::random('50'),
             ]);
         }
 
@@ -190,12 +192,11 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
-        if($seller->account_no==null || $seller->bank_name==null)
-        {
-            return response()->json(['message'=>translate('Update your bank info first')], 202);
+        if ($seller->account_no == null || $seller->bank_name == null) {
+            return response()->json(['message' => translate('Update your bank info first')], 202);
         }
 
         $wallet = SellerWallet::where('seller_id', $seller['id'])->first();
@@ -206,14 +207,16 @@ class SellerController extends Controller
                 'transaction_note' => null,
                 'approved' => 0,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
             $wallet->total_earning -= BackEndHelper::currency_to_usd($request['amount']);
             $wallet->pending_withdraw += BackEndHelper::currency_to_usd($request['amount']);
             $wallet->save();
+
             return response()->json(translate('Withdraw request sent successfully!'), 200);
         }
-        return response()->json(['message'=>translate('Invalid withdraw request')], 400);
+
+        return response()->json(['message' => translate('Invalid withdraw request')], 400);
     }
 
     public function close_withdraw_request(Request $request)
@@ -223,7 +226,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -235,6 +238,7 @@ class SellerController extends Controller
             $wallet->pending_withdraw -= BackEndHelper::currency_to_usd($request['amount']);
             $wallet->save();
             $withdraw_request->delete();
+
             return response()->json(translate('Withdraw request has been closed successfully!'), 200);
         }
 
@@ -248,7 +252,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -264,7 +268,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -274,7 +278,7 @@ class SellerController extends Controller
         $seller_earnings = OrderTransaction::where([
             'seller_is' => 'seller',
             'seller_id' => $seller['id'],
-            'status' => 'disburse'
+            'status' => 'disburse',
         ])->select(
             DB::raw('IFNULL(sum(seller_amount),0) as sums'),
             DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -286,7 +290,7 @@ class SellerController extends Controller
                     $default = $match['sums'];
                 }
             }
-            $seller_data .= $default . ',';
+            $seller_data .= $default.',';
         }
 
         return response()->json($seller_data, 200);
@@ -299,7 +303,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -310,7 +314,7 @@ class SellerController extends Controller
         $commission_earnings = OrderTransaction::where([
             'seller_is' => 'seller',
             'seller_id' => $seller['id'],
-            'status' => 'disburse'
+            'status' => 'disburse',
         ])->select(
             DB::raw('IFNULL(sum(admin_commission),0) as sums'),
             DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -322,7 +326,7 @@ class SellerController extends Controller
                     $default = $match['sums'];
                 }
             }
-            $commission_data .= $default . ',';
+            $commission_data .= $default.',';
         }
 
         return response()->json($commission_data, 200);
@@ -343,7 +347,7 @@ class SellerController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -359,20 +363,20 @@ class SellerController extends Controller
         $data = Helpers::get_seller_by_token($request);
         if ($data['success'] == 1) {
             $seller = $data['data'];
-        }else {
+        } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
-        if($seller->id){
-            ImageManager::delete('/seller/' . $seller['image']);
+        if ($seller->id) {
+            ImageManager::delete('/seller/'.$seller['image']);
 
             $seller->delete();
-            return response()->json(['message' => translate('Your_account_deleted_successfully!!')],200);
 
-        }else{
-            return response()->json(['message' =>'access_denied!!'],403);
+            return response()->json(['message' => translate('Your_account_deleted_successfully!!')], 200);
+        } else {
+            return response()->json(['message' => 'access_denied!!'], 403);
         }
     }
 }

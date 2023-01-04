@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Admin\Auth;
 
-use App\Http\Controllers\Controller;
-use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Http\Request;
-use Gregwar\Captcha\CaptchaBuilder;
 use App\CPU\Helpers;
-use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Controller;
 use App\Model\Admin;
+use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
@@ -20,7 +19,6 @@ class LoginController extends Controller
 
     public function captcha($tmp)
     {
-
         $phrase = new PhraseBuilder;
         $code = $phrase->build(4);
         $builder = new CaptchaBuilder($code, $phrase);
@@ -31,12 +29,12 @@ class LoginController extends Controller
         $builder->build($width = 100, $height = 40, $font = null);
         $phrase = $builder->getPhrase();
 
-        if(Session::has('default_captcha_code')) {
+        if (Session::has('default_captcha_code')) {
             Session::forget('default_captcha_code');
         }
         Session::put('default_captcha_code', $phrase);
-        header("Cache-Control: no-cache, must-revalidate");
-        header("Content-Type:image/jpeg");
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Content-Type:image/jpeg');
         $builder->output();
     }
 
@@ -49,7 +47,7 @@ class LoginController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6',
         ]);
 
         //recaptcha validation
@@ -61,10 +59,10 @@ class LoginController extends Controller
                         function ($attribute, $value, $fail) {
                             $secret_key = Helpers::get_business_settings('recaptcha')['secret_key'];
                             $response = $value;
-                            $url = 'https://www.google.com/recaptcha/api/siteverify?secret=' . $secret_key . '&response=' . $response;
+                            $url = 'https://www.google.com/recaptcha/api/siteverify?secret='.$secret_key.'&response='.$response;
                             $response = \file_get_contents($url);
                             $response = json_decode($response);
-                            if (!$response->success) {
+                            if (! $response->success) {
                                 $fail(\App\CPU\translate('ReCAPTCHA Failed'));
                             }
                         },
@@ -73,18 +71,17 @@ class LoginController extends Controller
             } catch (\Exception $exception) {
             }
         } else {
-
             if (strtolower($request->default_captcha_value) != strtolower(Session('default_captcha_code'))) {
                 Session::forget('default_captcha_code');
+
                 return back()->withErrors(\App\CPU\translate('Captcha Failed'));
             }
-
         }
         $admin = Admin::where('email', $request->email)->first();
         if (isset($admin) && $admin->status != 1) {
             return redirect()->back()->withInput($request->only('email', 'remember'))
                 ->withErrors(['You are blocked!!, contact with admin.']);
-        }else{
+        } else {
             if (auth('admin')->attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
                 return redirect()->route('admin.dashboard');
             }
@@ -98,6 +95,7 @@ class LoginController extends Controller
     {
         auth()->guard('admin')->logout();
         $request->session()->invalidate();
+
         return redirect()->route('admin.auth.login');
     }
 }

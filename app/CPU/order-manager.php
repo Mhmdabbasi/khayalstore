@@ -12,28 +12,29 @@ use App\Model\OrderTransaction;
 use App\Model\Product;
 use App\Model\Seller;
 use App\Model\SellerWallet;
-use App\Model\ShippingType;
 use App\Model\ShippingAddress;
+use App\Model\ShippingType;
 use App\Traits\CommonTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
-
 class OrderManager
 {
     use CommonTrait;
+
     public static function track_order($order_id)
     {
         $order = Order::where(['id' => $order_id])->first();
         $order['billing_address_data'] = json_decode($order['billing_address_data']);
         $order['shipping_address_data'] = json_decode($order['shipping_address_data']);
+
         return $order;
     }
 
     public static function gen_unique_id()
     {
-        return rand(1000, 9999) . '-' . Str::random(5) . '-' . time();
+        return rand(1000, 9999).'-'.Str::random(5).'-'.time();
     }
 
     public static function order_summary($order)
@@ -47,6 +48,7 @@ class OrderManager
             $total_discount_on_product += $detail->discount;
         }
         $total_shipping_cost = $order['shipping_cost'];
+
         return [
             'subtotal' => $sub_total,
             'total_tax' => $total_tax,
@@ -75,7 +77,7 @@ class OrderManager
                     ]);
                     OrderDetail::where(['id' => $detail['id']])->update([
                         'is_stock_decreased' => 0,
-                        'delivery_status' => $status
+                        'delivery_status' => $status,
                     ]);
                 }
             }
@@ -110,7 +112,7 @@ class OrderManager
                     ]);
                     OrderDetail::where(['id' => $detail['id']])->update([
                         'is_stock_decreased' => 1,
-                        'delivery_status' => $status
+                        'delivery_status' => $status,
                     ]);
                 }
             }
@@ -315,11 +317,11 @@ class OrderManager
             'shipping_type' => $shipping_type,
             'created_at' => now(),
             'updated_at' => now(),
-            'order_note' => $order_note
+            'order_note' => $order_note,
         ];
 //        confirmed
         DB::table('orders')->insertGetId($or);
-        self::add_order_status_history($order_id, auth('customer')->id(), $data['payment_status']=='paid'?'confirmed':'pending', 'customer');
+        self::add_order_status_history($order_id, auth('customer')->id(), $data['payment_status'] == 'paid' ? 'confirmed' : 'pending', 'customer');
 
         foreach (CartManager::get_cart($data['cart_group_id']) as $c) {
             $product = Product::where(['id' => $c['product_id']])->first();
@@ -339,7 +341,7 @@ class OrderManager
                 'shipping_method_id' => null,
                 'payment_status' => 'unpaid',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ];
 
             if ($c['variant'] != null) {
@@ -357,11 +359,10 @@ class OrderManager
             }
 
             Product::where(['id' => $product['id']])->update([
-                'current_stock' => $product['current_stock'] - $c['quantity']
+                'current_stock' => $product['current_stock'] - $c['quantity'],
             ]);
 
             DB::table('order_details')->insert($or_d);
-
         }
 
         if ($or['payment_method'] != 'cash_on_delivery') {

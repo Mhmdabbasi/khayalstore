@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\api\v1;
 
 use App\CPU\BrandManager;
-use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
@@ -16,7 +14,7 @@ class BrandController extends Controller
         } catch (\Exception $e) {
         }
 
-        return response()->json($brands,200);
+        return response()->json($brands, 200);
     }
 
     public function get_products($brand_id)
@@ -27,6 +25,6 @@ class BrandController extends Controller
             return response()->json(['errors' => $e], 403);
         }
 
-        return response()->json($products,200);
+        return response()->json($products, 200);
     }
 }
