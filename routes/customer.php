@@ -23,8 +23,8 @@ Route::get('authentication-failed', function () {
     ], 401);
 })->name('authentication-failed');
 
-Route::namespace('Customer')->prefix('customer')->name('customer.')->group(function () {
-    Route::namespace('Auth')->prefix('auth')->name('auth.')->group(function () {
+Route::prefix('customer')->name('customer.')->group(function () {
+    Route::prefix('auth')->name('auth.')->group(function () {
         Route::get('/code/captcha/{tmp}', 'LoginController@captcha')->name('default-captcha');
         Route::get('login', 'LoginController@login')->name('login');
         Route::post('login', 'LoginController@submit');
