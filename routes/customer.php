@@ -23,8 +23,8 @@ Route::get('authentication-failed', function () {
     ], 401);
 })->name('authentication-failed');
 
-Route::group(['namespace' => 'Customer', 'prefix' => 'customer', 'as' => 'customer.'], function () {
-    Route::group(['namespace' => 'Auth', 'prefix' => 'auth', 'as' => 'auth.'], function () {
+Route::namespace('Customer')->prefix('customer')->name('customer.')->group(function () {
+    Route::namespace('Auth')->prefix('auth')->name('auth.')->group(function () {
         Route::get('/code/captcha/{tmp}', 'LoginController@captcha')->name('default-captcha');
         Route::get('login', 'LoginController@login')->name('login');
         Route::post('login', 'LoginController@submit');
@@ -51,18 +51,15 @@ Route::group(['namespace' => 'Customer', 'prefix' => 'customer', 'as' => 'custom
         Route::post('reset-password', 'ForgotPasswordController@reset_password_submit');
     });
 
-    Route::group(['prefix' => 'payment-mobile'], function () {
+    Route::prefix('payment-mobile')->group(function () {
         Route::get('/', 'PaymentController@payment')->name('payment-mobile');
     });
 
-    Route::group([], function () {
-        Route::get('set-payment-method/{name}', 'SystemController@set_payment_method')->name('set-payment-method');
-        Route::get('set-shipping-method', 'SystemController@set_shipping_method')->name('set-shipping-method');
-        Route::post('choose-shipping-address', 'SystemController@choose_shipping_address')->name('choose-shipping-address');
-        Route::post('choose-billing-address', 'SystemController@choose_billing_address')->name('choose-billing-address');
+    Route::get('set-payment-method/{name}', 'SystemController@set_payment_method')->name('set-payment-method');
+    Route::get('set-shipping-method', 'SystemController@set_shipping_method')->name('set-shipping-method');
+    Route::post('choose-shipping-address', 'SystemController@choose_shipping_address')->name('choose-shipping-address');
+    Route::post('choose-billing-address', 'SystemController@choose_billing_address')->name('choose-billing-address');
 
-        Route::group(['prefix' => 'reward-points', 'as' => 'reward-points.', 'middleware' => ['auth:customer']], function () {
-            Route::get('convert', 'RewardPointController@convert')->name('convert');
-        });
-    });
+    Route::prefix('reward-points')->name('reward-points.')->middleware('auth:customer')->group(function () {
+        Route::get('convert', 'RewardPointController@convert')->name('convert');
 });

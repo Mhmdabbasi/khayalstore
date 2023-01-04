@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'api\v2', 'prefix' => 'v2', 'middleware' => ['api_lang']], function () {
-    Route::group(['prefix' => 'seller', 'namespace' => 'seller'], function () {
+Route::namespace('api\v2')->prefix('v2')->middleware('api_lang')->group(function () {
+    Route::prefix('seller')->namespace('seller')->group(function () {
         Route::get('seller-info', 'SellerController@seller_info');
         Route::get('account-delete', 'SellerController@account_delete');
         Route::get('seller-delivery-man', 'SellerController@seller_delivery_man');
@@ -21,11 +21,11 @@ Route::group(['namespace' => 'api\v2', 'prefix' => 'v2', 'middleware' => ['api_l
         Route::post('balance-withdraw', 'SellerController@withdraw_request');
         Route::delete('close-withdraw-request', 'SellerController@close_withdraw_request');
 
-        Route::group(['prefix' => 'brands'], function () {
+        Route::prefix('brands')->group(function () {
             Route::get('/', 'BrandController@getBrands');
         });
 
-        Route::group(['prefix' => 'products'], function () {
+        Route::prefix('products')->group(function () {
             Route::post('upload-images', 'ProductController@upload_images');
             Route::post('upload-digital-product', 'ProductController@upload_digital_product');
             Route::post('add', 'ProductController@add_new');
@@ -38,7 +38,7 @@ Route::group(['namespace' => 'api\v2', 'prefix' => 'v2', 'middleware' => ['api_l
             Route::get('barcode/generate', 'ProductController@barcode_generate');
         });
 
-        Route::group(['prefix' => 'orders'], function () {
+        Route::prefix('orders')->group(function () {
             Route::get('list', 'OrderController@list');
             Route::get('/{id}', 'OrderController@details');
             Route::put('order-detail-status/{id}', 'OrderController@order_detail_status');
@@ -49,20 +49,20 @@ Route::group(['namespace' => 'api\v2', 'prefix' => 'v2', 'middleware' => ['api_l
             Route::post('assign-third-party-delivery', 'OrderController@assign_third_party_delivery');
             Route::post('update-payment-status', 'OrderController@update_payment_status');
         });
-        Route::group(['prefix' => 'refund'], function () {
+        Route::prefix('refund')->group(function () {
             Route::get('list', 'RefundController@list');
             Route::get('refund-details', 'RefundController@refund_details');
             Route::post('refund-status-update', 'RefundController@refund_status_update');
         });
 
-        Route::group(['prefix' => 'shipping'], function () {
+        Route::prefix('shipping')->group(function () {
             Route::get('get-shipping-method', 'shippingController@get_shipping_type');
             Route::get('selected-shipping-method', 'shippingController@selected_shipping_type');
             Route::get('all-category-cost', 'shippingController@all_category_cost');
             Route::post('set-category-cost', 'shippingController@set_category_cost');
         });
 
-        Route::group(['prefix' => 'shipping-method'], function () {
+        Route::prefix('shipping-method')->group(function () {
             Route::get('list', 'ShippingMethodController@list');
             Route::post('add', 'ShippingMethodController@store');
             Route::get('edit/{id}', 'ShippingMethodController@edit');
@@ -71,14 +71,14 @@ Route::group(['namespace' => 'api\v2', 'prefix' => 'v2', 'middleware' => ['api_l
             Route::delete('delete/{id}', 'ShippingMethodController@delete');
         });
 
-        Route::group(['prefix' => 'messages'], function () {
+        Route::prefix('messages')->group(function () {
             Route::get('list/{type}', 'ChatController@list');
             Route::get('get-message/{type}/{id}', 'ChatController@get_message');
             Route::post('send/{type}', 'ChatController@send_message');
             Route::get('search/{type}', 'ChatController@search');
         });
 
-        Route::group(['prefix' => 'auth', 'namespace' => 'auth'], function () {
+        Route::prefix('auth')->namespace('auth')->group(function () {
             Route::post('login', 'LoginController@login');
 
             Route::post('forgot-password', 'ForgotPasswordController@reset_password_request');
@@ -86,21 +86,21 @@ Route::group(['namespace' => 'api\v2', 'prefix' => 'v2', 'middleware' => ['api_l
             Route::put('reset-password', 'ForgotPasswordController@reset_password_submit');
         });
 
-        Route::group(['prefix' => 'registration', 'namespace' => 'auth'], function () {
+        Route::prefix('registration')->namespace('auth')->group(function () {
             Route::post('/', 'RegisterController@store');
         });
     });
     Route::post('ls-lib-update', 'LsLibController@lib_update');
 
-    Route::group(['prefix' => 'delivery-man', 'namespace' => 'delivery_man'], function () {
-        Route::group(['prefix' => 'auth', 'namespace' => 'auth'], function () {
+    Route::prefix('delivery-man')->namespace('delivery_man')->group(function () {
+        Route::prefix('auth')->namespace('auth')->group(function () {
             Route::post('login', 'LoginController@login');
             Route::post('forgot-password', 'LoginController@reset_password_request');
             Route::post('verify-otp', 'LoginController@otp_verification_submit');
             Route::post('reset-password', 'LoginController@reset_password_submit');
         });
 
-        Route::group(['middleware' => ['delivery_man_auth']], function () {
+        Route::middleware('delivery_man_auth')->group(function () {
             Route::put('is-online', 'DeliveryManController@is_online');
             Route::get('info', 'DeliveryManController@info');
             Route::post('distance-api', 'DeliveryManController@distance_api');
@@ -132,7 +132,7 @@ Route::group(['namespace' => 'api\v2', 'prefix' => 'v2', 'middleware' => ['api_l
             Route::post('withdraw-request', 'WithdrawController@withdraw_request');
             Route::get('withdraw-list-by-approved', 'WithdrawController@withdraw_list_by_approved');
 
-            Route::group(['prefix' => 'messages'], function () {
+            Route::prefix('messages')->group(function () {
                 Route::get('list/{type}', 'ChatController@list');
                 Route::get('get-message/{type}/{id}', 'ChatController@get_message');
                 Route::post('send-message/{type}', 'ChatController@send_message');

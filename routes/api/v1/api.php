@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
-Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_lang']], function () {
-    Route::group(['prefix' => 'auth', 'namespace' => 'auth'], function () {
+Route::namespace('api\v1')->prefix('v1')->middleware('api_lang')->group(function () {
+    Route::prefix('auth')->namespace('auth')->group(function () {
         Route::post('register', 'PassportAuthController@register');
         Route::post('login', 'PassportAuthController@login');
 
@@ -32,11 +32,11 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::post('update-phone', 'SocialAuthController@update_phone');
     });
 
-    Route::group(['prefix' => 'config'], function () {
+    Route::prefix('config')->group(function () {
         Route::get('/', 'ConfigController@configuration');
     });
 
-    Route::group(['prefix' => 'shipping-method', 'middleware' => 'auth:api'], function () {
+    Route::prefix('shipping-method')->middleware('auth:api')->group(function () {
         Route::get('detail/{id}', 'ShippingMethodController@get_shipping_method_info');
         Route::get('by-seller/{id}/{seller_is}', 'ShippingMethodController@shipping_methods_by_seller');
         Route::post('choose-for-order', 'ShippingMethodController@choose_for_order');
@@ -45,7 +45,7 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::get('check-shipping-type', 'ShippingMethodController@check_shipping_type');
     });
 
-    Route::group(['prefix' => 'cart', 'middleware' => 'auth:api'], function () {
+    Route::prefix('cart')->middleware('auth:api')->group(function () {
         Route::get('/', 'CartController@cart');
         Route::post('add', 'CartController@add_to_cart');
         Route::put('update', 'CartController@update_cart');
@@ -55,7 +55,7 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
 
     Route::get('faq', 'GeneralController@faq');
 
-    Route::group(['prefix' => 'products'], function () {
+    Route::prefix('products')->group(function () {
         Route::get('latest', 'ProductController@get_latest_products');
         Route::get('featured', 'ProductController@get_featured_products');
         Route::get('top-rated', 'ProductController@get_top_rated_products');
@@ -73,38 +73,38 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         ROute::get('discounted-product', 'ProductController@get_discounted_product');
     });
 
-    Route::group(['prefix' => 'notifications'], function () {
+    Route::prefix('notifications')->group(function () {
         Route::get('/', 'NotificationController@get_notifications');
     });
 
-    Route::group(['prefix' => 'brands'], function () {
+    Route::prefix('brands')->group(function () {
         Route::get('/', 'BrandController@get_brands');
         Route::get('products/{brand_id}', 'BrandController@get_products');
     });
 
-    Route::group(['prefix' => 'attributes'], function () {
+    Route::prefix('attributes')->group(function () {
         Route::get('/', 'AttributeController@get_attributes');
     });
 
-    Route::group(['prefix' => 'flash-deals'], function () {
+    Route::prefix('flash-deals')->group(function () {
         Route::get('/', 'FlashDealController@get_flash_deal');
         Route::get('products/{deal_id}', 'FlashDealController@get_products');
     });
 
-    Route::group(['prefix' => 'deals'], function () {
+    Route::prefix('deals')->group(function () {
         Route::get('featured', 'DealController@get_featured_deal');
     });
 
-    Route::group(['prefix' => 'dealsoftheday'], function () {
+    Route::prefix('dealsoftheday')->group(function () {
         Route::get('deal-of-the-day', 'DealOfTheDayController@get_deal_of_the_day_product');
     });
 
-    Route::group(['prefix' => 'categories'], function () {
+    Route::prefix('categories')->group(function () {
         Route::get('/', 'CategoryController@get_categories');
         Route::get('products/{category_id}', 'CategoryController@get_products');
     });
 
-    Route::group(['prefix' => 'customer', 'middleware' => 'auth:api'], function () {
+    Route::prefix('customer')->middleware('auth:api')->group(function () {
         Route::get('info', 'CustomerController@info');
         Route::put('update-profile', 'CustomerController@update_profile');
         Route::put('cm-firebase-token', 'CustomerController@update_cm_firebase_token');
@@ -113,7 +113,7 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::get('get-restricted-country-list', 'CustomerController@get_restricted_country_list');
         Route::get('get-restricted-zip-list', 'CustomerController@get_restricted_zip_list');
 
-        Route::group(['prefix' => 'address'], function () {
+        Route::prefix('address')->group(function () {
             Route::get('list', 'CustomerController@address_list');
             Route::get('get/{id}', 'CustomerController@get_address');
             Route::post('add', 'CustomerController@add_new_address');
@@ -121,20 +121,20 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
             Route::delete('/', 'CustomerController@delete_address');
         });
 
-        Route::group(['prefix' => 'support-ticket'], function () {
+        Route::prefix('support-ticket')->group(function () {
             Route::post('create', 'CustomerController@create_support_ticket');
             Route::get('get', 'CustomerController@get_support_tickets');
             Route::get('conv/{ticket_id}', 'CustomerController@get_support_ticket_conv');
             Route::post('reply/{ticket_id}', 'CustomerController@reply_support_ticket');
         });
 
-        Route::group(['prefix' => 'wish-list'], function () {
+        Route::prefix('wish-list')->group(function () {
             Route::get('/', 'CustomerController@wish_list');
             Route::post('add', 'CustomerController@add_to_wishlist');
             Route::delete('remove', 'CustomerController@remove_from_wishlist');
         });
 
-        Route::group(['prefix' => 'order'], function () {
+        Route::prefix('order')->group(function () {
             Route::get('list', 'CustomerController@get_order_list');
             Route::get('details', 'CustomerController@get_order_details');
             Route::get('place', 'OrderController@place_order');
@@ -144,33 +144,33 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
             Route::post('deliveryman-reviews/submit', 'ProductController@submit_deliveryman_review')->middleware('auth:api');
         });
         // Chatting
-        Route::group(['prefix' => 'chat'], function () {
+        Route::prefix('chat')->group(function () {
             Route::get('list/{type}', 'ChatController@list');
             Route::get('get-messages/{type}/{id}', 'ChatController@get_message');
             Route::post('send-message/{type}', 'ChatController@send_message');
         });
 
         //wallet
-        Route::group(['prefix' => 'wallet'], function () {
+        Route::prefix('wallet')->group(function () {
             Route::get('list', 'UserWalletController@list');
         });
         //loyalty
-        Route::group(['prefix' => 'loyalty'], function () {
+        Route::prefix('loyalty')->group(function () {
             Route::get('list', 'UserLoyaltyController@list');
             Route::post('loyalty-exchange-currency', 'UserLoyaltyController@loyalty_exchange_currency');
         });
     });
 
-    Route::group(['prefix' => 'order'], function () {
+    Route::prefix('order')->group(function () {
         Route::get('track', 'OrderController@track_order');
         Route::get('cancel-order', 'OrderController@order_cancel');
     });
 
-    Route::group(['prefix' => 'banners'], function () {
+    Route::prefix('banners')->group(function () {
         Route::get('/', 'BannerController@get_banners');
     });
 
-    Route::group(['prefix' => 'seller'], function () {
+    Route::prefix('seller')->group(function () {
         Route::get('/', 'SellerController@get_seller_info');
         Route::get('{seller_id}/products', 'SellerController@get_seller_products');
         Route::get('{seller_id}/all-products', 'SellerController@get_seller_all_products');
@@ -178,12 +178,12 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::get('all', 'SellerController@get_all_sellers');
     });
 
-    Route::group(['prefix' => 'coupon', 'middleware' => 'auth:api'], function () {
+    Route::prefix('coupon')->middleware('auth:api')->group(function () {
         Route::get('apply', 'CouponController@apply');
     });
 
     //map api
-    Route::group(['prefix' => 'mapapi'], function () {
+    Route::prefix('mapapi')->group(function () {
         Route::get('place-api-autocomplete', 'MapApiController@place_api_autocomplete');
         Route::get('distance-api', 'MapApiController@distance_api');
         Route::get('place-api-details', 'MapApiController@place_api_details');

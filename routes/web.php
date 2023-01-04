@@ -16,13 +16,13 @@ use Illuminate\Support\Facades\Route;
 //for maintenance mode
 Route::get('maintenance-mode', 'Web\WebController@maintenance_mode')->name('maintenance-mode');
 
-Route::group(['namespace' => 'Web', 'middleware' => ['maintenance_mode']], function () {
+Route::namespace('Web')->middleware('maintenance_mode')->group(function () {
     Route::get('/', 'WebController@home')->name('home');
 
     Route::get('quick-view', 'WebController@quick_view')->name('quick-view');
     Route::get('searched-products', 'WebController@searched_products')->name('searched-products');
 
-    Route::group(['middleware' => ['customer']], function () {
+    Route::middleware('customer')->group(function () {
         Route::get('checkout-details', 'WebController@checkout_details')->name('checkout-details');
         Route::get('checkout-shipping', 'WebController@checkout_shipping')->name('checkout-shipping')->middleware('customer');
         Route::get('checkout-payment', 'WebController@checkout_payment')->name('checkout-payment')->middleware('customer');
@@ -100,7 +100,7 @@ Route::group(['namespace' => 'Web', 'middleware' => ['maintenance_mode']], funct
     // chatting end
 
     //Support Ticket
-    Route::group(['prefix' => 'support-ticket', 'as' => 'support-ticket.'], function () {
+    Route::prefix('support-ticket')->name('support-ticket.')->group(function () {
         Route::get('{id}', 'UserProfileController@single_ticket')->name('index');
         Route::post('{id}', 'UserProfileController@comment_submit')->name('comment');
         Route::get('delete/{id}', 'UserProfileController@support_ticket_delete')->name('delete');
@@ -114,7 +114,7 @@ Route::group(['namespace' => 'Web', 'middleware' => ['maintenance_mode']], funct
     Route::get('loyalty', 'UserLoyaltyController@index')->name('loyalty');
     Route::post('loyalty-exchange-currency', 'UserLoyaltyController@loyalty_exchange_currency')->name('loyalty-exchange-currency');
 
-    Route::group(['prefix' => 'track-order', 'as' => 'track-order.'], function () {
+    Route::prefix('track-order')->name('track-order.')->group(function () {
         Route::get('', 'UserProfileController@track_order')->name('index');
         Route::get('result-view', 'UserProfileController@track_order_result')->name('result-view');
         Route::get('last', 'UserProfileController@track_last_order')->name('last');
@@ -134,20 +134,20 @@ Route::group(['namespace' => 'Web', 'middleware' => ['maintenance_mode']], funct
     Route::get('best-sell', 'WebController@best_sell')->name('bestSell');
     Route::get('new-product', 'WebController@new_product')->name('newProduct');
 
-    Route::group(['prefix' => 'contact', 'as' => 'contact.'], function () {
+    Route::prefix('contact')->name('contact.')->group(function () {
         Route::post('store', 'WebController@contact_store')->name('store');
         Route::get('/code/captcha/{tmp}', 'WebController@captcha')->name('default-captcha');
     });
 });
 
 //Seller shop apply
-Route::group(['prefix' => 'shop', 'as' => 'shop.', 'namespace' => 'Seller\Auth'], function () {
+Route::prefix('shop')->name('shop.')->namespace('Seller\Auth')->group(function () {
     Route::get('apply', 'RegisterController@create')->name('apply');
     Route::post('apply', 'RegisterController@store');
 });
 
 //check done
-Route::group(['prefix' => 'cart', 'as' => 'cart.', 'namespace' => 'Web'], function () {
+Route::prefix('cart')->name('cart.')->namespace('Web')->group(function () {
     Route::post('variant_price', 'CartController@variant_price')->name('variant_price');
     Route::post('add', 'CartController@addToCart')->name('add');
     Route::post('remove', 'CartController@removeFromCart')->name('remove');
@@ -156,7 +156,7 @@ Route::group(['prefix' => 'cart', 'as' => 'cart.', 'namespace' => 'Web'], functi
 });
 
 //Seller shop apply
-Route::group(['prefix' => 'coupon', 'as' => 'coupon.', 'namespace' => 'Web'], function () {
+Route::prefix('coupon')->name('coupon.')->namespace('Web')->group(function () {
     Route::post('apply', 'CouponController@apply')->name('apply');
 });
 //check done
@@ -215,7 +215,7 @@ Route::any('/paytabs-payment', 'PaytabsController@payment')->name('paytabs-payme
 Route::any('/paytabs-response', 'PaytabsController@callback_response')->name('paytabs-response');
 
 //bkash
-Route::group(['prefix' => 'bkash'], function () {
+Route::prefix('bkash')->group(function () {
     // Payment Routes for bKash
     Route::post('get-token', 'BkashPaymentController@getToken')->name('bkash-get-token');
     Route::post('create-payment', 'BkashPaymentController@createPayment')->name('bkash-create-payment');

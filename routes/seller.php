@@ -13,10 +13,10 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'], function () {
+Route::namespace('Seller')->prefix('seller')->name('seller.')->group(function () {
 
     /*authentication*/
-    Route::group(['namespace' => 'Auth', 'prefix' => 'auth', 'as' => 'auth.'], function () {
+    Route::namespace('Auth')->prefix('auth')->name('auth.')->group(function () {
         Route::get('/code/captcha/{tmp}', 'LoginController@captcha')->name('default-captcha');
         Route::get('login', 'LoginController@login')->name('login');
         Route::post('login', 'LoginController@submit');
@@ -31,12 +31,12 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
     });
 
     /*authenticated*/
-    Route::group(['middleware' => ['seller']], function () {
+    Route::middleware('seller')->group(function () {
         //dashboard routes
 
         Route::get('/get-order-data', 'SystemController@order_data')->name('get-order-data');
 
-        Route::group(['prefix' => 'dashboard', 'as' => 'dashboard.'], function () {
+        Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get('dashboard', 'DashboardController@dashboard');
             Route::get('/', 'DashboardController@dashboard')->name('index');
             Route::post('order-stats', 'DashboardController@order_stats')->name('order-stats');
@@ -44,7 +44,7 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
             Route::get('earning-statistics', 'DashboardController@get_earning_statitics')->name('earning-statistics');
         });
 
-        Route::group(['prefix' => 'product', 'as' => 'product.'], function () {
+        Route::prefix('product')->name('product.')->group(function () {
             Route::post('image-upload', 'ProductController@imageUpload')->name('image-upload');
             Route::get('remove-image', 'ProductController@remove_image')->name('remove-image');
             Route::get('add-new', 'ProductController@add_new')->name('add-new');
@@ -69,13 +69,13 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
             Route::get('bulk-export', 'ProductController@bulk_export_data')->name('bulk-export');
         });
         //refund request
-        Route::group(['prefix' => 'refund', 'as' => 'refund.'], function () {
+        Route::prefix('refund')->name('refund.')->group(function () {
             Route::get('list/{status}', 'RefundController@list')->name('list');
             Route::get('details/{id}', 'RefundController@details')->name('details');
             Route::get('inhouse-order-filter', 'RefundController@inhouse_order_filter')->name('inhouse-order-filter');
             Route::post('refund-status-update', 'RefundController@refund_status_update')->name('refund-status-update');
         });
-        Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {
+        Route::prefix('orders')->name('orders.')->group(function () {
             Route::get('list/{status}', 'OrderController@list')->name('list');
             Route::get('details/{id}', 'OrderController@details')->name('details');
             Route::get('generate-invoice/{id}', 'OrderController@generate_invoice')->name('generate-invoice');
@@ -90,7 +90,7 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
             Route::get('export-order-data/{status}', 'OrderController@bulk_export_data')->name('order-bulk-export');
         });
         //pos management
-        Route::group(['prefix' => 'pos', 'as' => 'pos.'], function () {
+        Route::prefix('pos')->name('pos.')->group(function () {
             Route::get('/', 'POSController@index')->name('index');
             Route::get('quick-view', 'POSController@quick_view')->name('quick-view');
             Route::post('variant_price', 'POSController@variant_price')->name('variant_price');
@@ -122,21 +122,21 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
         });
         //Product Reviews
 
-        Route::group(['prefix' => 'reviews', 'as' => 'reviews.'], function () {
+        Route::prefix('reviews')->name('reviews.')->group(function () {
             Route::get('list', 'ReviewsController@list')->name('list');
             Route::get('export', 'ReviewsController@export')->name('export')->middleware('actch');
             Route::get('status/{id}/{status}', 'ReviewsController@status')->name('status');
         });
 
         // Messaging
-        Route::group(['prefix' => 'messages', 'as' => 'messages.'], function () {
+        Route::prefix('messages')->name('messages.')->group(function () {
             Route::get('/chat/{type}', 'ChattingController@chat')->name('chat');
             Route::get('/ajax-message-by-user', 'ChattingController@ajax_message_by_user')->name('ajax-message-by-user');
             Route::post('/ajax-seller-message-store', 'ChattingController@ajax_seller_message_store')->name('ajax-seller-message-store');
         });
         // profile
 
-        Route::group(['prefix' => 'profile', 'as' => 'profile.'], function () {
+        Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('view', 'ProfileController@view')->name('view');
             Route::get('update/{id}', 'ProfileController@edit')->name('update');
             Route::post('update/{id}', 'ProfileController@update');
@@ -145,19 +145,19 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
             Route::get('bank-edit/{id}', 'ProfileController@bank_edit')->name('bankInfo');
             Route::post('bank-update/{id}', 'ProfileController@bank_update')->name('bank_update');
         });
-        Route::group(['prefix' => 'shop', 'as' => 'shop.'], function () {
+        Route::prefix('shop')->name('shop.')->group(function () {
             Route::get('view', 'ShopController@view')->name('view');
             Route::get('edit/{id}', 'ShopController@edit')->name('edit');
             Route::post('update/{id}', 'ShopController@update')->name('update');
         });
 
-        Route::group(['prefix' => 'withdraw', 'as' => 'withdraw.'], function () {
+        Route::prefix('withdraw')->name('withdraw.')->group(function () {
             Route::post('request', 'WithdrawController@w_request')->name('request');
             Route::delete('close/{id}', 'WithdrawController@close_request')->name('close');
         });
 
-        Route::group(['prefix' => 'business-settings', 'as' => 'business-settings.'], function () {
-            Route::group(['prefix' => 'shipping-method', 'as' => 'shipping-method.'], function () {
+        Route::prefix('business-settings')->name('business-settings.')->group(function () {
+            Route::prefix('shipping-method')->name('shipping-method.')->group(function () {
                 Route::get('add', 'ShippingMethodController@index')->name('add');
                 Route::post('add', 'ShippingMethodController@store');
                 Route::get('edit/{id}', 'ShippingMethodController@edit')->name('edit');
@@ -166,21 +166,21 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
                 Route::post('status-update', 'ShippingMethodController@status_update')->name('status-update');
             });
 
-            Route::group(['prefix' => 'shipping-type', 'as' => 'shipping-type.'], function () {
+            Route::prefix('shipping-type')->name('shipping-type.')->group(function () {
                 Route::post('store', 'ShippingTypeController@store')->name('store');
             });
-            Route::group(['prefix' => 'category-shipping-cost', 'as' => 'category-shipping-cost.'], function () {
+            Route::prefix('category-shipping-cost')->name('category-shipping-cost.')->group(function () {
                 Route::post('store', 'CategoryShippingCostController@store')->name('store');
             });
 
-            Route::group(['prefix' => 'withdraw', 'as' => 'withdraw.'], function () {
+            Route::prefix('withdraw')->name('withdraw.')->group(function () {
                 Route::get('list', 'WithdrawController@list')->name('list');
                 Route::get('cancel/{id}', 'WithdrawController@close_request')->name('cancel');
                 Route::post('status-filter', 'WithdrawController@status_filter')->name('status-filter');
             });
         });
 
-        Route::group(['prefix' => 'delivery-man', 'as' => 'delivery-man.'], function () {
+        Route::prefix('delivery-man')->name('delivery-man.')->group(function () {
             Route::get('add', 'DeliveryManController@index')->name('add');
             Route::post('store', 'DeliveryManController@store')->name('store');
             Route::get('list', 'DeliveryManController@list')->name('list');
@@ -203,7 +203,7 @@ Route::group(['namespace' => 'Seller', 'prefix' => 'seller', 'as' => 'seller.'],
             Route::get('order-wise-earning/{id}', 'DeliveryManController@order_wise_earning')->name('order-wise-earning');
             Route::get('ajax-order-status-history/{order}', 'DeliveryManController@ajax_order_status_history')->name('ajax-order-status-history');
 
-            Route::group(['prefix' => 'emergency-contact', 'as' => 'emergency-contact.'], function () {
+            Route::prefix('emergency-contact')->name('emergency-contact.')->group(function () {
                 Route::get('/', 'EmergencyContactController@emergency_contact')->name('index');
                 Route::post('add', 'EmergencyContactController@add')->name('add');
                 Route::post('ajax-status-change', 'EmergencyContactController@ajax_status_change')->name('ajax-status-change');
