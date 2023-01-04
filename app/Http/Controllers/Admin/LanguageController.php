@@ -46,12 +46,12 @@ class LanguageController extends Controller
         }
         array_push($codes, $request['code']);
 
-        if (! file_exists(base_path('resources/lang/'.$request['code']))) {
-            mkdir(base_path('resources/lang/'.$request['code']), 0777, true);
+        if (! file_exists(base_path('lang/'.$request['code']))) {
+            mkdir(base_path('lang/'.$request['code']), 0777, true);
         }
 
-        $lang_file = fopen(base_path('resources/lang/'.$request['code'].'/'.'messages.php'), 'w') or exit('Unable to open file!');
-        $read = file_get_contents(base_path('resources/lang/en/messages.php'));
+        $lang_file = fopen(base_path('lang/'.$request['code'].'/'.'messages.php'), 'w') or exit('Unable to open file!');
+        $read = file_get_contents(base_path('lang/en/messages.php'));
         fwrite($lang_file, $read);
 
         array_push($lang_array, [
@@ -189,7 +189,7 @@ class LanguageController extends Controller
 
     public function translate($lang)
     {
-        $full_data = include base_path('resources/lang/'.$lang.'/messages.php');
+        $full_data = include base_path('lang/'.$lang.'/messages.php');
         $lang_data = [];
         ksort($full_data);
         foreach ($full_data as $key => $data) {
@@ -201,18 +201,18 @@ class LanguageController extends Controller
 
     public function translate_key_remove(Request $request, $lang)
     {
-        $full_data = include base_path('resources/lang/'.$lang.'/messages.php');
+        $full_data = include base_path('lang/'.$lang.'/messages.php');
         unset($full_data[$request['key']]);
         $str = '<?php return '.var_export($full_data, true).';';
-        file_put_contents(base_path('resources/lang/'.$lang.'/messages.php'), $str);
+        file_put_contents(base_path('lang/'.$lang.'/messages.php'), $str);
     }
 
     public function translate_submit(Request $request, $lang)
     {
-        $full_data = include base_path('resources/lang/'.$lang.'/messages.php');
+        $full_data = include base_path('lang/'.$lang.'/messages.php');
         $full_data[$request['key']] = $request['value'];
         $str = '<?php return '.var_export($full_data, true).';';
-        file_put_contents(base_path('resources/lang/'.$lang.'/messages.php'), $str);
+        file_put_contents(base_path('lang/'.$lang.'/messages.php'), $str);
     }
 
     public function delete($lang)
@@ -245,7 +245,7 @@ class LanguageController extends Controller
             'value' => $lang_array,
         ]);
 
-        $dir = base_path('resources/lang/'.$lang);
+        $dir = base_path('lang/'.$lang);
         if (File::isDirectory($dir)) {
             $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
             $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);

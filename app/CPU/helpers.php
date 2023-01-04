@@ -254,7 +254,7 @@ class Helpers
     {
         ksort($data);
         $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        file_put_contents(base_path('resources/lang/en/messages.json'), stripslashes($jsonData));
+        file_put_contents(base_path('lang/en/messages.json'), stripslashes($jsonData));
     }
 
     public static function combinations($arrays)
@@ -738,13 +738,13 @@ function translate($key)
     App::setLocale($local);
 
     try {
-        $lang_array = include base_path('resources/lang/'.$local.'/messages.php');
+        $lang_array = include base_path('lang/'.$local.'/messages.php');
         $processed_key = ucfirst(str_replace('_', ' ', Helpers::remove_invalid_charcaters($key)));
 
         if (! array_key_exists($key, $lang_array)) {
             $lang_array[$key] = $processed_key;
             $str = '<?php return '.var_export($lang_array, true).';';
-            file_put_contents(base_path('resources/lang/'.$local.'/messages.php'), $str);
+            file_put_contents(base_path('lang/'.$local.'/messages.php'), $str);
             $result = $processed_key;
         } else {
             $result = __('messages.'.$key);
