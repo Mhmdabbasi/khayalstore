@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\BusinessSetting;
 use App\Model\Currency;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use function App\CPU\translate;
 
 class PaymentMethodController extends Controller
 {
@@ -25,28 +25,28 @@ class PaymentMethodController extends Controller
                 DB::table('business_settings')->insert([
                     'type' => 'cash_on_delivery',
                     'value' => json_encode([
-                        'status' => $request['status']
+                        'status' => $request['status'],
                     ]),
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             } else {
                 DB::table('business_settings')->where(['type' => 'cash_on_delivery'])->update([
                     'type' => 'cash_on_delivery',
                     'value' => json_encode([
-                        'status' => $request['status']
+                        'status' => $request['status'],
                     ]),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         }
         if ($name == 'digital_payment') {
             DB::table('business_settings')->updateOrInsert(['type' => 'digital_payment'], [
                 'value' => json_encode([
-                    'status' => $request['status']
+                    'status' => $request['status'],
                 ]),
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         } elseif ($name == 'ssl_commerz_payment') {
             $payment = BusinessSetting::where('type', 'ssl_commerz_payment')->first();
@@ -60,17 +60,18 @@ class PaymentMethodController extends Controller
                         'store_password' => '',
                     ]),
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             } else {
                 if (Currency::where(['code' => 'BDT'])->first() == false) {
                     Toastr::error('Please add BDT currency before enable this gateway.');
+
                     return back();
                 }
                 if ($request['status'] == 1) {
                     $request->validate([
                         'store_id' => 'required',
-                        'store_password' => 'required'
+                        'store_password' => 'required',
                     ]);
                 }
                 DB::table('business_settings')->where(['type' => 'ssl_commerz_payment'])->update([
@@ -81,7 +82,7 @@ class PaymentMethodController extends Controller
                         'store_id' => $request['store_id'],
                         'store_password' => $request['store_password'],
                     ]),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         } elseif ($name == 'paypal') {
@@ -96,13 +97,13 @@ class PaymentMethodController extends Controller
                         'paypal_secret' => '',
                     ]),
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             } else {
                 if ($request['status'] == 1) {
                     $request->validate([
                         'paypal_client_id' => 'required',
-                        'paypal_secret' => 'required'
+                        'paypal_secret' => 'required',
                     ]);
                 }
                 DB::table('business_settings')->where(['type' => 'paypal'])->update([
@@ -113,7 +114,7 @@ class PaymentMethodController extends Controller
                         'paypal_client_id' => $request['paypal_client_id'],
                         'paypal_secret' => $request['paypal_secret'],
                     ]),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         } elseif ($name == 'stripe') {
@@ -125,16 +126,16 @@ class PaymentMethodController extends Controller
                         'status' => 1,
                         'environment' => 'sandbox',
                         'api_key' => '',
-                        'published_key' => ''
+                        'published_key' => '',
                     ]),
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             } else {
                 if ($request['status'] == 1) {
                     $request->validate([
                         'api_key' => 'required',
-                        'published_key' => 'required'
+                        'published_key' => 'required',
                     ]);
                 }
                 DB::table('business_settings')->where(['type' => 'stripe'])->update([
@@ -143,9 +144,9 @@ class PaymentMethodController extends Controller
                         'status' => $request['status'],
                         'environment' => $request['environment'],
                         'api_key' => $request['api_key'],
-                        'published_key' => $request['published_key']
+                        'published_key' => $request['published_key'],
                     ]),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         } elseif ($name == 'razor_pay') {
@@ -157,21 +158,22 @@ class PaymentMethodController extends Controller
                         'status' => 1,
                         'environment' => 'sandbox',
                         'razor_key' => '',
-                        'razor_secret' => ''
+                        'razor_secret' => '',
                     ]),
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             } else {
                 if (Currency::where(['code' => 'INR'])->first() == false) {
                     Toastr::error('Please add INR currency before enable this gateway.');
+
                     return back();
                 }
 
                 if ($request['status'] == 1) {
                     $request->validate([
                         'razor_key' => 'required',
-                        'razor_secret' => 'required'
+                        'razor_secret' => 'required',
                     ]);
                 }
                 DB::table('business_settings')->where(['type' => 'razor_pay'])->update([
@@ -179,9 +181,9 @@ class PaymentMethodController extends Controller
                         'status' => $request['status'],
                         'environment' => $request['environment'],
                         'razor_key' => $request['razor_key'],
-                        'razor_secret' => $request['razor_secret']
+                        'razor_secret' => $request['razor_secret'],
                     ]),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         } elseif ($name == 'senang_pay') {
@@ -201,13 +203,14 @@ class PaymentMethodController extends Controller
             } else {
                 if (Currency::where(['code' => 'MYR'])->first() == false) {
                     Toastr::error('Please add MYR currency before enable this gateway.');
+
                     return back();
                 }
 
                 if ($request['status'] == 1) {
                     $request->validate([
                         'secret_key' => 'required',
-                        'merchant_id' => 'required'
+                        'merchant_id' => 'required',
                     ]);
                 }
 
@@ -236,11 +239,12 @@ class PaymentMethodController extends Controller
                         'merchantEmail' => '',
                     ]),
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             } else {
                 if (Currency::where(['code' => 'ZAR'])->first() == false) {
                     Toastr::error('Please add ZAR currency before enable this gateway.');
+
                     return back();
                 }
 
@@ -249,7 +253,7 @@ class PaymentMethodController extends Controller
                         'publicKey' => 'required',
                         'secretKey' => 'required',
                         'paymentUrl' => 'required',
-                        'merchantEmail' => 'required'
+                        'merchantEmail' => 'required',
                     ]);
                 }
 
@@ -263,7 +267,7 @@ class PaymentMethodController extends Controller
                         'paymentUrl' => $request['paymentUrl'],
                         'merchantEmail' => $request['merchantEmail'],
                     ]),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         } elseif ($name == 'paymob_accept') {
@@ -276,7 +280,7 @@ class PaymentMethodController extends Controller
                     'integration_id' => $request['integration_id'],
                     'hmac' => $request['hmac'],
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         } elseif ($name == 'bkash') {
             DB::table('business_settings')->updateOrInsert(['type' => 'bkash'], [
@@ -288,7 +292,7 @@ class PaymentMethodController extends Controller
                     'username' => $request['username'],
                     'password' => $request['password'],
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         } elseif ($name == 'paytabs') {
             DB::table('business_settings')->updateOrInsert(['type' => 'paytabs'], [
@@ -297,9 +301,9 @@ class PaymentMethodController extends Controller
                     'environment' => $request['environment'],
                     'profile_id' => $request['profile_id'],
                     'server_key' => $request['server_key'],
-                    'base_url' => $request['base_url']
+                    'base_url' => $request['base_url'],
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         } elseif ($name == 'fawry_pay') {
             DB::table('business_settings')->updateOrInsert(['type' => 'fawry_pay'], [
@@ -307,9 +311,9 @@ class PaymentMethodController extends Controller
                     'status' => $request['status'],
                     'environment' => $request['environment'],
                     'merchant_code' => $request['merchant_code'],
-                    'security_key' => $request['security_key']
+                    'security_key' => $request['security_key'],
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         } elseif ($name == 'mercadopago') {
             BusinessSetting::updateOrInsert(['type' => 'mercadopago'],
@@ -319,7 +323,7 @@ class PaymentMethodController extends Controller
                     'public_key' => $request['public_key'],
                     'access_token' => $request['access_token'],
                 ]),
-                    'updated_at' => now()]
+                    'updated_at' => now(), ]
             );
         } elseif ($name == 'flutterwave') {
             $payment = BusinessSetting::where('type', 'flutterwave')->first();
@@ -354,9 +358,9 @@ class PaymentMethodController extends Controller
                     'status' => $request['status'],
                     'environment' => $request['environment'],
                     'public_key' => $request['public_key'],
-                    'private_key' => $request['private_key']
+                    'private_key' => $request['private_key'],
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         } elseif ($name == 'paytm') {
             DB::table('business_settings')->updateOrInsert(['type' => 'paytm'], [
@@ -368,10 +372,11 @@ class PaymentMethodController extends Controller
                     'paytm_merchant_website' => $request['paytm_merchant_website'],
                     'paytm_refund_url' => $request['paytm_refund_url'],
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
         Toastr::success(translate('successfully_updated'));
+
         return back();
     }
 }

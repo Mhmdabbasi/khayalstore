@@ -5,7 +5,6 @@ namespace App\CPU;
 use App\Model\BusinessSetting;
 use App\Model\Currency;
 use App\Model\Order;
-use App\Model\OrderTransaction;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +29,6 @@ class BackEndHelper
     {
         $currency_model = Helpers::get_business_settings('currency_model');
         if ($currency_model == 'multi_currency') {
-
             if (session()->has('default')) {
                 $default = session('default');
             } else {
@@ -57,6 +55,7 @@ class BackEndHelper
     public static function currency_symbol()
     {
         $currency = Currency::where('id', Helpers::get_business_settings('system_default_currency'))->first();
+
         return $currency->symbol;
     }
 
@@ -64,29 +63,30 @@ class BackEndHelper
     {
         $decimal_point_settings = Helpers::get_business_settings('decimal_point_settings');
         $position = Helpers::get_business_settings('currency_symbol_position');
-        if (!is_null($position) && $position == 'left') {
-            $string = currency_symbol() . '' . number_format($amount, (!empty($decimal_point_settings) ? $decimal_point_settings: 0));
+        if (! is_null($position) && $position == 'left') {
+            $string = currency_symbol().''.number_format($amount, (! empty($decimal_point_settings) ? $decimal_point_settings : 0));
         } else {
-            $string = number_format($amount, !empty($decimal_point_settings) ? $decimal_point_settings: 0) . '' . currency_symbol();
+            $string = number_format($amount, ! empty($decimal_point_settings) ? $decimal_point_settings : 0).''.currency_symbol();
         }
+
         return $string;
     }
 
     public static function currency_code()
     {
         $currency = Currency::where('id', Helpers::get_business_settings('system_default_currency'))->first();
+
         return $currency->code;
     }
 
     public static function max_earning()
     {
-
         $from = \Carbon\Carbon::now()->startOfYear()->format('Y-m-d');
         $to = Carbon::now()->endOfYear()->format('Y-m-d');
 
         $data = Order::where([
             'seller_is' => 'admin',
-            'order_status'=>'delivered'
+            'order_status' => 'delivered',
         ])->select(
             DB::raw('IFNULL(sum(order_amount),0) as sums'),
             DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -112,7 +112,7 @@ class BackEndHelper
         $to = Carbon::now()->endOfYear()->format('Y-m-d');
 
         $data = Order::where([
-            'order_type'=>'default_type'
+            'order_type' => 'default_type',
         ])->select(
             DB::raw('COUNT(id) as count'),
             DB::raw('YEAR(created_at) year, MONTH(created_at) month')

@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => (bool)env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -181,7 +181,7 @@ return [
         \App\Providers\PaymentConfigProvider::class,
         \App\Providers\ConfigServiceProvider::class,
         Laravelpkg\Laravelchk\LaravelchkServiceProvider::class,
-       /* Amirami\Localizator\ServiceProvider::class*/
+        /* Amirami\Localizator\ServiceProvider::class*/
     ],
 
     /*
@@ -234,7 +234,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Image' => Intervention\Image\Facades\Image::class,
         'Helper' => \App\CPU\Helpers::class,
-        'Madzipper' => Madnest\Madzipper\Madzipper::class
+        'Madzipper' => Madnest\Madzipper\Madzipper::class,
     ],
 
 ];

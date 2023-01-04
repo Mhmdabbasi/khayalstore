@@ -27,7 +27,7 @@ class SmsGatewayController extends Controller
                         'nexmo_secret' => '',
                     ]),
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             } else {
                 DB::table('business_settings')->where(['type' => 'sms_nexmo'])->update([
@@ -37,7 +37,7 @@ class SmsGatewayController extends Controller
                         'nexmo_key' => $request['nexmo_key'],
                         'nexmo_secret' => $request['nexmo_secret'],
                     ]),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         }

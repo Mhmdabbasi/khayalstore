@@ -17,6 +17,7 @@ class AuthorizationToolMiddleware
     public function handle(Request $request, Closure $next)
     {
         $request->headers->set('Authorization', $request->headers->get('X-Access-Token'));
+
         return $next($request);
     }
 }

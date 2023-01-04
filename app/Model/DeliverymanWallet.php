@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DeliverymanWallet extends Model
 {
     use HasFactory;
+
     protected $guarded = [];
 
     public function delivery_man()

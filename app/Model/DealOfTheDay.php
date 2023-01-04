@@ -6,17 +6,17 @@ use App\CPU\Helpers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 
 class DealOfTheDay extends Model
 {
     protected $casts = [
-        'discount'   => 'float',
+        'discount' => 'float',
         'product_id' => 'integer',
-        'status'     => 'integer',
+        'status' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -33,7 +33,7 @@ class DealOfTheDay extends Model
             return $title;
         }
 
-        return $this->translations[0]->value??$title;
+        return $this->translations[0]->value ?? $title;
     }
 
     protected static function boot()
@@ -41,9 +41,9 @@ class DealOfTheDay extends Model
         parent::boot();
         static::addGlobalScope('translate', function (Builder $builder) {
             $builder->with(['translations' => function ($query) {
-                if (strpos(url()->current(), '/api')){
+                if (strpos(url()->current(), '/api')) {
                     return $query->where('locale', App::getLocale());
-                }else{
+                } else {
                     return $query->where('locale', Helpers::default_lang());
                 }
             }]);

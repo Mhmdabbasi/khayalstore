@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class SocialMedia extends Model
 {
     protected $casts = [
-        'status'        => 'integer',
+        'status' => 'integer',
         'active_status' => 'integer',
-        'created_at'    => 'datetime',
-        'updated_at'    => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
+
     protected $table = 'social_medias';
 }

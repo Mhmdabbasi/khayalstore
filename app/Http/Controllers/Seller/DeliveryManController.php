@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Seller;
 
+use App\CPU\Helpers;
 use App\CPU\ImageManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\DeliveryMan;
-use App\Model\DeliverymanWallet;
 use App\Model\Order;
 use App\Model\OrderStatusHistory;
 use App\Model\Review;
@@ -13,14 +14,13 @@ use App\Traits\CommonTrait;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use function App\CPU\translate;
-use App\CPU\Helpers;
 
 class DeliveryManController extends Controller
 {
     use CommonTrait;
 
     private $shippingMethod;
+
     public function __construct()
     {
         $this->shippingMethod = Helpers::get_business_settings('shipping_method');
@@ -28,8 +28,9 @@ class DeliveryManController extends Controller
 
     public function index()
     {
-        if($this->shippingMethod=='inhouse_shipping') {
+        if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect('/');
         }
         $telephone_codes = TELEPHONE_CODES;
@@ -39,17 +40,17 @@ class DeliveryManController extends Controller
 
     public function list(Request $request)
     {
-        $shippingMethod=Helpers::get_business_settings('shipping_method');
-        if($shippingMethod=='inhouse_shipping')
-        {
+        $shippingMethod = Helpers::get_business_settings('shipping_method');
+        if ($shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
 
-        $shippingMethod=Helpers::get_business_settings('shipping_method');
-        if($shippingMethod=='inhouse_shipping')
-        {
+        $shippingMethod = Helpers::get_business_settings('shipping_method');
+        if ($shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
         $query_param = [];
@@ -68,13 +69,14 @@ class DeliveryManController extends Controller
             $delivery_men = new DeliveryMan();
         }
 
-        $delivery_men = $delivery_men->withCount(['orders'=> function($q){
-                            $q->where(['seller_is'=>'seller']);
-                        }])
+        $delivery_men = $delivery_men->withCount(['orders' => function ($q) {
+            $q->where(['seller_is' => 'seller']);
+        }])
                         ->latest()
                         ->where(['seller_id' => auth('seller')->id()])
                         ->paginate(25)
                         ->appends($query_param);
+
         return view('seller-views.delivery-man.list', compact('delivery_men', 'search'));
     }
 
@@ -90,14 +92,16 @@ class DeliveryManController extends Controller
                     ->orWhere('identity_number', 'like', "%{$value}%");
             }
         })->get();
+
         return response()->json([
-            'view' => view('seller-views.delivery-man.partials._table', compact('delivery_men'))->render()
+            'view' => view('seller-views.delivery-man.partials._table', compact('delivery_men'))->render(),
         ]);
     }
 
     public function preview($id)
     {
         $dm = DeliveryMan::with(['reviews'])->where(['id' => $id])->first();
+
         return view('seller-views.delivery-man.view', compact('dm'));
     }
 
@@ -109,22 +113,22 @@ class DeliveryManController extends Controller
             'phone' => 'required',
             'email' => 'required|unique:delivery_men,email',
             'country_code' => 'required',
-            'password' => 'required|same:confirm_password|min:8'
+            'password' => 'required|same:confirm_password|min:8',
 
         ], [
             'f_name.required' => 'First name is required!',
-            'l_name.required' => 'Last name is required!'
+            'l_name.required' => 'Last name is required!',
         ]);
 
-        $phone_combo_exists =  DeliveryMan::where(['phone'=> $request->phone, 'country_code'=> $request->country_code])->exists();
+        $phone_combo_exists = DeliveryMan::where(['phone' => $request->phone, 'country_code' => $request->country_code])->exists();
         if ($phone_combo_exists) {
             Toastr::error(translate('This_phone_number_is_already_taken'));
+
             return back();
         }
 
-
         $id_img_names = [];
-        if (!empty($request->file('identity_image'))) {
+        if (! empty($request->file('identity_image'))) {
             foreach ($request->identity_image as $img) {
                 array_push($id_img_names, ImageManager::upload('delivery-man/', 'png', $img));
             }
@@ -133,33 +137,36 @@ class DeliveryManController extends Controller
             $identity_image = json_encode([]);
         }
 
-        $dm                     = new DeliveryMan();
-        $dm->seller_id          = auth('seller')->id();
-        $dm->f_name             = $request->f_name;
-        $dm->l_name             = $request->l_name;
-        $dm->address            = $request->address;
-        $dm->email              = $request->email;
-        $dm->country_code       = $request->country_code;
-        $dm->phone              = $request->phone;
-        $dm->identity_number    = $request->identity_number;
-        $dm->identity_type      = $request->identity_type;
-        $dm->identity_image     = $identity_image;
-        $dm->image              = ImageManager::upload('delivery-man/', 'png', $request->file('image'));
-        $dm->password           = bcrypt($request->password);
+        $dm = new DeliveryMan();
+        $dm->seller_id = auth('seller')->id();
+        $dm->f_name = $request->f_name;
+        $dm->l_name = $request->l_name;
+        $dm->address = $request->address;
+        $dm->email = $request->email;
+        $dm->country_code = $request->country_code;
+        $dm->phone = $request->phone;
+        $dm->identity_number = $request->identity_number;
+        $dm->identity_type = $request->identity_type;
+        $dm->identity_image = $identity_image;
+        $dm->image = ImageManager::upload('delivery-man/', 'png', $request->file('image'));
+        $dm->password = bcrypt($request->password);
         $dm->save();
 
         Toastr::success('Delivery-man added successfully!');
+
         return redirect('seller/delivery-man/list');
     }
 
     public function edit($id)
     {
-        if($this->shippingMethod=='inhouse_shipping') {
+        if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
         $telephone_codes = TELEPHONE_CODES;
         $delivery_man = DeliveryMan::where(['seller_id' => auth('seller')->id(), 'id' => $id])->first();
+
         return view('seller-views.delivery-man.edit', compact('delivery_man', 'telephone_codes'));
     }
 
@@ -168,6 +175,7 @@ class DeliveryManController extends Controller
         $delivery_man = DeliveryMan::find($request->id);
         $delivery_man->is_active = $request->status;
         $delivery_man->save();
+
         return response()->json([], 200);
     }
 
@@ -176,26 +184,27 @@ class DeliveryManController extends Controller
         $request->validate([
             'f_name' => 'required',
             'l_name' => 'required',
-            'email' => 'required|email|unique:delivery_men,email,' . $id,
+            'email' => 'required|email|unique:delivery_men,email,'.$id,
             'phone' => 'required',
-            'country_code' => 'required'
+            'country_code' => 'required',
         ], [
             'f_name.required' => 'First name is required!',
-            'l_name.required' => 'Last name is required!'
+            'l_name.required' => 'Last name is required!',
         ]);
 
         if ($request->password) {
             $request->validate([
-                'password' => 'required|min:6|same:confirm_password'
+                'password' => 'required|min:6|same:confirm_password',
             ]);
         }
 
         $delivery_man = DeliveryMan::where(['id' => $id, 'seller_id' => auth('seller')->id()])->first();
 
-        $phone_combo_exists =  DeliveryMan::where(['phone'=> $request->phone, 'country_code'=> $request->country_code])->first();
+        $phone_combo_exists = DeliveryMan::where(['phone' => $request->phone, 'country_code' => $request->country_code])->first();
 
         if (isset($phone_combo_exists) && $phone_combo_exists->id != $delivery_man->id) {
             Toastr::error(translate('This_phone_number_is_already_taken'));
+
             return back();
         }
 
@@ -205,10 +214,10 @@ class DeliveryManController extends Controller
             ]);
         }
 
-        if (!empty($request->file('identity_image'))) {
+        if (! empty($request->file('identity_image'))) {
             foreach (json_decode($delivery_man['identity_image'], true) as $img) {
-                if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                    Storage::disk('public')->delete('delivery-man/' . $img);
+                if (Storage::disk('public')->exists('delivery-man/'.$img)) {
+                    Storage::disk('public')->delete('delivery-man/'.$img);
                 }
             }
             $img_keeper = [];
@@ -219,18 +228,18 @@ class DeliveryManController extends Controller
         } else {
             $identity_image = $delivery_man['identity_image'];
         }
-        $delivery_man->seller_id        = auth('seller')->id();
-        $delivery_man->f_name           = $request->f_name;
-        $delivery_man->l_name           = $request->l_name;
-        $delivery_man->address          = $request->address;
-        $delivery_man->email            = $request->email;
-        $delivery_man->country_code     = $request->country_code;
-        $delivery_man->phone            = $request->phone;
-        $delivery_man->identity_number  = $request->identity_number;
-        $delivery_man->identity_type    = $request->identity_type;
-        $delivery_man->identity_image   = $identity_image;
-        $delivery_man->image            = $request->has('image') ? ImageManager::update('delivery-man/', $delivery_man->image, 'png', $request->file('image')) : $delivery_man->image;
-        $delivery_man->password         = strlen($request->password) > 1 ? bcrypt($request->password) : $delivery_man['password'];
+        $delivery_man->seller_id = auth('seller')->id();
+        $delivery_man->f_name = $request->f_name;
+        $delivery_man->l_name = $request->l_name;
+        $delivery_man->address = $request->address;
+        $delivery_man->email = $request->email;
+        $delivery_man->country_code = $request->country_code;
+        $delivery_man->phone = $request->phone;
+        $delivery_man->identity_number = $request->identity_number;
+        $delivery_man->identity_type = $request->identity_type;
+        $delivery_man->identity_image = $identity_image;
+        $delivery_man->image = $request->has('image') ? ImageManager::update('delivery-man/', $delivery_man->image, 'png', $request->file('image')) : $delivery_man->image;
+        $delivery_man->password = strlen($request->password) > 1 ? bcrypt($request->password) : $delivery_man['password'];
         $delivery_man->save();
 
         Toastr::success('Delivery-man updated successfully!');
@@ -238,34 +247,36 @@ class DeliveryManController extends Controller
         return redirect('seller/delivery-man/list');
     }
 
-    public function delete(Request $request,$id)
+    public function delete(Request $request, $id)
     {
-        if($this->shippingMethod=='inhouse_shipping') {
+        if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
         $delivery_man = DeliveryMan::where(['seller_id' => auth('seller')->id(), 'id' => $id])->first();
 
-
-        if (Storage::disk('public')->exists('delivery-man/' . $delivery_man['image'])) {
-            Storage::disk('public')->delete('delivery-man/' . $delivery_man['image']);
+        if (Storage::disk('public')->exists('delivery-man/'.$delivery_man['image'])) {
+            Storage::disk('public')->delete('delivery-man/'.$delivery_man['image']);
         }
 
         foreach (json_decode($delivery_man['identity_image'], true) as $img) {
-            if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                Storage::disk('public')->delete('delivery-man/' . $img);
+            if (Storage::disk('public')->exists('delivery-man/'.$img)) {
+                Storage::disk('public')->delete('delivery-man/'.$img);
             }
         }
 
         $delivery_man->delete();
         Toastr::success(translate('Delivery-man removed!'));
+
         return back();
     }
 
     public function earning_statement(Request $request, $id)
     {
-        if($this->shippingMethod=='inhouse_shipping') {
+        if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
         $delivery_man = DeliveryMan::with('wallet')->find($id);
@@ -276,15 +287,14 @@ class DeliveryManController extends Controller
             $withdrawbale_balance = null;
         }
 
-        return view('seller-views.delivery-man.earning-statement.overview', compact( 'delivery_man', 'withdrawbale_balance'));
+        return view('seller-views.delivery-man.earning-statement.overview', compact('delivery_man', 'withdrawbale_balance'));
     }
-
-
 
     public function earning_active_log(Request $request, $id)
     {
-        if($this->shippingMethod=='inhouse_shipping') {
+        if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect('/');
         }
 
@@ -297,15 +307,16 @@ class DeliveryManController extends Controller
             })
             ->latest()
             ->paginate(Helpers::pagination_limit())
-            ->appends(['search'=>$request['search']]);
+            ->appends(['search' => $request['search']]);
 
-        return view('seller-views.delivery-man.earning-statement.active-log', compact( 'delivery_man', 'orders', 'search'));
+        return view('seller-views.delivery-man.earning-statement.active-log', compact('delivery_man', 'orders', 'search'));
     }
 
     public function order_wise_earning(Request $request, $id)
     {
-        if($this->shippingMethod=='inhouse_shipping') {
+        if ($this->shippingMethod == 'inhouse_shipping') {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect()->route('seller.auth.login');
         }
         $search = $request->search;
@@ -316,14 +327,13 @@ class DeliveryManController extends Controller
             })
             ->latest()
             ->paginate(Helpers::pagination_limit())
-            ->appends(['search'=>$request['search']]);
-
+            ->appends(['search' => $request['search']]);
 
         $delivery_man = DeliveryMan::with('wallet')->find($id);
         $total_earn = self::delivery_man_total_earn($id);
         $withdrawable_balance = self::delivery_man_withdrawable_balance($id);
 
-        return view('seller-views.delivery-man.earning-statement.earning', compact( 'delivery_man', 'total_earn', 'withdrawable_balance', 'orders', 'search'));
+        return view('seller-views.delivery-man.earning-statement.earning', compact('delivery_man', 'total_earn', 'withdrawable_balance', 'orders', 'search'));
     }
 
     public function ajax_order_status_history($order)
@@ -331,6 +341,7 @@ class DeliveryManController extends Controller
         $histories = OrderStatusHistory::where(['order_id' => $order])
             ->latest()
             ->get();
+
         return view('seller-views.delivery-man.earning-statement._order-status-history', compact('histories'));
     }
 
@@ -342,22 +353,23 @@ class DeliveryManController extends Controller
         $rating = $request->rating;
 
         $delivery_man = DeliveryMan::where(['seller_id' => auth('seller')->user()->id])->with(['review'])->find($id);
-        if (!$delivery_man) {
+        if (! $delivery_man) {
             Toastr::warning(translate('Invaild_review!'));
+
             return redirect(route('seller.delivery-man.list'));
         }
 
         $reviews_collection = Review::where(['delivery_man_id' => $id])
-            ->when(!empty($request->search), function($query) use($request){
-                $query->whereHas('order', function($query) use($request){
+            ->when(! empty($request->search), function ($query) use ($request) {
+                $query->whereHas('order', function ($query) use ($request) {
                     $query->where('id', 'like', "%{$request->search}%");
                 });
             })
-            ->when(!empty($from_date) && !empty($to_date), function($query) use($from_date, $to_date) {
-                $query->whereDate('updated_at', '>=',$from_date)
-                    ->whereDate('updated_at', '<=',$to_date);
+            ->when(! empty($from_date) && ! empty($to_date), function ($query) use ($from_date, $to_date) {
+                $query->whereDate('updated_at', '>=', $from_date)
+                    ->whereDate('updated_at', '<=', $to_date);
             })
-            ->when(!empty($rating), function($query) use($rating) {
+            ->when(! empty($rating), function ($query) use ($rating) {
                 $query->where('rating', $rating);
             })
             ->latest('updated_at')
@@ -375,5 +387,4 @@ class DeliveryManController extends Controller
 
         return view('seller-views.delivery-man.rating', compact('delivery_man', 'reviews', 'average_setting', 'total', 'one', 'two', 'three', 'four', 'five', 'from_date', 'to_date', 'rating', 'search'));
     }
-
 }

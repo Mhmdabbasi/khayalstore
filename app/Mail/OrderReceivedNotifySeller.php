@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -31,6 +30,7 @@ class OrderReceivedNotifySeller extends Mailable
     public function build()
     {
         $o_id = $this->o_id;
-        return $this->view('email-templates.order-received-notify-seller',['id'=>$o_id]);
+
+        return $this->view('email-templates.order-received-notify-seller', ['id' => $o_id]);
     }
 }

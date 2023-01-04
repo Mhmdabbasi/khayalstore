@@ -2,9 +2,9 @@
 
 namespace App\Model;
 
+use App\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\User;
 
 class WalletTransaction extends Model
 {
@@ -14,10 +14,10 @@ class WalletTransaction extends Model
         'user_id' => 'integer',
         'credit' => 'float',
         'debit' => 'float',
-        'admin_bonus'=>'float',
-        'balance'=>'float',
-        'reference'=>'string',
-        'created_at'=>'string'
+        'admin_bonus' => 'float',
+        'balance' => 'float',
+        'reference' => 'string',
+        'created_at' => 'string',
     ];
 
     public function user()

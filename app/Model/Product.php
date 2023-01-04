@@ -32,7 +32,7 @@ class Product extends Model
         'shipping_cost' => 'float',
         'multiply_qty' => 'integer',
         'temp_shipping_cost' => 'float',
-        'is_shipping_cost_updated' => 'integer'
+        'is_shipping_cost_updated' => 'integer',
     ];
 
     public function translations()
@@ -45,7 +45,7 @@ class Product extends Model
         $brand_setting = BusinessSetting::where('type', 'product_brand')->first()->value;
         $digital_product_setting = BusinessSetting::where('type', 'digital_product')->first()->value;
 
-        if (!$digital_product_setting) {
+        if (! $digital_product_setting) {
             $product_type = ['physical'];
         } else {
             $product_type = ['digital', 'physical'];
@@ -55,7 +55,7 @@ class Product extends Model
             $q->whereHas('brand', function ($query) {
                 $query->where(['status' => 1]);
             });
-        })->when(!$brand_setting, function ($q) {
+        })->when(! $brand_setting, function ($q) {
             $q->whereNull('brand_id');
         })->where(['status' => 1])->orWhere(function ($query) {
             $query->whereNull('brand_id')->where('status', 1);
@@ -69,7 +69,6 @@ class Product extends Model
         })->orWhere(function ($query) {
             $query->where(['added_by' => 'admin', 'status' => 1]);
         });
-
     }
 
     public function stocks()
@@ -115,12 +114,10 @@ class Product extends Model
         return $this->hasMany(OrderDetail::class, 'product_id');
     }
 
-
     public function order_delivered()
     {
         return $this->hasMany(OrderDetail::class, 'product_id')
             ->where('delivery_status', 'delivered');
-
     }
 
     public function wish_list()
@@ -133,6 +130,7 @@ class Product extends Model
         if (strpos(url()->current(), '/admin') || strpos(url()->current(), '/seller')) {
             return $name;
         }
+
         return $this->translations[0]->value ?? $name;
     }
 
@@ -141,6 +139,7 @@ class Product extends Model
         if (strpos(url()->current(), '/admin') || strpos(url()->current(), '/seller')) {
             return $detail;
         }
+
         return $this->translations[1]->value ?? $detail;
     }
 
@@ -154,9 +153,9 @@ class Product extends Model
                 } else {
                     return $query->where('locale', Helpers::default_lang());
                 }
-            }, 'reviews'=>function($query){
+            }, 'reviews' => function ($query) {
                 $query->whereNull('delivery_man_id');
-            }])->withCount(['reviews'=>function($query){
+            }])->withCount(['reviews' => function ($query) {
                 $query->whereNull('delivery_man_id');
             }]);
         });

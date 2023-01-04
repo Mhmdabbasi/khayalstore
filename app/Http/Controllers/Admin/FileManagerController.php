@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\CPU\FileManagerLogic;
+use App\Http\Controllers\Controller;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Madnest\Madzipper\Facades\Madzipper;
 
@@ -16,7 +16,7 @@ class FileManagerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($folder_path = "cHVibGlj")
+    public function index($folder_path = 'cHVibGlj')
     {
         $file = Storage::files(base64_decode($folder_path));
         $directories = Storage::directories(base64_decode($folder_path));
@@ -25,14 +25,15 @@ class FileManagerController extends Controller
         $files = FileManagerLogic::format_file_and_folders($file, 'file');
         // dd($files);
         $data = array_merge($folders, $files);
+
         return view('admin-views.file-manager.index', compact('data', 'folder_path'));
     }
-
 
     public function upload(Request $request)
     {
         if (env('APP_MODE') == 'demo') {
             Toastr::info('This option is disabled for demo.');
+
             return back();
         }
 
@@ -46,21 +47,20 @@ class FileManagerController extends Controller
 
             foreach ($images as $image) {
                 $name = $image->getClientOriginalName();
-                Storage::disk('local')->put($request->path . '/' . $name, file_get_contents($image));
+                Storage::disk('local')->put($request->path.'/'.$name, file_get_contents($image));
             }
         }
         if ($request->hasfile('file')) {
             $file = $request->file('file');
             $name = $file->getClientOriginalName();
 
-            Madzipper::make($file)->extractTo('storage/app/' . $request->path);
+            Madzipper::make($file)->extractTo('storage/app/'.$request->path);
             // Storage::disk('local')->put($request->path.'/'. $name, file_get_contents($file));
-
         }
         Toastr::success(\App\CPU\translate('image_uploaded_successfully'));
+
         return back()->with('success', \App\CPU\translate('image_uploaded_successfully'));
     }
-
 
     public function download($file_name)
     {
@@ -70,7 +70,7 @@ class FileManagerController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -81,8 +81,8 @@ class FileManagerController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -90,11 +90,11 @@ class FileManagerController extends Controller
         //
     }
 
-
     public function destroy($file_path)
     {
         Storage::disk('local')->delete(base64_decode($file_path));
         Toastr::success(trans('messages.image_deleted_successfully'));
+
         return back()->with('success', trans('messages.image_deleted_successfully'));
     }
 }

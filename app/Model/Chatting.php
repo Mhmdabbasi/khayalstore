@@ -20,7 +20,7 @@ class Chatting extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected $guarded=[];
+    protected $guarded = [];
 
     public function seller_info()
     {
@@ -42,7 +42,8 @@ class Chatting extends Model
         return $this->belongsTo(DeliveryMan::class, 'delivery_man_id');
     }
 
-    public function admin(){
+    public function admin()
+    {
         return $this->belongsTo(Admin::class, 'admin_id');
     }
 }

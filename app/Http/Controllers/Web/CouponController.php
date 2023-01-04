@@ -7,7 +7,6 @@ use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
 use App\Model\Coupon;
 use App\Model\Order;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CouponController extends Controller
@@ -22,7 +21,7 @@ class CouponController extends Controller
             ->where('status', '=', 1)
             ->whereDate('start_date', '<=', date('y-m-d'))
             ->whereDate('expire_date', '>=', date('y-m-d'))->first();
-    
+
         if ($coupon) {
             $total = 0;
             foreach (CartManager::get_cart() as $cart) {
@@ -43,14 +42,14 @@ class CouponController extends Controller
                     'status' => 1,
                     'discount' => Helpers::currency_converter($discount),
                     'total' => Helpers::currency_converter($total - $discount),
-                    'messages' => ['0' => 'Coupon Applied Successfully!']
+                    'messages' => ['0' => 'Coupon Applied Successfully!'],
                 ]);
             }
         }
 
         return response()->json([
             'status' => 0,
-            'messages' => ['0' => 'Invalid Coupon']
+            'messages' => ['0' => 'Invalid Coupon'],
         ]);
     }
 }

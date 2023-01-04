@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Model\BusinessSetting;
-use App\Model\OrderDetail;
 use App\Model\SearchFunction;
-use App\Model\WithdrawRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -34,12 +32,13 @@ class SystemController extends Controller
     }
 
     //data import into search_function table
-    public function importSearchFunctionData(){
+    public function importSearchFunctionData()
+    {
         $jsonSidebarData = file_get_contents(storage_path('data/sidebar-search.json'));
-        $datas = json_decode($jsonSidebarData, True);
+        $datas = json_decode($jsonSidebarData, true);
 
         SearchFunction::truncate();
-        foreach($datas as $data){
+        foreach ($datas as $data) {
             SearchFunction::create($data);
         }
 
@@ -64,17 +63,20 @@ class SystemController extends Controller
             ]);
         }
 
-        if (isset($maintenance_mode) && $maintenance_mode->value){
-            return response()->json(['message'=>'Maintenance is off.']);
+        if (isset($maintenance_mode) && $maintenance_mode->value) {
+            return response()->json(['message' => 'Maintenance is off.']);
         }
-        return response()->json(['message'=>'Maintenance is on.']);
+
+        return response()->json(['message' => 'Maintenance is on.']);
     }
+
     public function order_data()
     {
         $new_order = DB::table('orders')->where(['checked' => 0])->count();
+
         return response()->json([
             'success' => 1,
-            'data' => ['new_order' => $new_order]
+            'data' => ['new_order' => $new_order],
         ]);
     }
 }

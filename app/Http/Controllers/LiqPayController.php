@@ -8,7 +8,6 @@ use App\CPU\OrderManager;
 use App\Model\Order;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use stdClass;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
@@ -23,8 +22,9 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
  * http://opensource.org/licenses/osl-3.0.php
  *
  * @category        LiqPay
- * @package         liqpay/liqpay
+ *
  * @version         3.0
+ *
  * @author          Liqpay
  * @copyright       Copyright (c) 2014 Liqpay
  * @license         http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
@@ -32,7 +32,6 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
  * EXTENSION INFORMATION
  *
  * LIQPAY API       https://www.liqpay.ua/documentation/en
- *
  */
 
 /**
@@ -43,30 +42,39 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
 class LiqPay
 {
     const CURRENCY_EUR = 'EUR';
+
     const CURRENCY_USD = 'USD';
+
     const CURRENCY_UAH = 'UAH';
+
     const CURRENCY_RUB = 'RUB';
+
     const CURRENCY_RUR = 'RUR';
 
     private $_api_url = 'https://www.liqpay.ua/api/';
+
     private $_checkout_url = 'https://www.liqpay.ua/api/3/checkout';
-    protected $_supportedCurrencies = array(
+
+    protected $_supportedCurrencies = [
         self::CURRENCY_EUR,
         self::CURRENCY_USD,
         self::CURRENCY_UAH,
         self::CURRENCY_RUB,
         self::CURRENCY_RUR,
-    );
+    ];
+
     private $_public_key;
+
     private $_private_key;
+
     private $_server_response_code = null;
 
     /**
      * Constructor.
      *
-     * @param string $public_key
-     * @param string $private_key
-     * @param string $api_url (optional)
+     * @param  string  $public_key
+     * @param  string  $private_key
+     * @param  string  $api_url (optional)
      *
      * @throws InvalidArgumentException
      */
@@ -91,26 +99,25 @@ class LiqPay
     /**
      * Call API
      *
-     * @param string $path
-     * @param array $params
-     * @param int $timeout
-     *
+     * @param  string  $path
+     * @param  array  $params
+     * @param  int  $timeout
      * @return stdClass
      */
-    public function api($path, $params = array(), $timeout = 5)
+    public function api($path, $params = [], $timeout = 5)
     {
-        if (!isset($params['version'])) {
+        if (! isset($params['version'])) {
             throw new InvalidArgumentException('version is null');
         }
-        $url = $this->_api_url . $path;
+        $url = $this->_api_url.$path;
         $public_key = $this->_public_key;
         $private_key = $this->_private_key;
         $data = $this->encode_params(array_merge(compact('public_key'), $params));
-        $signature = $this->str_to_sign($private_key . $data . $private_key);
-        $postfields = http_build_query(array(
+        $signature = $this->str_to_sign($private_key.$data.$private_key);
+        $postfields = http_build_query([
             'data' => $data,
-            'signature' => $signature
-        ));
+            'signature' => $signature,
+        ]);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -124,6 +131,7 @@ class LiqPay
         $server_output = curl_exec($ch);
         $this->_server_response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
         return json_decode($server_output);
     }
 
@@ -140,8 +148,7 @@ class LiqPay
     /**
      * cnb_form
      *
-     * @param array $params
-     *
+     * @param  array  $params
      * @return string
      *
      * @throws InvalidArgumentException
@@ -181,18 +188,17 @@ class LiqPay
     {
         $params = $this->cnb_params($params);
 
-        return array(
+        return [
             'url' => $this->_checkout_url,
             'data' => $this->encode_params($params),
-            'signature' => $this->cnb_signature($params)
-        );
+            'signature' => $this->cnb_signature($params),
+        ];
     }
 
     /**
      * cnb_signature
      *
-     * @param array $params
-     *
+     * @param  array  $params
      * @return string
      */
     public function cnb_signature($params)
@@ -201,7 +207,7 @@ class LiqPay
         $private_key = $this->_private_key;
 
         $json = $this->encode_params($params);
-        $signature = $this->str_to_sign($private_key . $json . $private_key);
+        $signature = $this->str_to_sign($private_key.$json.$private_key);
 
         return $signature;
     }
@@ -209,30 +215,29 @@ class LiqPay
     /**
      * cnb_params
      *
-     * @param array $params
-     *
+     * @param  array  $params
      * @return array $params
      */
     private function cnb_params($params)
     {
         $params['public_key'] = $this->_public_key;
 
-        if (!isset($params['version'])) {
+        if (! isset($params['version'])) {
             throw new InvalidArgumentException('version is null');
         }
-        if (!isset($params['amount'])) {
+        if (! isset($params['amount'])) {
             throw new InvalidArgumentException('amount is null');
         }
-        if (!isset($params['currency'])) {
+        if (! isset($params['currency'])) {
             throw new InvalidArgumentException('currency is null');
         }
-        if (!in_array($params['currency'], $this->_supportedCurrencies)) {
+        if (! in_array($params['currency'], $this->_supportedCurrencies)) {
             throw new InvalidArgumentException('currency is not supported');
         }
         if ($params['currency'] == self::CURRENCY_RUR) {
             $params['currency'] = self::CURRENCY_RUB;
         }
-        if (!isset($params['description'])) {
+        if (! isset($params['description'])) {
             throw new InvalidArgumentException('description is null');
         }
 
@@ -242,7 +247,7 @@ class LiqPay
     /**
      * encode_params
      *
-     * @param array $params
+     * @param  array  $params
      * @return string
      */
     private function encode_params($params)
@@ -253,7 +258,7 @@ class LiqPay
     /**
      * decode_params
      *
-     * @param string $params
+     * @param  string  $params
      * @return array
      */
     public function decode_params($params)
@@ -264,8 +269,7 @@ class LiqPay
     /**
      * str_to_sign
      *
-     * @param string $str
-     *
+     * @param  string  $str
      * @return string
      */
     public function str_to_sign($str)
@@ -280,7 +284,7 @@ class LiqPayController extends Controller
 {
     public function payment()
     {
-        $tran = Str::random(6) . '-' . rand(1, 1000);
+        $tran = Str::random(6).'-'.rand(1, 1000);
         $order_id = Order::orderBy('id', 'DESC')->first()->id ?? 100001;
         $discount = session()->has('coupon_discount') ? session('coupon_discount') : 0;
         $value = CartManager::cart_grand_total() - $discount;
@@ -289,16 +293,17 @@ class LiqPayController extends Controller
         $public_key = $config['public_key'];
         $private_key = $config['private_key'];
         $liqpay = new LiqPay($public_key, $private_key);
-        $html = $liqpay->cnb_form(array(
+        $html = $liqpay->cnb_form([
             'action' => 'pay',
             'amount' => round($value, 2),
             'currency' => Helpers::currency_code(), //USD
-            'description' => 'Transaction ID: ' . $tran,
+            'description' => 'Transaction ID: '.$tran,
             'order_id' => $order_id,
             'result_url' => route('liqpay-callback'),
             'server_url' => route('liqpay-callback'),
-            'version' => '3'
-        ));
+            'version' => '3',
+        ]);
+
         return $html;
     }
 
@@ -313,9 +318,9 @@ class LiqPayController extends Controller
                     'payment_method' => 'liqpay',
                     'order_status' => 'confirmed',
                     'payment_status' => 'paid',
-                    'transaction_ref' => 'trx_' . $unique_id,
+                    'transaction_ref' => 'trx_'.$unique_id,
                     'order_group_id' => $unique_id,
-                    'cart_group_id' => $group_id
+                    'cart_group_id' => $group_id,
                 ];
                 $order_id = OrderManager::generate_order($data);
                 array_push($order_ids, $order_id);
@@ -323,9 +328,11 @@ class LiqPayController extends Controller
 
             if (session()->has('payment_mode') && session('payment_mode') == 'app') {
                 CartManager::cart_clean();
+
                 return redirect()->route('payment-success');
             } else {
                 CartManager::cart_clean();
+
                 return view('web-views.checkout-complete');
             }
         }
@@ -334,6 +341,7 @@ class LiqPayController extends Controller
             return redirect()->route('payment-fail');
         }
         Toastr::error('Payment process failed!');
+
         return back();
     }
 }

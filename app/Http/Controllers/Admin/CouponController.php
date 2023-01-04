@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\CPU\BackEndHelper;
 use App\CPU\Convert;
 use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
@@ -10,7 +9,6 @@ use App\Model\Coupon;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class CouponController extends Controller
 {
@@ -64,12 +62,14 @@ class CouponController extends Controller
         $coupon->save();
 
         Toastr::success('Coupon added successfully!');
+
         return back();
     }
 
     public function edit($id)
     {
         $c = Coupon::where(['id' => $id])->first();
+
         return view('admin-views.coupon.edit', compact('c'));
     }
 
@@ -100,6 +100,7 @@ class CouponController extends Controller
         ]);
 
         Toastr::success('Coupon updated successfully!');
+
         return back();
     }
 
@@ -111,6 +112,7 @@ class CouponController extends Controller
         // $data = $request->status;
         // return response()->json($data);
         Toastr::success('Coupon status updated!');
+
         return back();
     }
 
@@ -119,6 +121,7 @@ class CouponController extends Controller
         $coupon = Coupon::find($id);
         $coupon->delete();
         Toastr::success('Coupon deleted successfully!');
+
         return back();
     }
 }

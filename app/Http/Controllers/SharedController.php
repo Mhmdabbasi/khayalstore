@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\CPU\Helpers;
-use App\CPU\ImageManager;
 use App\Model\BusinessSetting;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
 
 class SharedController extends Controller
@@ -24,6 +21,7 @@ class SharedController extends Controller
         Helpers::language_load();
         session()->put('local', $local);
         Session::put('direction', $direction);
+
         return redirect()->back();
     }
 }

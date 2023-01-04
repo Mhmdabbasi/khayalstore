@@ -15,7 +15,6 @@ use App\Model\ShippingMethod;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
 class Helpers
@@ -35,10 +34,10 @@ class Helpers
     {
         if ($transaction['paid_by'] == 'customer') {
             $user = User::find($transaction['payer_id']);
-            $payer = $user->f_name . ' ' . $user->l_name;
+            $payer = $user->f_name.' '.$user->l_name;
         } elseif ($transaction['paid_by'] == 'seller') {
             $user = Seller::find($transaction['payer_id']);
-            $payer = $user->f_name . ' ' . $user->l_name;
+            $payer = $user->f_name.' '.$user->l_name;
         } elseif ($transaction['paid_by'] == 'admin') {
             $user = Admin::find($transaction['payer_id']);
             $payer = $user->name;
@@ -46,10 +45,10 @@ class Helpers
 
         if ($transaction['paid_to'] == 'customer') {
             $user = User::find($transaction['payment_receiver_id']);
-            $receiver = $user->f_name . ' ' . $user->l_name;
+            $receiver = $user->f_name.' '.$user->l_name;
         } elseif ($transaction['paid_to'] == 'seller') {
             $user = Seller::find($transaction['payment_receiver_id']);
-            $receiver = $user->f_name . ' ' . $user->l_name;
+            $receiver = $user->f_name.' '.$user->l_name;
         } elseif ($transaction['paid_to'] == 'admin') {
             $user = Admin::find($transaction['payment_receiver_id']);
             $receiver = $user->name;
@@ -132,6 +131,7 @@ class Helpers
             Session::put('direction', $direction);
             $lang = $code;
         }
+
         return $lang;
     }
 
@@ -172,6 +172,7 @@ class Helpers
                 $config = $setting;
             }
         }
+
         return $config;
     }
 
@@ -187,6 +188,7 @@ class Helpers
     public static function get_image_path($type)
     {
         $path = asset('storage/app/public/brand');
+
         return $path;
     }
 
@@ -200,7 +202,7 @@ class Helpers
             $attributes = [];
             if (json_decode($data['attributes']) != null) {
                 foreach (json_decode($data['attributes']) as $attribute) {
-                    $attributes[] = (integer)$attribute;
+                    $attributes[] = (int) $attribute;
                 }
             }
             $data['attributes'] = $attributes;
@@ -208,9 +210,9 @@ class Helpers
             foreach (json_decode($data['variation'], true) as $var) {
                 $variation[] = [
                     'type' => $var['type'],
-                    'price' => (double)$var['price'],
+                    'price' => (float) $var['price'],
                     'sku' => $var['sku'],
-                    'qty' => (integer)$var['qty'],
+                    'qty' => (int) $var['qty'],
                 ];
             }
             $data['variation'] = $variation;
@@ -230,7 +232,7 @@ class Helpers
             }
             $data = $storage;
         } else {
-            $data = Helpers::set_data_format($data);;
+            $data = Helpers::set_data_format($data);
         }
 
         return $data;
@@ -239,6 +241,7 @@ class Helpers
     public static function units()
     {
         $x = ['kg', 'pc', 'gms', 'ltrs'];
+
         return $x;
     }
 
@@ -266,6 +269,7 @@ class Helpers
             }
             $result = $tmp;
         }
+
         return $result;
     }
 
@@ -275,6 +279,7 @@ class Helpers
         foreach ($validator->errors()->getMessages() as $index => $error) {
             $err_keeper[] = ['code' => $index, 'message' => $error[0]];
         }
+
         return $err_keeper;
     }
 
@@ -319,12 +324,14 @@ class Helpers
             $language = BusinessSetting::where('type', 'language')->first();
             \session()->put('language_settings', $language);
         }
+
         return $language;
     }
 
     public static function tax_calculation($price, $tax, $tax_type)
     {
         $amount = ($price / 100) * $tax;
+
         return $amount;
     }
 
@@ -348,7 +355,8 @@ class Helpers
         if ($lowest_price == $highest_price) {
             return $lowest_price;
         }
-        return $lowest_price . ' - ' . $highest_price;
+
+        return $lowest_price.' - '.$highest_price;
     }
 
     public static function get_product_discount($product, $price)
@@ -367,13 +375,14 @@ class Helpers
     {
         $user_role = auth('admin')->user()->role;
         $permission = $user_role->module_access;
-        if (isset($permission) && $user_role->status == 1  && in_array($mod_name, (array)json_decode($permission)) == true) {
+        if (isset($permission) && $user_role->status == 1 && in_array($mod_name, (array) json_decode($permission)) == true) {
             return true;
         }
 
         if (auth('admin')->user()->admin_role_id == 1) {
             return true;
         }
+
         return false;
     }
 
@@ -427,6 +436,7 @@ class Helpers
         if ($res['status'] == 0) {
             return 0;
         }
+
         return $res['message'];
     }
 
@@ -436,30 +446,30 @@ class Helpers
     public static function send_push_notif_to_device($fcm_token, $data)
     {
         $key = BusinessSetting::where(['type' => 'push_notification_key'])->first()->value;
-        $url = "https://fcm.googleapis.com/fcm/send";
-        $header = array("authorization: key=" . $key . "",
-            "content-type: application/json"
-        );
+        $url = 'https://fcm.googleapis.com/fcm/send';
+        $header = ['authorization: key='.$key.'',
+            'content-type: application/json',
+        ];
 
         if (isset($data['order_id']) == false) {
             $data['order_id'] = null;
         }
 
         $postdata = '{
-            "to" : "' . $fcm_token . '",
+            "to" : "'.$fcm_token.'",
             "data" : {
-                "title" :"' . $data['title'] . '",
-                "body" : "' . $data['description'] . '",
-                "image" : "' . $data['image'] . '",
-                "order_id":"' . $data['order_id'] . '",
+                "title" :"'.$data['title'].'",
+                "body" : "'.$data['description'].'",
+                "image" : "'.$data['image'].'",
+                "order_id":"'.$data['order_id'].'",
                 "is_read": 0
               },
               "notification" : {
-                "title" :"' . $data['title'] . '",
-                "body" : "' . $data['description'] . '",
-                "image" : "' . $data['image'] . '",
-                "order_id":"' . $data['order_id'] . '",
-                "title_loc_key":"' . $data['order_id'] . '",
+                "title" :"'.$data['title'].'",
+                "body" : "'.$data['description'].'",
+                "image" : "'.$data['image'].'",
+                "order_id":"'.$data['order_id'].'",
+                "title_loc_key":"'.$data['order_id'].'",
                 "is_read": 0,
                 "icon" : "new",
                 "sound" : "default"
@@ -471,7 +481,7 @@ class Helpers
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 
@@ -487,24 +497,24 @@ class Helpers
     {
         $key = BusinessSetting::where(['type' => 'push_notification_key'])->first()->value;
 
-        $url = "https://fcm.googleapis.com/fcm/send";
-        $header = ["authorization: key=" . $key . "",
-            "content-type: application/json",
+        $url = 'https://fcm.googleapis.com/fcm/send';
+        $header = ['authorization: key='.$key.'',
+            'content-type: application/json',
         ];
 
-        $image = asset('storage/app/public/notification') . '/' . $data['image'];
+        $image = asset('storage/app/public/notification').'/'.$data['image'];
         $postdata = '{
             "to" : "/topics/sixvalley",
             "data" : {
-                "title":"' . $data->title . '",
-                "body" : "' . $data->description . '",
-                "image" : "' . $image . '",
+                "title":"'.$data->title.'",
+                "body" : "'.$data->description.'",
+                "image" : "'.$image.'",
                 "is_read": 0
               },
               "notification" : {
-                "title":"' . $data->title . '",
-                "body" : "' . $data->description . '",
-                "image" : "' . $image . '",
+                "title":"'.$data->title.'",
+                "body" : "'.$data->description.'",
+                "image" : "'.$image.'",
                 "title_loc_key":null,
                 "is_read": 0,
                 "icon" : "new",
@@ -517,7 +527,7 @@ class Helpers
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 
@@ -545,7 +555,7 @@ class Helpers
 
         return [
             'success' => $success,
-            'data' => $data
+            'data' => $data,
         ];
     }
 
@@ -554,8 +564,12 @@ class Helpers
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (filetype($dir . "/" . $object) == "dir") Helpers::remove_dir($dir . "/" . $object); else unlink($dir . "/" . $object);
+                if ($object != '.' && $object != '..') {
+                    if (filetype($dir.'/'.$object) == 'dir') {
+                        Helpers::remove_dir($dir.'/'.$object);
+                    } else {
+                        unlink($dir.'/'.$object);
+                    }
                 }
             }
             reset($objects);
@@ -573,6 +587,7 @@ class Helpers
             $system_default_currency_info = session('system_default_currency_info');
             $code = $system_default_currency_info->code;
         }
+
         return $code;
     }
 
@@ -610,6 +625,7 @@ class Helpers
         $fp = fopen($envFile, 'w');
         fwrite($fp, $str);
         fclose($fp);
+
         return $envValue;
     }
 
@@ -618,17 +634,18 @@ class Helpers
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => route(base64_decode('YWN0aXZhdGlvbi1jaGVjaw==')),
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
+            CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-        ));
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ]);
         $response = curl_exec($curl);
         $data = json_decode($response, true);
+
         return $data;
     }
 
@@ -647,6 +664,7 @@ class Helpers
             }
             $commission_amount = (($order_total / 100) * $commission);
         }
+
         return $commission_amount;
     }
 
@@ -659,11 +677,12 @@ class Helpers
     {
         $decimal_point_settings = Helpers::get_business_settings('decimal_point_settings');
         $position = Helpers::get_business_settings('currency_symbol_position');
-        if (!is_null($position) && $position == 'left') {
-            $string = currency_symbol() . '' . number_format($amount, (!empty($decimal_point_settings) ? $decimal_point_settings: 0));
+        if (! is_null($position) && $position == 'left') {
+            $string = currency_symbol().''.number_format($amount, (! empty($decimal_point_settings) ? $decimal_point_settings : 0));
         } else {
-            $string = number_format($amount, !empty($decimal_point_settings) ? $decimal_point_settings: 0) . '' . currency_symbol();
+            $string = number_format($amount, ! empty($decimal_point_settings) ? $decimal_point_settings : 0).''.currency_symbol();
         }
+
         return $string;
     }
 
@@ -687,12 +706,11 @@ class Helpers
         $mpdf_view = $view;
         $mpdf_view = $mpdf_view->render();
         $mpdf->WriteHTML($mpdf_view);
-        $mpdf->Output($file_prefix . $file_postfix . '.pdf', 'D');
+        $mpdf->Output($file_prefix.$file_postfix.'.pdf', 'D');
     }
 }
 
-
-if (!function_exists('currency_symbol')) {
+if (! function_exists('currency_symbol')) {
     function currency_symbol()
     {
         Helpers::currency_load();
@@ -702,14 +720,15 @@ if (!function_exists('currency_symbol')) {
             $system_default_currency_info = \session('system_default_currency_info');
             $symbol = $system_default_currency_info->symbol;
         }
+
         return $symbol;
     }
 }
 //formats currency
-if (!function_exists('format_price')) {
+if (! function_exists('format_price')) {
     function format_price($price)
     {
-        return number_format($price, 2) . currency_symbol();
+        return number_format($price, 2).currency_symbol();
     }
 }
 
@@ -719,19 +738,19 @@ function translate($key)
     App::setLocale($local);
 
     try {
-        $lang_array = include(base_path('resources/lang/' . $local . '/messages.php'));
+        $lang_array = include base_path('resources/lang/'.$local.'/messages.php');
         $processed_key = ucfirst(str_replace('_', ' ', Helpers::remove_invalid_charcaters($key)));
 
-        if (!array_key_exists($key, $lang_array)) {
+        if (! array_key_exists($key, $lang_array)) {
             $lang_array[$key] = $processed_key;
-            $str = "<?php return " . var_export($lang_array, true) . ";";
-            file_put_contents(base_path('resources/lang/' . $local . '/messages.php'), $str);
+            $str = '<?php return '.var_export($lang_array, true).';';
+            file_put_contents(base_path('resources/lang/'.$local.'/messages.php'), $str);
             $result = $processed_key;
         } else {
-            $result = __('messages.' . $key);
+            $result = __('messages.'.$key);
         }
     } catch (\Exception $exception) {
-        $result = __('messages.' . $key);
+        $result = __('messages.'.$key);
     }
 
     return $result;

@@ -13,5 +13,4 @@ class ShippingType extends Model
         'seller_id' => 'integer',
         'shipping_type' => 'string',
     ];
-    
 }

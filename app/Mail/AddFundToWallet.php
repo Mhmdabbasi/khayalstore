@@ -15,7 +15,6 @@ class AddFundToWallet extends Mailable
      *
      * @return void
      */
-
     protected $data;
 
     public function __construct($data)
@@ -30,6 +29,6 @@ class AddFundToWallet extends Mailable
      */
     public function build()
     {
-        return $this->view('email-templates.add-fund')->with(['data'=>$this->data]);
+        return $this->view('email-templates.add-fund')->with(['data' => $this->data]);
     }
 }

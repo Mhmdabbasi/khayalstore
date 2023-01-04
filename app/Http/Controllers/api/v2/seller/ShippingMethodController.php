@@ -4,12 +4,12 @@ namespace App\Http\Controllers\api\v2\seller;
 
 use App\CPU\BackEndHelper;
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\ShippingMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use function App\CPU\translate;
 
 class ShippingMethodController extends Controller
 {
@@ -21,14 +21,14 @@ class ShippingMethodController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:200',
             'duration' => 'required',
-            'cost' => 'numeric'
+            'cost' => 'numeric',
         ]);
 
         if ($validator->errors()->count() > 0) {
@@ -43,7 +43,7 @@ class ShippingMethodController extends Controller
             'cost' => BackEndHelper::currency_to_usd($request['cost']),
             'status' => 1,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         return response()->json(['message' => translate('successfully_added')], 200);
@@ -57,7 +57,7 @@ class ShippingMethodController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -72,7 +72,7 @@ class ShippingMethodController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
@@ -86,7 +86,7 @@ class ShippingMethodController extends Controller
         }
 
         ShippingMethod::where(['id' => $request['id'], 'creator_id' => $seller['id']])->update([
-            'status' => $request['status']
+            'status' => $request['status'],
         ]);
 
         return response()->json(['message' => translate('successfully_status_updated')], 200);
@@ -100,7 +100,7 @@ class ShippingMethodController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
         $method = ShippingMethod::where(['id' => $id, 'creator_id' => $seller['id']])->first();
@@ -119,14 +119,14 @@ class ShippingMethodController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:200',
             'duration' => 'required',
-            'cost' => 'numeric'
+            'cost' => 'numeric',
         ]);
 
         if ($validator->errors()->count() > 0) {
@@ -139,7 +139,7 @@ class ShippingMethodController extends Controller
             'cost' => BackEndHelper::currency_to_usd($request['cost']),
             'status' => 1,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         return response()->json(['message' => translate('successfully_updated')], 200);
@@ -153,7 +153,7 @@ class ShippingMethodController extends Controller
             $seller = $data['data'];
         } else {
             return response()->json([
-                'auth-001' => translate('Your existing session token does not authorize you any more')
+                'auth-001' => translate('Your existing session token does not authorize you any more'),
             ], 401);
         }
 

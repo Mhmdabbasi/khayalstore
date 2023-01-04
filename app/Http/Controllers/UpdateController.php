@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\CPU\Helpers;
 use App\Model\AdminWallet;
-use App\User;
 use App\Model\BusinessSetting;
 use App\Model\Color;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -25,11 +25,11 @@ class UpdateController extends Controller
         Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key']);
         Helpers::setEnvironmentValue('SOFTWARE_VERSION', '12.1');
         Helpers::setEnvironmentValue('APP_MODE', 'live');
-        Helpers::setEnvironmentValue('APP_NAME', '6valley' . time());
+        Helpers::setEnvironmentValue('APP_NAME', '6valley'.time());
         Helpers::setEnvironmentValue('SESSION_LIFETIME', '60');
 
         $data = Helpers::requestSender();
-        if (!$data['active']) {
+        if (! $data['active']) {
             return redirect(base64_decode('aHR0cHM6Ly82YW10ZWNoLmNvbS9zb2Z0d2FyZS1hY3RpdmF0aW9u'));
         }
 
@@ -183,8 +183,8 @@ class UpdateController extends Controller
                 'type' => 'delivery_boy_expected_delivery_date_message',
                 'value' => json_encode([
                     'status' => 0,
-                    'message' => ''
-                ])
+                    'message' => '',
+                ]),
             ]);
         }
         if (BusinessSetting::where(['type' => 'order_canceled'])->first() == false) {
@@ -192,14 +192,14 @@ class UpdateController extends Controller
                 'type' => 'order_canceled',
                 'value' => json_encode([
                     'status' => 0,
-                    'message' => ''
-                ])
+                    'message' => '',
+                ]),
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'seller_registration'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'seller_registration'], [
-                'value' => 1
+                'value' => 1,
             ]);
         }
         if (BusinessSetting::where(['type' => 'pnc_language'])->first() == false) {
@@ -217,26 +217,26 @@ class UpdateController extends Controller
         if (BusinessSetting::where(['type' => 'razor_pay'])->first() == false) {
             BusinessSetting::insert([
                 'type' => 'razor_pay',
-                'value' => '{"status":"1","razor_key":"","razor_secret":""}'
+                'value' => '{"status":"1","razor_key":"","razor_secret":""}',
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'paystack'])->first() == false) {
             BusinessSetting::insert([
                 'type' => 'paystack',
-                'value' => '{"status":"0","publicKey":"","secretKey":"","paymentUrl":"","merchantEmail":""}'
+                'value' => '{"status":"0","publicKey":"","secretKey":"","paymentUrl":"","merchantEmail":""}',
             ]);
         }
         if (BusinessSetting::where(['type' => 'senang_pay'])->first() == false) {
             BusinessSetting::insert([
                 'type' => 'senang_pay',
-                'value' => '{"status":"0","secret_key":"","merchant_id":""}'
+                'value' => '{"status":"0","secret_key":"","merchant_id":""}',
             ]);
         }
         if (BusinessSetting::where(['type' => 'paymob_accept'])->first() == false) {
             BusinessSetting::insert([
                 'type' => 'paymob_accept',
-                'value' => '{"status":"0","api_key":"","iframe_id":"","integration_id":"","hmac":""}'
+                'value' => '{"status":"0","api_key":"","iframe_id":"","integration_id":"","hmac":""}',
             ]);
         }
 
@@ -260,128 +260,116 @@ class UpdateController extends Controller
 
         if (BusinessSetting::where(['type' => 'phone_verification'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'phone_verification'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'email_verification'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'email_verification'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
 
         // stock limit
         if (BusinessSetting::where(['type' => 'stock_limit'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'stock_limit'], [
-                'value' => 10
+                'value' => 10,
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'order_verification'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'order_verification'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'country_code'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'country_code'], [
-                'value' => 'BD'
+                'value' => 'BD',
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'pagination_limit'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'pagination_limit'], [
-                'value' => 10
+                'value' => 10,
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'shipping_method'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'shipping_method'], [
-                'value' => 'inhouse_shipping'
+                'value' => 'inhouse_shipping',
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'seller_pos'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'seller_pos'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
-        if(BusinessSetting::where(['type' => 'refund_day_limit'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'refund_day_limit'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'refund_day_limit'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
-        if(BusinessSetting::where(['type' => 'business_mode'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'business_mode'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'business_mode'], [
-                'value' => 'multi'
+                'value' => 'multi',
             ]);
         }
 
-        if(BusinessSetting::where(['type' => 'decimal_point_settings'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'decimal_point_settings'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'decimal_point_settings'], [
-                'value' => 2
+                'value' => 2,
             ]);
         }
 
-        if(BusinessSetting::where(['type' => 'shop_address'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'shop_address'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'shop_address'], [
-                'value' => ''
+                'value' => '',
             ]);
         }
 
-        if(BusinessSetting::where(['type' => 'minimum_order_limit'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'minimum_order_limit'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'minimum_order_limit'], [
-                'value' => 1
+                'value' => 1,
             ]);
         }
 
-        if(BusinessSetting::where(['type' => 'billing_input_by_customer'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'billing_input_by_customer'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'billing_input_by_customer'], [
-                'value' => 1
+                'value' => 1,
             ]);
         }
 
-        if(BusinessSetting::where(['type' => 'wallet_status'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'wallet_status'])->first() == false) {
             BusinessSetting::updateOrInsert(['type' => 'wallet_status'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
-        if(BusinessSetting::where(['type' => 'loyalty_point_status'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'loyalty_point_status'])->first() == false) {
             BusinessSetting::updateOrInsert(['type' => 'loyalty_point_status'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
-        if(BusinessSetting::where(['type' => 'wallet_add_refund'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'wallet_add_refund'])->first() == false) {
             BusinessSetting::updateOrInsert(['type' => 'wallet_add_refund'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
-        if(BusinessSetting::where(['type' => 'loyalty_point_exchange_rate'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'loyalty_point_exchange_rate'])->first() == false) {
             BusinessSetting::updateOrInsert(['type' => 'loyalty_point_exchange_rate'], [
-                'value' => 0
+                'value' => 0,
             ]);
         }
-        if(BusinessSetting::where(['type' => 'loyalty_point_item_purchase_point'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'loyalty_point_item_purchase_point'])->first() == false) {
             BusinessSetting::updateOrInsert(['type' => 'loyalty_point_item_purchase_point'], [
-            'value' => 0
-        ]);
+                'value' => 0,
+            ]);
         }
-        if(BusinessSetting::where(['type' => 'loyalty_point_minimum_point'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'loyalty_point_minimum_point'])->first() == false) {
             BusinessSetting::updateOrInsert(['type' => 'loyalty_point_minimum_point'], [
-            'value' => 0
-        ]);
+                'value' => 0,
+            ]);
         }
 
         if (BusinessSetting::where(['type' => 'flutterwave'])->first() == false) {
@@ -391,7 +379,7 @@ class UpdateController extends Controller
                     'public_key' => '',
                     'secret_key' => '',
                     'hash' => '',
-                ])
+                ]),
             ]);
         }
 
@@ -401,7 +389,7 @@ class UpdateController extends Controller
                     'status' => 1,
                     'public_key' => '',
                     'access_token' => '',
-                ])
+                ]),
             ]);
         }
 
@@ -411,7 +399,7 @@ class UpdateController extends Controller
 
         if (BusinessSetting::where(['type' => 'forgot_password_verification'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'forgot_password_verification'], [
-                'value' => 'email'
+                'value' => 'email',
             ]);
         }
 
@@ -421,7 +409,7 @@ class UpdateController extends Controller
                 'f_name' => 'walking',
                 'l_name' => 'customer',
                 'email' => 'walking@customer.com',
-                'phone' => '000000000000'
+                'phone' => '000000000000',
             ]);
             User::where('phone', '000000000000')->update(['id' => 0]);
         }
@@ -437,106 +425,103 @@ class UpdateController extends Controller
             ]);
         }
 
-        if(BusinessSetting::where(['type' => 'mail_config'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'mail_config'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'mail_config'], [
                 'value' => json_encode([
-                    "status" => 0,
-                    "name" => '',
-                    "host" => '',
-                    "driver" => '',
-                    "port" => '',
-                    "username" => '',
-                    "email_id" => '',
-                    "encryption" => '',
-                    "password" => ''
-                ])
+                    'status' => 0,
+                    'name' => '',
+                    'host' => '',
+                    'driver' => '',
+                    'port' => '',
+                    'username' => '',
+                    'email_id' => '',
+                    'encryption' => '',
+                    'password' => '',
+                ]),
             ]);
-        }else{
+        } else {
             $mail_config = Helpers::get_business_settings('mail_config');
             DB::table('business_settings')->updateOrInsert(['type' => 'mail_config'], [
                 'value' => json_encode([
-                    "status" => $mail_config['status']??0,
-                    "name" => $mail_config['name']??'',
-                    "host" => $mail_config['host']??'',
-                    "driver" => $mail_config['driver']??'',
-                    "port" => $mail_config['port']??'',
-                    "username" => $mail_config['username']??'',
-                    "email_id" => $mail_config['email_id']??'',
-                    "encryption" => $mail_config['encryption']??'',
-                    "password" => $mail_config['password']??''
-                ])
+                    'status' => $mail_config['status'] ?? 0,
+                    'name' => $mail_config['name'] ?? '',
+                    'host' => $mail_config['host'] ?? '',
+                    'driver' => $mail_config['driver'] ?? '',
+                    'port' => $mail_config['port'] ?? '',
+                    'username' => $mail_config['username'] ?? '',
+                    'email_id' => $mail_config['email_id'] ?? '',
+                    'encryption' => $mail_config['encryption'] ?? '',
+                    'password' => $mail_config['password'] ?? '',
+                ]),
             ]);
         }
 
-        if(BusinessSetting::where(['type' => 'mail_config_sendgrid'])->first() == false)
-        {
+        if (BusinessSetting::where(['type' => 'mail_config_sendgrid'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'mail_config_sendgrid'], [
                 'value' => json_encode([
-                    "status" => 0,
-                    "name" => '',
-                    "host" => '',
-                    "driver" => '',
-                    "port" => '',
-                    "username" => '',
-                    "email_id" => '',
-                    "encryption" => '',
-                    "password" => ''
-                ])
+                    'status' => 0,
+                    'name' => '',
+                    'host' => '',
+                    'driver' => '',
+                    'port' => '',
+                    'username' => '',
+                    'email_id' => '',
+                    'encryption' => '',
+                    'password' => '',
+                ]),
             ]);
         }
 
         $ssl_commerz_payment = Helpers::get_business_settings('ssl_commerz_payment');
 
-        DB::table('business_settings')->updateOrInsert(['type' => 'ssl_commerz_payment'],[
+        DB::table('business_settings')->updateOrInsert(['type' => 'ssl_commerz_payment'], [
 
             'value' => json_encode([
-                'status' => $ssl_commerz_payment['status']??0,
-                'environment'=> $ssl_commerz_payment['environment']??'sandbox',
-                'store_id' => $ssl_commerz_payment['store_id']??'',
-                'store_password' => $ssl_commerz_payment['store_password']??'',
+                'status' => $ssl_commerz_payment['status'] ?? 0,
+                'environment' => $ssl_commerz_payment['environment'] ?? 'sandbox',
+                'store_id' => $ssl_commerz_payment['store_id'] ?? '',
+                'store_password' => $ssl_commerz_payment['store_password'] ?? '',
             ]),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
-
 
         $paypal = Helpers::get_business_settings('paypal');
 
-        DB::table('business_settings')->updateOrInsert(['type' => 'paypal'],[
+        DB::table('business_settings')->updateOrInsert(['type' => 'paypal'], [
             'value' => json_encode([
-                'status' => $paypal['status']??0,
-                'environment'=>$paypal['environment']??'sandbox',
-                'paypal_client_id' => $paypal['paypal_client_id']??'',
-                'paypal_secret' => $paypal['paypal_secret']??'',
+                'status' => $paypal['status'] ?? 0,
+                'environment' => $paypal['environment'] ?? 'sandbox',
+                'paypal_client_id' => $paypal['paypal_client_id'] ?? '',
+                'paypal_secret' => $paypal['paypal_secret'] ?? '',
             ]),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         $paytm = Helpers::get_business_settings('paytm');
 
         DB::table('business_settings')->updateOrInsert(['type' => 'paytm'], [
             'value' => json_encode([
-                'status' => $paytm['status']??0,
-                'environment'=>$paytm['environment']??'sandbox',
-                'paytm_merchant_key' => $paytm['paytm_merchant_key']??'',
-                'paytm_merchant_mid' => $paytm['paytm_merchant_mid']??'',
-                'paytm_merchant_website' => $paytm['paytm_merchant_website']??'',
-                'paytm_refund_url' => $paytm['paytm_refund_url']??'',
+                'status' => $paytm['status'] ?? 0,
+                'environment' => $paytm['environment'] ?? 'sandbox',
+                'paytm_merchant_key' => $paytm['paytm_merchant_key'] ?? '',
+                'paytm_merchant_mid' => $paytm['paytm_merchant_mid'] ?? '',
+                'paytm_merchant_website' => $paytm['paytm_merchant_website'] ?? '',
+                'paytm_refund_url' => $paytm['paytm_refund_url'] ?? '',
             ]),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         $bkash = Helpers::get_business_settings('bkash');
         DB::table('business_settings')->updateOrInsert(['type' => 'bkash'], [
             'value' => json_encode([
-                'status' => $bkash['status']??0,
-                'environment'=>$bkash['environment']??'sandbox',
-                'api_key' => $bkash['api_key']??'',
-                'api_secret' => $bkash['api_secret']??'',
-                'username' => $bkash['username']??'',
-                'password' => $bkash['password']??'',
+                'status' => $bkash['status'] ?? 0,
+                'environment' => $bkash['environment'] ?? 'sandbox',
+                'api_key' => $bkash['api_key'] ?? '',
+                'api_secret' => $bkash['api_secret'] ?? '',
+                'username' => $bkash['username'] ?? '',
+                'password' => $bkash['password'] ?? '',
             ]),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         if (BusinessSetting::where(['type' => 'fawry_pay'])->first() == false) {
@@ -545,9 +530,9 @@ class UpdateController extends Controller
                 'value' => json_encode([
                     'status' => 0,
                     'merchant_code' => '',
-                    'security_key' => ''
+                    'security_key' => '',
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
@@ -558,9 +543,9 @@ class UpdateController extends Controller
                     'status' => 0,
                     'profile_id' => '',
                     'server_key' => '',
-                    'base_url' => 'https://secure-egypt.paytabs.com/'
+                    'base_url' => 'https://secure-egypt.paytabs.com/',
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
@@ -572,7 +557,7 @@ class UpdateController extends Controller
                     'site_key' => '',
                     'secret_key' => '',
                 ]),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
@@ -596,8 +581,8 @@ class UpdateController extends Controller
                     'paytm_merchant_key' => '',
                     'paytm_merchant_mid' => '',
                     'paytm_merchant_website' => '',
-                    'paytm_refund_url' => null
-                ])
+                    'paytm_refund_url' => null,
+                ]),
             ]);
         }
 
@@ -606,20 +591,20 @@ class UpdateController extends Controller
                 'value' => json_encode([
                     'status' => 0,
                     'public_key' => '',
-                    'private_key' => ''
-                ])
+                    'private_key' => '',
+                ]),
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'product_brand'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'product_brand'], [
-                'value' => 1
+                'value' => 1,
             ]);
         }
 
         if (BusinessSetting::where(['type' => 'digital_product'])->first() == false) {
             DB::table('business_settings')->updateOrInsert(['type' => 'digital_product'], [
-                'value' => 1
+                'value' => 1,
             ]);
         }
 

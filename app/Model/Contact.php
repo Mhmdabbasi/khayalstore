@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Contact extends Model
 {
     protected $casts = [
-        'seen'       => 'integer',
+        'seen' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
     protected $table = 'contacts';
 
     protected $fillable = [

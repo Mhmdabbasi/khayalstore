@@ -12,22 +12,17 @@
  */
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Mail;
-
-
-
 
 //for maintenance mode
 Route::get('maintenance-mode', 'Web\WebController@maintenance_mode')->name('maintenance-mode');
 
-
-Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function () {
+Route::group(['namespace' => 'Web', 'middleware' => ['maintenance_mode']], function () {
     Route::get('/', 'WebController@home')->name('home');
 
     Route::get('quick-view', 'WebController@quick_view')->name('quick-view');
     Route::get('searched-products', 'WebController@searched_products')->name('searched-products');
 
-    Route::group(['middleware'=>['customer']], function () {
+    Route::group(['middleware' => ['customer']], function () {
         Route::get('checkout-details', 'WebController@checkout_details')->name('checkout-details');
         Route::get('checkout-shipping', 'WebController@checkout_shipping')->name('checkout-shipping')->middleware('customer');
         Route::get('checkout-payment', 'WebController@checkout_payment')->name('checkout-payment')->middleware('customer');
@@ -37,10 +32,10 @@ Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function
         Route::get('shop-cart', 'WebController@shop_cart')->name('shop-cart');
         Route::post('order_note', 'WebController@order_note')->name('order_note');
         Route::get('digital-product-download/{id}', 'WebController@digital_product_download')->name('digital-product-download')->middleware('customer');
-        Route::get('submit-review/{id}','UserProfileController@submit_review')->name('submit-review');
+        Route::get('submit-review/{id}', 'UserProfileController@submit_review')->name('submit-review');
         Route::post('review', 'ReviewController@store')->name('review.store');
-        Route::get('deliveryman-review/{id}','ReviewController@delivery_man_review')->name('deliveryman-review');
-        Route::post('submit-deliveryman-review','ReviewController@delivery_man_submit')->name('submit-deliveryman-review');
+        Route::get('deliveryman-review/{id}', 'ReviewController@delivery_man_review')->name('deliveryman-review');
+        Route::post('submit-deliveryman-review', 'ReviewController@delivery_man_submit')->name('submit-deliveryman-review');
     });
 
     //wallet payment
@@ -65,7 +60,7 @@ Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function
     Route::get('orderDetails', 'WebController@orderdetails')->name('orderdetails');
     Route::get('discounted-products', 'WebController@discounted_products')->name('discounted-products');
 
-    Route::post('review-list-product','WebController@review_list_product')->name('review-list-product');
+    Route::post('review-list-product', 'WebController@review_list_product')->name('review-list-product');
     //Chat with seller from product details
     Route::get('chat-for-product', 'WebController@chat_for_product')->name('chat-for-product');
 
@@ -84,20 +79,20 @@ Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function
     Route::get('account-address', 'UserProfileController@account_address')->name('account-address');
     Route::post('account-address-store', 'UserProfileController@address_store')->name('address-store');
     Route::get('account-address-delete', 'UserProfileController@address_delete')->name('address-delete');
-    ROute::get('account-address-edit/{id}','UserProfileController@address_edit')->name('address-edit');
+    ROute::get('account-address-edit/{id}', 'UserProfileController@address_edit')->name('address-edit');
     Route::post('account-address-update', 'UserProfileController@address_update')->name('address-update');
     Route::get('account-payment', 'UserProfileController@account_payment')->name('account-payment');
     Route::get('account-oder', 'UserProfileController@account_oder')->name('account-oder');
     Route::get('account-order-details', 'UserProfileController@account_order_details')->name('account-order-details')->middleware('customer');
     Route::get('generate-invoice/{id}', 'UserProfileController@generate_invoice')->name('generate-invoice');
     Route::get('account-wishlist', 'UserProfileController@account_wishlist')->name('account-wishlist'); //add to card not work
-    Route::get('refund-request/{id}','UserProfileController@refund_request')->name('refund-request');
-    Route::get('refund-details/{id}','UserProfileController@refund_details')->name('refund-details');
-    Route::post('refund-store','UserProfileController@store_refund')->name('refund-store');
+    Route::get('refund-request/{id}', 'UserProfileController@refund_request')->name('refund-request');
+    Route::get('refund-details/{id}', 'UserProfileController@refund_details')->name('refund-details');
+    Route::post('refund-store', 'UserProfileController@store_refund')->name('refund-store');
     Route::get('account-tickets', 'UserProfileController@account_tickets')->name('account-tickets');
     Route::get('order-cancel/{id}', 'UserProfileController@order_cancel')->name('order-cancel');
     Route::post('ticket-submit', 'UserProfileController@ticket_submit')->name('ticket-submit');
-    Route::get('account-delete/{id}','UserProfileController@account_delete')->name('account-delete');
+    Route::get('account-delete/{id}', 'UserProfileController@account_delete')->name('account-delete');
     // Chatting start
     Route::get('chat/{type}', 'ChattingController@chat_list')->name('chat');
     Route::get('messages', 'ChattingController@messages')->name('messages');
@@ -115,9 +110,9 @@ Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function
     Route::get('account-transaction', 'UserProfileController@account_transaction')->name('account-transaction');
     Route::get('account-wallet-history', 'UserProfileController@account_wallet_history')->name('account-wallet-history');
 
-    Route::get('wallet','UserWalletController@index')->name('wallet');
-    Route::get('loyalty','UserLoyaltyController@index')->name('loyalty');
-    Route::post('loyalty-exchange-currency','UserLoyaltyController@loyalty_exchange_currency')->name('loyalty-exchange-currency');
+    Route::get('wallet', 'UserWalletController@index')->name('wallet');
+    Route::get('loyalty', 'UserLoyaltyController@index')->name('loyalty');
+    Route::post('loyalty-exchange-currency', 'UserLoyaltyController@loyalty_exchange_currency')->name('loyalty-exchange-currency');
 
     Route::group(['prefix' => 'track-order', 'as' => 'track-order.'], function () {
         Route::get('', 'UserProfileController@track_order')->name('index');
@@ -149,7 +144,6 @@ Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function
 Route::group(['prefix' => 'shop', 'as' => 'shop.', 'namespace' => 'Seller\Auth'], function () {
     Route::get('apply', 'RegisterController@create')->name('apply');
     Route::post('apply', 'RegisterController@store');
-
 });
 
 //check done
@@ -202,14 +196,13 @@ Route::get('payment-razor/fail', 'RazorPayController@success')->name('payment-ra
 Route::get('payment-success', 'Customer\PaymentController@success')->name('payment-success');
 Route::get('payment-fail', 'Customer\PaymentController@fail')->name('payment-fail');
 
-
 //senang pay
 Route::match(['get', 'post'], '/return-senang-pay', 'SenangPayController@return_senang_pay')->name('return-senang-pay');
 
 //paystack
 Route::post('/paystack-pay', 'PaystackController@redirectToGateway')->name('paystack-pay');
 Route::get('/paystack-callback', 'PaystackController@handleGatewayCallback')->name('paystack-callback');
-Route::get('/paystack',function (){
+Route::get('/paystack', function () {
     return view('paystack');
 });
 
@@ -217,13 +210,12 @@ Route::get('/paystack',function (){
 Route::post('/paymob-credit', 'PaymobController@credit')->name('paymob-credit');
 Route::get('/paymob-callback', 'PaymobController@callback')->name('paymob-callback');
 
-
 //paytabs
 Route::any('/paytabs-payment', 'PaytabsController@payment')->name('paytabs-payment');
 Route::any('/paytabs-response', 'PaytabsController@callback_response')->name('paytabs-response');
 
 //bkash
-Route::group(['prefix'=>'bkash'], function () {
+Route::group(['prefix' => 'bkash'], function () {
     // Payment Routes for bKash
     Route::post('get-token', 'BkashPaymentController@getToken')->name('bkash-get-token');
     Route::post('create-payment', 'BkashPaymentController@createPayment')->name('bkash-create-payment');
@@ -246,7 +238,7 @@ Route::post('mercadopago/make-payment', 'MercadoPagoController@make_payment')->n
 Route::get('mercadopago/get-user', 'MercadoPagoController@get_test_user')->name('mercadopago.get-user');
 
 // The route that the button calls to initialize payment
-Route::post('/flutterwave-pay','FlutterwaveController@initialize')->name('flutterwave_pay');
+Route::post('/flutterwave-pay', 'FlutterwaveController@initialize')->name('flutterwave_pay');
 // The callback url after a payment
 Route::get('/rave/callback', 'FlutterwaveController@callback')->name('flutterwave_callback');
 
@@ -258,8 +250,9 @@ Route::any('paytm-response', 'PaytmController@callback')->name('paytm-response')
 Route::get('liqpay-payment', 'LiqPayController@payment')->name('liqpay-payment');
 Route::any('liqpay-callback', 'LiqPayController@callback')->name('liqpay-callback');
 
-Route::get('/test', function (){
+Route::get('/test', function () {
     $product = \App\Model\Product::find(116);
     $quantity = 6;
+
     return view('seller-views.product.barcode-pdf', compact('product', 'quantity'));
 });

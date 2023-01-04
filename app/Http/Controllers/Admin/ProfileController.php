@@ -11,10 +11,10 @@ use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-
     public function view()
     {
         $data = Admin::where('id', auth('admin')->id())->first();
+
         return view('admin-views.profile.view', compact('data'));
     }
 
@@ -22,6 +22,7 @@ class ProfileController extends Controller
     {
         $data = Admin::where('id', $id)->first();
         $shop_banner = Helpers::get_business_settings('shop_banner');
+
         return view('admin-views.profile.edit', compact('data', 'shop_banner'));
     }
 
@@ -36,6 +37,7 @@ class ProfileController extends Controller
         }
         $admin->save();
         Toastr::info('Profile updated successfully!');
+
         return back();
     }
 
@@ -50,7 +52,7 @@ class ProfileController extends Controller
         $admin->password = bcrypt($request['password']);
         $admin->save();
         Toastr::success('Admin password updated successfully!');
+
         return back();
     }
-
 }

@@ -7,9 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Model\Shop;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class ShopController extends Controller
 {
@@ -24,7 +22,7 @@ class ShopController extends Controller
                 'contact' => auth('seller')->user()->phone,
                 'image' => 'def.png',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
             $shop = Shop::where(['seller_id' => auth('seller')->id()])->first();
         }
@@ -34,20 +32,21 @@ class ShopController extends Controller
 
     public function edit($id)
     {
-        $shop = Shop::where(['seller_id' =>  auth('seller')->id()])->first();
+        $shop = Shop::where(['seller_id' => auth('seller')->id()])->first();
+
         return view('seller-views.shop.edit', compact('shop'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'banner'      => 'mimes:png,jpg,jpeg|max:2048',
-            'image'       => 'mimes:png,jpg,jpeg|max:2048',
+            'banner' => 'mimes:png,jpg,jpeg|max:2048',
+            'image' => 'mimes:png,jpg,jpeg|max:2048',
         ], [
-            'banner.mimes'   => 'Banner image type jpg, jpeg or png',
-            'banner.max'     => 'Banner Maximum size 2MB',
-            'image.mimes'    => 'Image type jpg, jpeg or png',
-            'image.max'      => 'Image Maximum size 2MB',
+            'banner.mimes' => 'Banner image type jpg, jpeg or png',
+            'banner.max' => 'Banner Maximum size 2MB',
+            'image.mimes' => 'Image type jpg, jpeg or png',
+            'image.max' => 'Image Maximum size 2MB',
         ]);
 
         $shop = Shop::find($id);
@@ -63,7 +62,7 @@ class ShopController extends Controller
         $shop->save();
 
         Toastr::info('Shop updated successfully!');
+
         return redirect()->route('seller.shop.view');
     }
-
 }

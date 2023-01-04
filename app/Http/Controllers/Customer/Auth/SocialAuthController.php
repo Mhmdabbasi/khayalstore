@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Customer\Auth;
 
 use App\CPU\CartManager;
-use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
 use App\Model\BusinessSetting;
 use App\Model\Wishlist;
@@ -12,7 +11,6 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
-use Session;
 
 class SocialAuthController extends Controller
 {
@@ -29,10 +27,10 @@ class SocialAuthController extends Controller
 
         $name = explode(' ', $user_data['name']);
         if (count($name) > 1) {
-            $fast_name = implode(" ", array_slice($name, 0, -1));
+            $fast_name = implode(' ', array_slice($name, 0, -1));
             $last_name = end($name);
         } else {
-            $fast_name = implode(" ", $name);
+            $fast_name = implode(' ', $name);
             $last_name = '';
         }
 
@@ -48,7 +46,7 @@ class SocialAuthController extends Controller
                 'social_id' => $user_data->id,
                 'is_phone_verified' => 0,
                 'is_email_verified' => 1,
-                'temporary_token' => Str::random(40)
+                'temporary_token' => Str::random(40),
             ]);
         } else {
             $user->temporary_token = Str::random(40);
@@ -61,12 +59,14 @@ class SocialAuthController extends Controller
         //redirect if website user
         $message = self::login_process($user, $user_data->getEmail(), $user_data->id);
         Toastr::info($message);
+
         return redirect()->route('home');
     }
 
     public function editPhone($id)
     {
         $user = User::find($id);
+
         return view('customer-view.auth.update-phone', compact('user'));
     }
 
@@ -81,7 +81,7 @@ class SocialAuthController extends Controller
             'l_name.required' => 'Last Name is Required',
             'phone.required' => 'Phone Number is Required',
             'unique' => 'Phone Number Must Be Unique!',
-            'phone.min' => 'Phone Number Should be Minimum of 11 Character'
+            'phone.min' => 'Phone Number Should be Minimum of 11 Character',
         ]);
 
         $user = User::find($request->id);
@@ -99,12 +99,12 @@ class SocialAuthController extends Controller
         $company_name = BusinessSetting::where('type', 'company_name')->first();
 
         if ($user->is_active && auth('customer')->attempt(['email' => $email, 'password' => $password], true)) {
-            $wish_list = Wishlist::whereHas('wishlistProduct',function($q){
+            $wish_list = Wishlist::whereHas('wishlistProduct', function ($q) {
                 return $q;
             })->where('customer_id', $user->id)->pluck('product_id')->toArray();
 
             session()->put('wish_list', $wish_list);
-            $message = 'Welcome to ' . $company_name->value . '!';
+            $message = 'Welcome to '.$company_name->value.'!';
             CartManager::cart_to_db();
         } else {
             $message = 'Credentials are not matched or your account is not active!';

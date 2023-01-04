@@ -19,15 +19,15 @@ class MailController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            "status" => 'required',
-            "name" => 'required',
-            "host" => 'required',
-            "driver" => 'required',
-            "port" => 'required',
-            "username" => 'required',
-            "email" => 'required',
-            "encryption" => 'required',
-            "password" => 'required',
+            'status' => 'required',
+            'name' => 'required',
+            'host' => 'required',
+            'driver' => 'required',
+            'port' => 'required',
+            'username' => 'required',
+            'email' => 'required',
+            'encryption' => 'required',
+            'password' => 'required',
         ]);
 
         if ($request['status'] == 1) {
@@ -36,48 +36,49 @@ class MailController extends Controller
 
             BusinessSetting::where(['type' => 'mail_config_sendgrid'])->update([
                 'value' => json_encode([
-                    "status" => 0,
-                    "name" => $data_mail_sendgrid['name'],
-                    "host" => $data_mail_sendgrid['host'],
-                    "driver" => $data_mail_sendgrid['driver'],
-                    "port" => $data_mail_sendgrid['port'],
-                    "username" => $data_mail_sendgrid['username'],
-                    "email_id" => $data_mail_sendgrid['email_id'],
-                    "encryption" => $data_mail_sendgrid['encryption'],
-                    "password" => $data_mail_sendgrid['password']
-                ])
+                    'status' => 0,
+                    'name' => $data_mail_sendgrid['name'],
+                    'host' => $data_mail_sendgrid['host'],
+                    'driver' => $data_mail_sendgrid['driver'],
+                    'port' => $data_mail_sendgrid['port'],
+                    'username' => $data_mail_sendgrid['username'],
+                    'email_id' => $data_mail_sendgrid['email_id'],
+                    'encryption' => $data_mail_sendgrid['encryption'],
+                    'password' => $data_mail_sendgrid['password'],
+                ]),
             ]);
         }
 
         BusinessSetting::where(['type' => 'mail_config'])->update([
             'value' => json_encode([
-                "status" => $request['status'],
-                "name" => $request['name'],
-                "host" => $request['host'],
-                "driver" => $request['driver'],
-                "port" => $request['port'],
-                "username" => $request['username'],
-                "email_id" => $request['email'],
-                "encryption" => $request['encryption'],
-                "password" => $request['password']
-            ])
+                'status' => $request['status'],
+                'name' => $request['name'],
+                'host' => $request['host'],
+                'driver' => $request['driver'],
+                'port' => $request['port'],
+                'username' => $request['username'],
+                'email_id' => $request['email'],
+                'encryption' => $request['encryption'],
+                'password' => $request['password'],
+            ]),
         ]);
         Toastr::success('Configuration updated successfully!');
+
         return back();
     }
 
     public function update_sendgrid(Request $request)
     {
         $request->validate([
-            "status" => 'required',
-            "name" => 'required',
-            "host" => 'required',
-            "driver" => 'required',
-            "port" => 'required',
-            "username" => 'required',
-            "email" => 'required',
-            "encryption" => 'required',
-            "password" => 'required',
+            'status' => 'required',
+            'name' => 'required',
+            'host' => 'required',
+            'driver' => 'required',
+            'port' => 'required',
+            'username' => 'required',
+            'email' => 'required',
+            'encryption' => 'required',
+            'password' => 'required',
         ]);
 
         if ($request['status'] == 1) {
@@ -86,32 +87,33 @@ class MailController extends Controller
 
             BusinessSetting::where(['type' => 'mail_config'])->update([
                 'value' => json_encode([
-                    "status" => 0,
-                    "name" => $data_mail_smtp['name'],
-                    "host" => $data_mail_smtp['host'],
-                    "driver" => $data_mail_smtp['driver'],
-                    "port" => $data_mail_smtp['port'],
-                    "username" => $data_mail_smtp['username'],
-                    "email_id" => $data_mail_smtp['email_id'],
-                    "encryption" => $data_mail_smtp['encryption'],
-                    "password" => $data_mail_smtp['password']
-                ])
+                    'status' => 0,
+                    'name' => $data_mail_smtp['name'],
+                    'host' => $data_mail_smtp['host'],
+                    'driver' => $data_mail_smtp['driver'],
+                    'port' => $data_mail_smtp['port'],
+                    'username' => $data_mail_smtp['username'],
+                    'email_id' => $data_mail_smtp['email_id'],
+                    'encryption' => $data_mail_smtp['encryption'],
+                    'password' => $data_mail_smtp['password'],
+                ]),
             ]);
         }
         BusinessSetting::where(['type' => 'mail_config_sendgrid'])->update([
             'value' => json_encode([
-                "status" => $request['status'],
-                "name" => $request['name'],
-                "host" => $request['host'],
-                "driver" => $request['driver'],
-                "port" => $request['port'],
-                "username" => $request['username'],
-                "email_id" => $request['email'],
-                "encryption" => $request['encryption'],
-                "password" => $request['password']
-            ])
+                'status' => $request['status'],
+                'name' => $request['name'],
+                'host' => $request['host'],
+                'driver' => $request['driver'],
+                'port' => $request['port'],
+                'username' => $request['username'],
+                'email_id' => $request['email'],
+                'encryption' => $request['encryption'],
+                'password' => $request['password'],
+            ]),
         ]);
         Toastr::success('SendGrid Configuration updated successfully!');
+
         return back();
     }
 

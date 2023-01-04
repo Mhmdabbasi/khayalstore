@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_lang']], function () {
-
     Route::group(['prefix' => 'auth', 'namespace' => 'auth'], function () {
         Route::post('register', 'PassportAuthController@register');
         Route::post('login', 'PassportAuthController@login');
@@ -37,22 +36,21 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::get('/', 'ConfigController@configuration');
     });
 
-    Route::group(['prefix' => 'shipping-method','middleware'=>'auth:api'], function () {
+    Route::group(['prefix' => 'shipping-method', 'middleware' => 'auth:api'], function () {
         Route::get('detail/{id}', 'ShippingMethodController@get_shipping_method_info');
         Route::get('by-seller/{id}/{seller_is}', 'ShippingMethodController@shipping_methods_by_seller');
         Route::post('choose-for-order', 'ShippingMethodController@choose_for_order');
         Route::get('chosen', 'ShippingMethodController@chosen_shipping_methods');
 
-        Route::get('check-shipping-type','ShippingMethodController@check_shipping_type');
+        Route::get('check-shipping-type', 'ShippingMethodController@check_shipping_type');
     });
 
-    Route::group(['prefix' => 'cart','middleware'=>'auth:api'], function () {
+    Route::group(['prefix' => 'cart', 'middleware' => 'auth:api'], function () {
         Route::get('/', 'CartController@cart');
         Route::post('add', 'CartController@add_to_cart');
         Route::put('update', 'CartController@update_cart');
         Route::delete('remove', 'CartController@remove_from_cart');
-        Route::delete('remove-all','CartController@remove_all_from_cart');
-
+        Route::delete('remove-all', 'CartController@remove_all_from_cart');
     });
 
     Route::get('faq', 'GeneralController@faq');
@@ -110,10 +108,10 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::get('info', 'CustomerController@info');
         Route::put('update-profile', 'CustomerController@update_profile');
         Route::put('cm-firebase-token', 'CustomerController@update_cm_firebase_token');
-        Route::get('account-delete/{id}','CustomerController@account_delete');
+        Route::get('account-delete/{id}', 'CustomerController@account_delete');
 
-        Route::get('get-restricted-country-list','CustomerController@get_restricted_country_list');
-        Route::get('get-restricted-zip-list','CustomerController@get_restricted_zip_list');
+        Route::get('get-restricted-country-list', 'CustomerController@get_restricted_country_list');
+        Route::get('get-restricted-zip-list', 'CustomerController@get_restricted_zip_list');
 
         Route::group(['prefix' => 'address'], function () {
             Route::get('list', 'CustomerController@address_list');
@@ -165,7 +163,7 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
 
     Route::group(['prefix' => 'order'], function () {
         Route::get('track', 'OrderController@track_order');
-        Route::get('cancel-order','OrderController@order_cancel');
+        Route::get('cancel-order', 'OrderController@order_cancel');
     });
 
     Route::group(['prefix' => 'banners'], function () {
@@ -180,11 +178,9 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::get('all', 'SellerController@get_all_sellers');
     });
 
-    Route::group(['prefix' => 'coupon','middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'coupon', 'middleware' => 'auth:api'], function () {
         Route::get('apply', 'CouponController@apply');
     });
-
-
 
     //map api
     Route::group(['prefix' => 'mapapi'], function () {

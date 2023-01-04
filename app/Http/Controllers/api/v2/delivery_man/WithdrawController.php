@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\v2\delivery_man;
 
 use App\CPU\Convert;
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\DeliverymanWallet;
 use App\Model\WithdrawRequest;
@@ -11,7 +12,6 @@ use App\Traits\CommonTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use function App\CPU\translate;
 
 class WithdrawController extends Controller
 {
@@ -21,8 +21,8 @@ class WithdrawController extends Controller
         $parent_id = $request->delivery_man->seller_id;
 
         $withdrawable_balance = CommonTrait::delivery_man_withdrawable_balance($delivery_man['id']);
-        if(Convert::usd($withdrawable_balance) < $request['amount']){
-            return response()->json(['message'=>translate('withdraw_request_amount_can_not_be_more_than_withdrawable_balance')], 403);
+        if (Convert::usd($withdrawable_balance) < $request['amount']) {
+            return response()->json(['message' => translate('withdraw_request_amount_can_not_be_more_than_withdrawable_balance')], 403);
         }
 
         $wallet = DeliverymanWallet::where('delivery_man_id', $delivery_man['id'])->first();
@@ -30,17 +30,19 @@ class WithdrawController extends Controller
             WithdrawRequest::insert([
                 'delivery_man_id' => $delivery_man['id'],
                 ($parent_id == 0) ? 'admin_id' : 'seller_id' => $parent_id,
-                'amount'            => Convert::usd($request['amount']),
-                'transaction_note'  => $request['note'],
-                'created_at'        => now(),
-                'updated_at'        => now()
+                'amount' => Convert::usd($request['amount']),
+                'transaction_note' => $request['note'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             $wallet->pending_withdraw += Convert::usd($request['amount']);
             $wallet->save();
-            return response()->json(['message'=>translate('Withdraw request sent successfully!')], 200);
+
+            return response()->json(['message' => translate('Withdraw request sent successfully!')], 200);
         }
-        return response()->json(['message'=>translate('Invalid withdraw request')], 403);
+
+        return response()->json(['message' => translate('Invalid withdraw request')], 403);
     }
 
     public function withdraw_list_by_approved(Request $request)
@@ -55,13 +57,13 @@ class WithdrawController extends Controller
         }
         $delivery_man = $request['delivery_man'];
 
-        if($request->type == 'withdrawn'){
+        if ($request->type == 'withdrawn') {
             $approved = 1;
-        }else{
+        } else {
             $approved = 0;
         }
 
-        $withdraw = WithdrawRequest::where(['delivery_man_id'=> $delivery_man->id, 'approved'=>$approved]);
+        $withdraw = WithdrawRequest::where(['delivery_man_id' => $delivery_man->id, 'approved' => $approved]);
 
         if (isset($request->start_date) && isset($request->end_date)) {
             $start_date = Carbon::parse($request['start_date'])->format('Y-m-d 00:00:00');
@@ -75,7 +77,7 @@ class WithdrawController extends Controller
         $data['limit'] = $request['limit'];
         $data['offset'] = $request['offset'];
         $data['withdraws'] = $withdraws->items();
-        return response()->json($data, 200);
 
+        return response()->json($data, 200);
     }
 }

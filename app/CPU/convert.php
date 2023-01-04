@@ -2,8 +2,6 @@
 
 namespace App\CPU;
 
-
-use App\Model\BusinessSetting;
 use App\Model\Currency;
 
 class Convert
@@ -34,6 +32,7 @@ class Convert
         } else {
             $value = floatval($amount);
         }
+
         return round($value, 2);
     }
 

@@ -8,20 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class RefundTransaction extends Model
 {
     use HasFactory;
-    
+
     protected $casts = [
         'order_id' => 'integer',
-        'payment_for'=>'string',
+        'payment_for' => 'string',
         'payer_id' => 'integer',
         'payment_receiver_id' => 'integer',
-        'paid_by'=>'string',
-        'paid_to'=>'string',
-        'payment_method'=>'string',
-        'payment_status'=>'string',
+        'paid_by' => 'string',
+        'paid_to' => 'string',
+        'payment_method' => 'string',
+        'payment_status' => 'string',
         'order_details_id' => 'integer',
         'amount' => 'float',
-        'transaction_type'=>'string',
-        'refund_id'=>'string'
-             
+        'transaction_type' => 'string',
+        'refund_id' => 'string',
+
     ];
 }

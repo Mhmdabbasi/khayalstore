@@ -3,45 +3,40 @@
 namespace App\Http\Controllers\Seller;
 
 use App\CPU\BackEndHelper;
+use App\CPU\Convert;
+use App\CPU\CustomerManager;
 use App\CPU\Helpers;
 use App\CPU\ImageManager;
 use App\CPU\OrderManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
-use App\Model\Admin;
-use App\Model\AdminWallet;
 use App\Model\BusinessSetting;
 use App\Model\DeliveryMan;
 use App\Model\DeliveryManTransaction;
 use App\Model\DeliverymanWallet;
 use App\Model\Order;
-use App\Model\Seller;
 use App\Model\OrderDetail;
-use App\Model\Product;
-use App\Model\SellerWallet;
+use App\Model\Seller;
 use App\Model\ShippingAddress;
-use App\Model\ShippingMethod;
 use App\Traits\CommonTrait;
-use Barryvdh\DomPDF\Facade as PDF;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
-use function App\CPU\translate;
 use Rap2hpoutre\FastExcel\FastExcel;
-use App\CPU\CustomerManager;
-use App\CPU\Convert;
 
 class OrderController extends Controller
 {
     use CommonTrait;
+
     public function list(Request $request, $status)
     {
         $seller = auth('seller')->user();
         $sellerId = $seller->id;
 
-        Order::where(['seller_id' => $sellerId,'checked' => 0])->update(['checked' => 1]);
+        Order::where(['seller_id' => $sellerId, 'checked' => 0])->update(['checked' => 1]);
 
-        $seller_pos=\App\Model\BusinessSetting::where('type','seller_pos')->first()->value;
+        $seller_pos = \App\Model\BusinessSetting::where('type', 'seller_pos')->first()->value;
 
         $search = $request['search'];
         $filter = $request['filter'];
@@ -51,22 +46,22 @@ class OrderController extends Controller
         $key = $request['search'] ? explode(' ', $request['search']) : '';
         $delivery_man_id = $request['delivery_man_id'];
 
-        $orders = Order::with(['customer','shipping','shippingAddress','delivery_man','billingAddress'])
-            ->where('seller_is','seller')
-            ->where(['seller_id'=>$sellerId])
-            ->when($filter == 'POS', function ($q){
+        $orders = Order::with(['customer', 'shipping', 'shippingAddress', 'delivery_man', 'billingAddress'])
+            ->where('seller_is', 'seller')
+            ->where(['seller_id' => $sellerId])
+            ->when($filter == 'POS', function ($q) {
                 $q->where('order_type', 'POS');
             })
-            ->when($status !='all', function($q) use($status){
-                $q->where(function($query) use ($status){
-                    $query->orWhere('order_status',$status);
+            ->when($status != 'all', function ($q) use ($status) {
+                $q->where(function ($query) use ($status) {
+                    $query->orWhere('order_status', $status);
                 });
             })
-            ->when(!empty($from) && !empty($to),function($query) use($from,$to){
-                $query->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
+            ->when(! empty($from) && ! empty($to), function ($query) use ($from, $to) {
+                $query->whereBetween('created_at', [$from.' 00:00:00', $to.' 23:59:59']);
             })
-            ->when($request->has('search') && $search!=null,function ($q) use ($key) {
-                $q->where(function($qq) use ($key){
+            ->when($request->has('search') && $search != null, function ($q) use ($key) {
+                $q->where(function ($qq) use ($key) {
                     foreach ($key as $value) {
                         $qq->where('id', 'like', "%{$value}%")
                             ->orWhere('order_status', 'like', "%{$value}%")
@@ -74,43 +69,43 @@ class OrderController extends Controller
                     }
                 });
             })
-            ->when($delivery_man_id, function ($q) use($delivery_man_id){
-                $q->where(['delivery_man_id'=> $delivery_man_id, 'seller_is'=>'seller']);
+            ->when($delivery_man_id, function ($q) use ($delivery_man_id) {
+                $q->where(['delivery_man_id' => $delivery_man_id, 'seller_is' => 'seller']);
             })
             ->latest()
             ->paginate(Helpers::pagination_limit())
-            ->appends(['search'=>$request['search'],'filter'=>$request['filter'],'from'=>$request['from'],'to'=>$request['to'],'delivery_man_id'=>$request['delivery_man_id']]);
+            ->appends(['search' => $request['search'], 'filter' => $request['filter'], 'from' => $request['from'], 'to' => $request['to'], 'delivery_man_id' => $request['delivery_man_id']]);
 
-        $pending_query = Order::where(['seller_is'=>'seller','order_status'=>'pending','seller_id'=>$sellerId]);
+        $pending_query = Order::where(['seller_is' => 'seller', 'order_status' => 'pending', 'seller_id' => $sellerId]);
         $pending = $this->common_query_status_count($pending_query, $request);
 
-        $confirmed_query = Order::where(['seller_is'=>'seller','order_status'=>'confirmed','seller_id'=>$sellerId]);
+        $confirmed_query = Order::where(['seller_is' => 'seller', 'order_status' => 'confirmed', 'seller_id' => $sellerId]);
         $confirmed = $this->common_query_status_count($confirmed_query, $request);
 
-        $processing_query = Order::where(['seller_is'=>'seller','order_status'=>'processing','seller_id'=>$sellerId]);
+        $processing_query = Order::where(['seller_is' => 'seller', 'order_status' => 'processing', 'seller_id' => $sellerId]);
         $processing = $this->common_query_status_count($processing_query, $request);
 
-        $out_for_delivery_query = Order::where(['seller_is'=>'seller','order_status'=>'out_for_delivery','seller_id'=>$sellerId]);
+        $out_for_delivery_query = Order::where(['seller_is' => 'seller', 'order_status' => 'out_for_delivery', 'seller_id' => $sellerId]);
         $out_for_delivery = $this->common_query_status_count($out_for_delivery_query, $request);
 
-        $delivered_query = Order::where(['seller_is'=>'seller','order_status'=>'delivered','seller_id'=>$sellerId]);
+        $delivered_query = Order::where(['seller_is' => 'seller', 'order_status' => 'delivered', 'seller_id' => $sellerId]);
         $delivered = $this->common_query_status_count($delivered_query, $request);
 
-        $canceled_query = Order::where(['seller_is'=>'seller','order_status'=>'canceled','seller_id'=>$sellerId]);
+        $canceled_query = Order::where(['seller_is' => 'seller', 'order_status' => 'canceled', 'seller_id' => $sellerId]);
         $canceled = $this->common_query_status_count($canceled_query, $request);
 
-        $returned_query = Order::where(['seller_is'=>'seller','order_status'=>'returned','seller_id'=>$sellerId]);
+        $returned_query = Order::where(['seller_is' => 'seller', 'order_status' => 'returned', 'seller_id' => $sellerId]);
         $returned = $this->common_query_status_count($returned_query, $request);
 
-        $failed_query = Order::where(['seller_is'=>'seller','order_status'=>'failed','seller_id'=>$sellerId]);
+        $failed_query = Order::where(['seller_is' => 'seller', 'order_status' => 'failed', 'seller_id' => $sellerId]);
         $failed = $this->common_query_status_count($failed_query, $request);
 
         return view(
             'seller-views.order.list',
             compact(
                 'orders',
-                'search','from','to',
-                'status','sellerId',
+                'search', 'from', 'to',
+                'status', 'sellerId',
                 'filter',
                 'pending',
                 'confirmed',
@@ -126,21 +121,22 @@ class OrderController extends Controller
         );
     }
 
-    public function common_query_status_count($query, $request){
+    public function common_query_status_count($query, $request)
+    {
         $search = $request['search'];
         $filter = $request['filter'];
         $from = $request['from'];
         $to = $request['to'];
         $key = $request['search'] ? explode(' ', $request['search']) : '';
 
-        return $query->when($filter == 'POS', function ($q){
-                $q->where('order_type', 'POS');
+        return $query->when($filter == 'POS', function ($q) {
+            $q->where('order_type', 'POS');
+        })
+            ->when(! empty($from) && ! empty($to), function ($query) use ($from, $to) {
+                $query->whereBetween('created_at', [$from.' 00:00:00', $to.' 23:59:59']);
             })
-            ->when(!empty($from) && !empty($to),function($query) use($from,$to){
-                $query->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
-            })
-            ->when($request->has('search') && $search!=null,function ($q) use ($key) {
-                $q->where(function($qq) use ($key){
+            ->when($request->has('search') && $search != null, function ($q) use ($key) {
+                $q->where(function ($qq) use ($key) {
                     foreach ($key as $value) {
                         $qq->where('id', 'like', "%{$value}%")
                             ->orWhere('order_status', 'like', "%{$value}%")
@@ -159,8 +155,8 @@ class OrderController extends Controller
             ->where('id', $id)->first();
 
         $physical_product = false;
-        foreach($order->details as $product){
-            if(isset($product->product) && $product->product->product_type == 'physical'){
+        foreach ($order->details as $product) {
+            if (isset($product->product) && $product->product->product_type == 'physical') {
                 $physical_product = true;
             }
         }
@@ -168,7 +164,7 @@ class OrderController extends Controller
         $total_delivered = Order::where(['seller_id' => $sellerId, 'order_status' => 'delivered'])->count();
 
         $shipping_method = Helpers::get_business_settings('shipping_method');
-        $delivery_men = DeliveryMan::where('is_active',1)->when($shipping_method == 'inhouse_shipping', function ($query) {
+        $delivery_men = DeliveryMan::where('is_active', 1)->when($shipping_method == 'inhouse_shipping', function ($query) {
             $query->where(['seller_id' => 0]);
         })->when($shipping_method == 'sellerwise_shipping', function ($query) use ($order) {
             $query->where(['seller_id' => $order['seller_id']]);
@@ -176,9 +172,9 @@ class OrderController extends Controller
 
         $shipping_address = ShippingAddress::find($order->shipping_address);
 
-        if($order->order_type == 'default_type') {
+        if ($order->order_type == 'default_type') {
             return view('seller-views.order.order-details', compact('shipping_address', 'order', 'delivery_men', 'shipping_method', 'total_delivered', 'physical_product'));
-        }else{
+        } else {
             return view('seller-views.pos.order.order-details', compact('order', 'physical_product'));
         }
     }
@@ -189,7 +185,7 @@ class OrderController extends Controller
     public function digital_file_upload_after_sell(Request $request)
     {
         $request->validate([
-            'digital_file_after_sell'    => 'required|mimes:jpg,jpeg,png,gif,zip,pdf'
+            'digital_file_after_sell' => 'required|mimes:jpg,jpeg,png,gif,zip,pdf',
         ], [
             'digital_file_after_sell.required' => 'Digital file upload after sell is required',
             'digital_file_after_sell.mimes' => 'Digital file upload after sell upload must be a file of type: pdf, zip, jpg, jpeg, png, gif.',
@@ -198,11 +194,12 @@ class OrderController extends Controller
         $order_details = OrderDetail::find($request->order_id);
         $order_details->digital_file_after_sell = ImageManager::update('product/digital-product/', $order_details->digital_file_after_sell, $request->digital_file_after_sell->getClientOriginalExtension(), $request->file('digital_file_after_sell'));
 
-        if($order_details->save()){
+        if ($order_details->save()) {
             Toastr::success('Digital file upload successfully!');
-        }else{
+        } else {
             Toastr::error('Digital file upload failed!');
         }
+
         return back();
     }
 
@@ -212,7 +209,7 @@ class OrderController extends Controller
             return response()->json([], 401);
         }
         $order = Order::where(['seller_id' => auth('seller')->id(), 'id' => $order_id])->first();
-        if($order->order_status == 'delivered') {
+        if ($order->order_status == 'delivered') {
             return response()->json(['status' => false], 200);
         }
         $order->delivery_man_id = $delivery_man_id;
@@ -223,7 +220,7 @@ class OrderController extends Controller
 
         $fcm_token = isset($order->delivery_man) ? $order->delivery_man->fcm_token : null;
         $value = Helpers::order_status_update_message('del_assign');
-        if(!empty($fcm_token)) {
+        if (! empty($fcm_token)) {
             try {
                 if ($value) {
                     $data = [
@@ -246,10 +243,10 @@ class OrderController extends Controller
 
     public function generate_invoice($id)
     {
-        $company_phone =BusinessSetting::where('type', 'company_phone')->first()->value;
-        $company_email =BusinessSetting::where('type', 'company_email')->first()->value;
-        $company_name =BusinessSetting::where('type', 'company_name')->first()->value;
-        $company_web_logo =BusinessSetting::where('type', 'company_web_logo')->first()->value;
+        $company_phone = BusinessSetting::where('type', 'company_phone')->first()->value;
+        $company_email = BusinessSetting::where('type', 'company_email')->first()->value;
+        $company_name = BusinessSetting::where('type', 'company_name')->first()->value;
+        $company_web_logo = BusinessSetting::where('type', 'company_web_logo')->first()->value;
 
         $sellerId = auth('seller')->id();
         $seller = Seller::find($sellerId)->gst;
@@ -260,12 +257,11 @@ class OrderController extends Controller
             ->with('seller')
             ->where('id', $id)->first();
 
-        $data["email"] = $order->customer !=null?$order->customer["email"]:\App\CPU\translate('email_not_found');
-        $data["client_name"] = $order->customer !=null? $order->customer["f_name"] . ' ' . $order->customer["l_name"]:\App\CPU\translate('customer_not_found');
-        $data["order"] = $order;
+        $data['email'] = $order->customer != null ? $order->customer['email'] : \App\CPU\translate('email_not_found');
+        $data['client_name'] = $order->customer != null ? $order->customer['f_name'].' '.$order->customer['l_name'] : \App\CPU\translate('customer_not_found');
+        $data['order'] = $order;
 
-
-      $mpdf_view = \View::make('seller-views.order.invoice', compact('order', 'seller', 'company_phone', 'company_email', 'company_name', 'company_web_logo'));
+        $mpdf_view = \View::make('seller-views.order.invoice', compact('order', 'seller', 'company_phone', 'company_email', 'company_name', 'company_web_logo'));
         Helpers::gen_mpdf($mpdf_view, 'order_invoice_', $order->id);
     }
 
@@ -274,15 +270,15 @@ class OrderController extends Controller
         if ($request->ajax()) {
             $order = Order::find($request->id);
 
-            if(!isset($order->customer))
-            {
-                return response()->json(['customer_status'=>0],200);
+            if (! isset($order->customer)) {
+                return response()->json(['customer_status' => 0], 200);
             }
 
             $order = Order::find($request->id);
             $order->payment_status = $request->payment_status;
             $order->save();
             $data = $request->payment_status;
+
             return response()->json($data);
         }
     }
@@ -291,17 +287,15 @@ class OrderController extends Controller
     {
         $order = Order::find($request->id);
 
-        if(!isset($order->customer))
-        {
-            return response()->json(['customer_status'=>0],200);
+        if (! isset($order->customer)) {
+            return response()->json(['customer_status' => 0], 200);
         }
 
         $wallet_status = Helpers::get_business_settings('wallet_status');
         $loyalty_point_status = Helpers::get_business_settings('loyalty_point_status');
 
-        if($request->order_status=='delivered' && $order->payment_status !='paid'){
-
-            return response()->json(['payment_status'=>0],200);
+        if ($request->order_status == 'delivered' && $order->payment_status != 'paid') {
+            return response()->json(['payment_status' => 0], 200);
         }
         $fcm_token = isset($order->customer) ? $order->customer->cm_firebase_token : null;
         $value = Helpers::order_status_update_message($request->order_status);
@@ -309,7 +303,7 @@ class OrderController extends Controller
         if ($order->order_status == 'delivered') {
             return response()->json(['success' => 0, 'message' => 'order is already delivered.'], 200);
         }
-        if (!empty($fcm_token)) {
+        if (! empty($fcm_token)) {
             try {
                 if ($value) {
                     $data = [
@@ -327,20 +321,20 @@ class OrderController extends Controller
 
         try {
             $fcm_token_delivery_man = $order->delivery_man->fcm_token;
-            if ($request->order_status == 'canceled' && $value != null && !empty($fcm_token_delivery_man)) {
+            if ($request->order_status == 'canceled' && $value != null && ! empty($fcm_token_delivery_man)) {
                 $data = [
                     'title' => translate('order'),
                     'description' => $value,
                     'order_id' => $order['id'],
                     'image' => '',
                 ];
-                if($order->delivery_man_id) {
+                if ($order->delivery_man_id) {
                     self::add_deliveryman_push_notification($data, $order['delivery_man_id']);
                 }
                 Helpers::send_push_notif_to_device($fcm_token_delivery_man, $data);
             }
-        } catch (\Exception $e) {}
-
+        } catch (\Exception $e) {
+        }
 
         $order->order_status = $request->order_status;
         OrderManager::stock_update_on_order_status_change($order, $request->order_status);
@@ -348,16 +342,15 @@ class OrderController extends Controller
         if ($request->order_status == 'delivered' && $order['seller_id'] != null) {
             OrderManager::wallet_manage_on_order_status_change($order, 'seller');
             OrderDetail::where('order_id', $order->id)->update(
-                ['delivery_status'=>'delivered']
+                ['delivery_status' => 'delivered']
             );
         }
 
         $order->save();
 
-        if($wallet_status == 1 && $loyalty_point_status == 1)
-        {
-            if($request->order_status == 'delivered' && $order->payment_status =='paid'){
-                CustomerManager::create_loyalty_point_transaction($order->customer_id, $order->id, Convert::default($order->order_amount-$order->shipping_cost), 'order_place');
+        if ($wallet_status == 1 && $loyalty_point_status == 1) {
+            if ($request->order_status == 'delivered' && $order->payment_status == 'paid') {
+                CustomerManager::create_loyalty_point_transaction($order->customer_id, $order->id, Convert::default($order->order_amount - $order->shipping_cost), 'order_place');
             }
         }
 
@@ -379,14 +372,14 @@ class OrderController extends Controller
                 $dm_wallet->save();
             }
 
-            if($order->deliveryman_charge && $request->order_status == 'delivered'){
+            if ($order->deliveryman_charge && $request->order_status == 'delivered') {
                 DeliveryManTransaction::create([
                     'delivery_man_id' => $order->delivery_man_id,
                     'user_id' => auth('seller')->id(),
                     'user_type' => 'seller',
                     'credit' => BackEndHelper::currency_to_usd($order->deliveryman_charge) ?? 0,
                     'transaction_id' => Uuid::uuid4(),
-                    'transaction_type' => 'deliveryman_charge'
+                    'transaction_type' => 'deliveryman_charge',
                 ]);
             }
         }
@@ -394,10 +387,12 @@ class OrderController extends Controller
         CommonTrait::add_order_status_history($request->id, auth('seller')->id(), $request->order_status, 'seller');
 
         $data = $request->order_status;
+
         return response()->json($data);
     }
 
-    public function amount_date_update(Request $request){
+    public function amount_date_update(Request $request)
+    {
         $field_name = $request->field_name;
         $field_val = $request->field_val;
         $user_id = auth('seller')->id();
@@ -408,20 +403,21 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            if($field_name == 'expected_delivery_date'){
+            if ($field_name == 'expected_delivery_date') {
                 CommonTrait::add_expected_delivery_date_history($request->order_id, $user_id, $field_val, 'seller');
             }
             $order->save();
 
             DB::commit();
-        }catch(\Exception $ex){
+        } catch (\Exception $ex) {
             DB::rollback();
+
             return response()->json(['status' => false], 403);
         }
 
         $fcm_token = isset($order->delivery_man) ? $order->delivery_man->fcm_token : null;
-        if($field_name == 'expected_delivery_date' && !empty($fcm_token)) {
-            $value = Helpers::order_status_update_message($field_name) . " ID: " . $order['id'];
+        if ($field_name == 'expected_delivery_date' && ! empty($fcm_token)) {
+            $value = Helpers::order_status_update_message($field_name).' ID: '.$order['id'];
             try {
                 if ($value != null) {
                     $data = [
@@ -440,6 +436,7 @@ class OrderController extends Controller
                 return response()->json(['status' => false], 200);
             }
         }
+
         return response()->json(['status' => true], 200);
     }
 
@@ -455,6 +452,7 @@ class OrderController extends Controller
         $order->save();
 
         Toastr::success(\App\CPU\translate('updated_successfully!'));
+
         return back();
     }
 
@@ -470,23 +468,23 @@ class OrderController extends Controller
 
         $key = $request['search'] ? explode(' ', $request['search']) : '';
 
-        $orders = Order::with(['customer','shipping','shippingAddress','delivery_man','billingAddress'])
-            ->where('seller_is','seller')
-            ->where(['seller_id'=>$sellerId])
-            ->when($filter == 'POS', function ($q){
+        $orders = Order::with(['customer', 'shipping', 'shippingAddress', 'delivery_man', 'billingAddress'])
+            ->where('seller_is', 'seller')
+            ->where(['seller_id' => $sellerId])
+            ->when($filter == 'POS', function ($q) {
                 $q->where('order_type', 'POS');
             })
-            ->when($status !='all', function($q) use($status){
-                $q->where(function($query) use ($status){
-                    $query->orWhere('order_status',$status)
-                        ->orWhere('payment_status',$status);
+            ->when($status != 'all', function ($q) use ($status) {
+                $q->where(function ($query) use ($status) {
+                    $query->orWhere('order_status', $status)
+                        ->orWhere('payment_status', $status);
                 });
             })
-            ->when(!empty($from) && !empty($to),function($query) use($from,$to){
-                $query->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
+            ->when(! empty($from) && ! empty($to), function ($query) use ($from, $to) {
+                $query->whereBetween('created_at', [$from.' 00:00:00', $to.' 23:59:59']);
             })
-            ->when($request->has('search') && $search!=null,function ($q) use ($key) {
-                $q->where(function($qq) use ($key){
+            ->when($request->has('search') && $search != null, function ($q) use ($key) {
+                $q->where(function ($qq) use ($key) {
                     foreach ($key as $value) {
                         $qq->where('id', 'like', "%{$value}%")
                             ->orWhere('order_status', 'like', "%{$value}%")
@@ -496,32 +494,32 @@ class OrderController extends Controller
             })
             ->latest()->get();
 
-        if ($orders->count()==0) {
+        if ($orders->count() == 0) {
             Toastr::warning(\App\CPU\translate('Data is Not available !!!'));
+
             return back();
         }
 
         $storage = [];
 
         foreach ($orders as $item) {
-
             $order_amount = $item->order_amount;
             $discount_amount = $item->discount_amount;
             $shipping_cost = $item->shipping_cost;
             $extra_discount = $item->extra_discount;
 
-            if($item->order_status == 'processing'){
+            if ($item->order_status == 'processing') {
                 $order_status = 'packaging';
-            }elseif($item->order_status == 'failed'){
+            } elseif ($item->order_status == 'failed') {
                 $order_status = 'Failed To Deliver';
-            }else{
+            } else {
                 $order_status = $item->order_status;
             }
 
             $storage[] = [
-                'order_id'=>$item->id,
+                'order_id' => $item->id,
                 'Customer Id' => $item->customer_id,
-                'Customer Name'=> isset($item->customer) ? $item->customer->f_name. ' '.$item->customer->l_name:'not found',
+                'Customer Name' => isset($item->customer) ? $item->customer->f_name.' '.$item->customer->l_name : 'not found',
                 'Order Group Id' => $item->order_group_id,
                 'Order Status' => $order_status,
                 'Order Amount' => Helpers::currency_converter($order_amount),
@@ -535,17 +533,17 @@ class OrderController extends Controller
                 'Payment Method' => $item->payment_method,
                 'Transaction_ref' => $item->transaction_ref,
                 'Verification Code' => $item->verification_code,
-                'Billing Address' => isset($item->billingAddress)? $item->billingAddress->address:'not found',
+                'Billing Address' => isset($item->billingAddress) ? $item->billingAddress->address : 'not found',
                 'Billing Address Data' => $item->billing_address_data,
                 'Shipping Type' => $item->shipping_type,
-                'Shipping Address' => isset($item->shippingAddress)? $item->shippingAddress->address:'not found',
+                'Shipping Address' => isset($item->shippingAddress) ? $item->shippingAddress->address : 'not found',
                 'Shipping Method Id' => $item->shipping_method_id,
-                'Shipping Method Name' => isset($item->shipping)? $item->shipping->title:'not found',
+                'Shipping Method Name' => isset($item->shipping) ? $item->shipping->title : 'not found',
                 'Shipping Cost' => Helpers::currency_converter($shipping_cost),
                 'Seller Id' => $item->seller_id,
-                'Seller Name' => isset($item->seller)? $item->seller->f_name. ' '.$item->seller->l_name:'not found',
-                'Seller Email'  => isset($item->seller)? $item->seller->email:'not found',
-                'Seller Phone'  => isset($item->seller)? $item->seller->phone:'not found',
+                'Seller Name' => isset($item->seller) ? $item->seller->f_name.' '.$item->seller->l_name : 'not found',
+                'Seller Email' => isset($item->seller) ? $item->seller->email : 'not found',
+                'Seller Phone' => isset($item->seller) ? $item->seller->phone : 'not found',
                 'Seller Is' => $item->seller_is,
                 'Shipping Address Data' => $item->shipping_address_data,
                 'Delivery Type' => $item->delivery_type,
@@ -557,8 +555,6 @@ class OrderController extends Controller
             ];
         }
 
-
-            return (new FastExcel($storage))->download('Order_All_details.xlsx');
-
+        return (new FastExcel($storage))->download('Order_All_details.xlsx');
     }
 }

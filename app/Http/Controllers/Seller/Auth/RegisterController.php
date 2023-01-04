@@ -2,43 +2,44 @@
 
 namespace App\Http\Controllers\Seller\Auth;
 
+use App\CPU\Helpers;
 use App\CPU\ImageManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Seller;
 use App\Model\Shop;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\CPU\Helpers;
-use function App\CPU\translate;
 
 class RegisterController extends Controller
 {
     public function create()
     {
-        $business_mode=Helpers::get_business_settings('business_mode');
-        $seller_registration=Helpers::get_business_settings('seller_registration');
-        if((isset($business_mode) && $business_mode=='single') || (isset($seller_registration) && $seller_registration==0))
-        {
+        $business_mode = Helpers::get_business_settings('business_mode');
+        $seller_registration = Helpers::get_business_settings('seller_registration');
+        if ((isset($business_mode) && $business_mode == 'single') || (isset($seller_registration) && $seller_registration == 0)) {
             Toastr::warning(translate('access_denied!!'));
+
             return redirect('/');
         }
+
         return view('seller-views.auth.register');
     }
 
     public function store(Request $request)
     {
         $this->validate($request, [
-            'image'         => 'required|mimes: jpg,jpeg,png,gif',
-            'logo'          => 'required|mimes: jpg,jpeg,png,gif',
-            'banner'        => 'required|mimes: jpg,jpeg,png,gif',
-            'email'         => 'required|unique:sellers',
-            'shop_address'  => 'required',
-            'f_name'        => 'required',
-            'l_name'        => 'required',
-            'shop_name'     => 'required',
-            'phone'         => 'required',
-            'password'      => 'required|min:8',
+            'image' => 'required|mimes: jpg,jpeg,png,gif',
+            'logo' => 'required|mimes: jpg,jpeg,png,gif',
+            'banner' => 'required|mimes: jpg,jpeg,png,gif',
+            'email' => 'required|unique:sellers',
+            'shop_address' => 'required',
+            'f_name' => 'required',
+            'l_name' => 'required',
+            'shop_name' => 'required',
+            'phone' => 'required',
+            'password' => 'required|min:8',
         ]);
 
         DB::transaction(function ($r) use ($request) {
@@ -49,7 +50,7 @@ class RegisterController extends Controller
             $seller->email = $request->email;
             $seller->image = ImageManager::upload('seller/', 'png', $request->file('image'));
             $seller->password = bcrypt($request->password);
-            $seller->status =  $request->status == 'approved'?'approved': "pending";
+            $seller->status = $request->status == 'approved' ? 'approved' : 'pending';
             $seller->save();
 
             $shop = new Shop();
@@ -72,17 +73,16 @@ class RegisterController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
         });
 
-        if($request->status == 'approved'){
+        if ($request->status == 'approved') {
             Toastr::success('Shop apply successfully!');
+
             return back();
-        }else{
+        } else {
             Toastr::success('Shop apply successfully!');
+
             return redirect()->route('seller.auth.login');
         }
-
-
     }
 }

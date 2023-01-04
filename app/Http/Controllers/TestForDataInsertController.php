@@ -2,97 +2,83 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Model\Admin;
+use App\CPU\Helpers;
+use App\CPU\OrderManager;
 use App\Model\AdminWallet;
-use App\Model\Cart;
-use App\Model\CartShipping;
 use App\Model\Order;
 use App\Model\OrderDetail;
-use App\Model\OrderTransaction;
 use App\Model\Product;
-use App\Model\Seller;
-use App\Model\SellerWallet;
 use App\Model\ShippingAddress;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use App\CPU\Helpers;
 use App\User;
-use App\CPU\OrderManager;
+use Illuminate\Support\Facades\DB;
 
 class TestForDataInsertController extends Controller
 {
     public function generate_order()
-    {   
-        for($j=0; $j<4 ;$j++)
-        {
-            for($i=0; $i<100;$i++)
-            {
+    {
+        for ($j = 0; $j < 4; $j++) {
+            for ($i = 0; $i < 100; $i++) {
                 $order_id = 100000 + Order::all()->count() + 1;
-                
-                $user_id= rand(1, 14);
+
+                $user_id = rand(1, 14);
                 $user = User::find($user_id);
 
-                $shipping_address_id = ShippingAddress::where('customer_id',$user->id)->first()->id;
+                $shipping_address_id = ShippingAddress::where('customer_id', $user->id)->first()->id;
                 $billing_address_id = $shipping_address_id;
                 $coupon_code = 'xyz';
                 $discount = 10;
                 $order_note = 'fjkskjfd';
 
-                
-                $product_id = rand(1,19);
-                    $product = Product::where(['id' => $product_id])->first();
-                    $product_price = $product->unit_price *1;
-                    $order_details = new OrderDetail;
-                    
-                    $order_details->order_id = $order_id;
-                    $order_details->product_id = $product->id;
-                    $order_details->seller_id = $product->user_id;
-                    $order_details->product_details = $product;
-                    $order_details->qty = 1;
-                    $order_details->price = $product->unit_price;
-                    $order_details->tax = $product->tax * 1;
-                    $order_details->discount = 10 * 1;
-                    $order_details->discount_type = 'discount_on_product';
-                    $order_details->variant = 0;
-                    $order_details->variation = $product->variation;
-                    $order_details->delivery_status = 'pending';
-                    $order_details->shipping_method_id = null;
-                    $order_details->payment_status = 'unpaid';
-                    $order_details->created_at = now();
-                    $order_details->updated_at = now();
-                    $order_details->save();
-                
-                $order_new = new Order;
-               
-                    $order_new->id = $order_id;
-                    $order_new->verification_code = rand(100000, 999999);
-                    $order_new->customer_id = $user->id;
-                    $order_new->seller_id = $product->user_id;
-                    $order_new->seller_is = $product->added_by;
-                    $order_new->customer_type = 'customer';
-                    $order_new->payment_status = 'unpaid';
-                    $order_new->order_status = 'pending';
-                    $order_new->payment_method = 'cash_on_delivery';
-                    $order_new->transaction_ref = '';
-                    $order_new->order_group_id = rand(1,10000);
-                    $order_new->discount_amount = $discount;
-                    $order_new->discount_type = 'coupon_discount';
-                    $order_new->coupon_code = $coupon_code;
-                    $order_new->order_amount =  $product_price - $discount;
-                    $order_new->shipping_address = $shipping_address_id;
-                    $order_new->shipping_address_data = ShippingAddress::find($shipping_address_id);
-                    $order_new->billing_address = $shipping_address_id;
-                    $order_new->billing_address_data = ShippingAddress::find($shipping_address_id);
-                    $order_new->shipping_cost = 5;
-                    $order_new->shipping_method_id = 2;
-                    $order_new->created_at = now();
-                    $order_new->updated_at = now();
-                    $order_new->order_note = $order_note;
-                    $order_new->save();
+                $product_id = rand(1, 19);
+                $product = Product::where(['id' => $product_id])->first();
+                $product_price = $product->unit_price * 1;
+                $order_details = new OrderDetail;
 
-                
+                $order_details->order_id = $order_id;
+                $order_details->product_id = $product->id;
+                $order_details->seller_id = $product->user_id;
+                $order_details->product_details = $product;
+                $order_details->qty = 1;
+                $order_details->price = $product->unit_price;
+                $order_details->tax = $product->tax * 1;
+                $order_details->discount = 10 * 1;
+                $order_details->discount_type = 'discount_on_product';
+                $order_details->variant = 0;
+                $order_details->variation = $product->variation;
+                $order_details->delivery_status = 'pending';
+                $order_details->shipping_method_id = null;
+                $order_details->payment_status = 'unpaid';
+                $order_details->created_at = now();
+                $order_details->updated_at = now();
+                $order_details->save();
+
+                $order_new = new Order;
+
+                $order_new->id = $order_id;
+                $order_new->verification_code = rand(100000, 999999);
+                $order_new->customer_id = $user->id;
+                $order_new->seller_id = $product->user_id;
+                $order_new->seller_is = $product->added_by;
+                $order_new->customer_type = 'customer';
+                $order_new->payment_status = 'unpaid';
+                $order_new->order_status = 'pending';
+                $order_new->payment_method = 'cash_on_delivery';
+                $order_new->transaction_ref = '';
+                $order_new->order_group_id = rand(1, 10000);
+                $order_new->discount_amount = $discount;
+                $order_new->discount_type = 'coupon_discount';
+                $order_new->coupon_code = $coupon_code;
+                $order_new->order_amount = $product_price - $discount;
+                $order_new->shipping_address = $shipping_address_id;
+                $order_new->shipping_address_data = ShippingAddress::find($shipping_address_id);
+                $order_new->billing_address = $shipping_address_id;
+                $order_new->billing_address_data = ShippingAddress::find($shipping_address_id);
+                $order_new->shipping_cost = 5;
+                $order_new->shipping_method_id = 2;
+                $order_new->created_at = now();
+                $order_new->updated_at = now();
+                $order_new->order_note = $order_note;
+                $order_new->save();
 
                 if (1) {
                     $order = Order::find($order_id);
@@ -136,6 +122,6 @@ class TestForDataInsertController extends Controller
             }
         }
 
-        return "done";
+        return 'done';
     }
 }

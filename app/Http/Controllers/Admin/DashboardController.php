@@ -10,14 +10,11 @@ use App\Model\OrderDetail;
 use App\Model\OrderTransaction;
 use App\Model\Product;
 use App\Model\SellerWallet;
-use App\Model\SellerWalletHistory;
 use App\Model\Shop;
-use App\Model\WithdrawRequest;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Session;
 
 class DashboardController extends Controller
 {
@@ -27,7 +24,7 @@ class DashboardController extends Controller
             ->select('product_id', DB::raw('SUM(qty) as count'))
             ->where('delivery_status', 'delivered')
             ->groupBy('product_id')
-            ->orderBy("count", 'desc')
+            ->orderBy('count', 'desc')
             ->take(6)
             ->get();
 
@@ -35,48 +32,47 @@ class DashboardController extends Controller
             ->groupBy('product_id')
             ->select(['product_id',
                 DB::raw('AVG(reviews.rating) as ratings_average'),
-                DB::raw('count(*) as total')
+                DB::raw('count(*) as total'),
             ])
             ->orderBy('total', 'desc')
             ->take(6)
             ->get();
 
-
         $top_store_by_earning = SellerWallet::select('seller_id', DB::raw('SUM(total_earning) as count'))
-            ->whereHas('seller', function ($query){
+            ->whereHas('seller', function ($query) {
                 return $query;
             })
             ->groupBy('seller_id')
-            ->orderBy("count", 'desc')
+            ->orderBy('count', 'desc')
             ->take(6)
             ->get();
 
         $top_customer = Order::with(['customer'])
             ->select('customer_id', DB::raw('COUNT(customer_id) as count'))
-            ->whereHas('customer',function ($q){
-                $q->where('id','!=',0);
+            ->whereHas('customer', function ($q) {
+                $q->where('id', '!=', 0);
             })
             ->groupBy('customer_id')
-            ->orderBy("count", 'desc')
+            ->orderBy('count', 'desc')
             ->take(6)
             ->get();
 
-        $top_store_by_order_received = Order::whereHas('seller', function ($query){
-                return $query;
-            })
+        $top_store_by_order_received = Order::whereHas('seller', function ($query) {
+            return $query;
+        })
             ->where('seller_is', 'seller')
             ->select('seller_id', DB::raw('COUNT(id) as count'))
             ->groupBy('seller_id')
-            ->orderBy("count", 'desc')
+            ->orderBy('count', 'desc')
             ->take(6)
             ->get();
 
         $top_deliveryman = Order::with(['delivery_man'])
             ->select('delivery_man_id', DB::raw('COUNT(delivery_man_id) as count'))
-            ->where(['seller_is'=> 'admin','order_status'=>'delivered'])
+            ->where(['seller_is' => 'admin', 'order_status' => 'delivered'])
             ->whereNotNull('delivery_man_id')
             ->groupBy('delivery_man_id')
-            ->orderBy("count", 'desc')
+            ->orderBy('count', 'desc')
             ->take(6)
             ->get();
 
@@ -86,7 +82,7 @@ class DashboardController extends Controller
         $inhouse_data = [];
         $inhouse_earning = OrderTransaction::where([
             'seller_is' => 'admin',
-            'status' => 'disburse'
+            'status' => 'disburse',
         ])->select(
             DB::raw('IFNULL(sum(seller_amount),0) as sums'),
             DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -103,7 +99,7 @@ class DashboardController extends Controller
         $seller_data = [];
         $seller_earnings = OrderTransaction::where([
             'seller_is' => 'seller',
-            'status' => 'disburse'
+            'status' => 'disburse',
         ])->select(
             DB::raw('IFNULL(sum(seller_amount),0) as sums'),
             DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -119,7 +115,7 @@ class DashboardController extends Controller
 
         $commission_data = [];
         $commission_earnings = OrderTransaction::where([
-            'status' => 'disburse'
+            'status' => 'disburse',
         ])->select(
             DB::raw('IFNULL(sum(admin_commission),0) as sums'),
             DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -145,11 +141,11 @@ class DashboardController extends Controller
         $data['top_deliveryman'] = $top_deliveryman;
 
         $admin_wallet = AdminWallet::where('admin_id', 1)->first();
-        $data['inhouse_earning'] = $admin_wallet!=null?$admin_wallet->inhouse_earning:0;
-        $data['commission_earned'] = $admin_wallet!=null?$admin_wallet->commission_earned:0;
-        $data['delivery_charge_earned'] = $admin_wallet!=null?$admin_wallet->delivery_charge_earned:0;
-        $data['pending_amount'] = $admin_wallet!=null?$admin_wallet->pending_amount:0;
-        $data['total_tax_collected'] = $admin_wallet!=null?$admin_wallet->total_tax_collected:0;
+        $data['inhouse_earning'] = $admin_wallet != null ? $admin_wallet->inhouse_earning : 0;
+        $data['commission_earned'] = $admin_wallet != null ? $admin_wallet->commission_earned : 0;
+        $data['delivery_charge_earned'] = $admin_wallet != null ? $admin_wallet->delivery_charge_earned : 0;
+        $data['pending_amount'] = $admin_wallet != null ? $admin_wallet->pending_amount : 0;
+        $data['total_tax_collected'] = $admin_wallet != null ? $admin_wallet->total_tax_collected : 0;
 
         return view('admin-views.system.dashboard', compact('data', 'inhouse_data', 'seller_data', 'commission_data'));
     }
@@ -160,13 +156,12 @@ class DashboardController extends Controller
         $data = self::order_stats_data();
 
         return response()->json([
-            'view' => view('admin-views.partials._dashboard-order-stats', compact('data'))->render()
+            'view' => view('admin-views.partials._dashboard-order-stats', compact('data'))->render(),
         ], 200);
     }
 
     public function order_stats_data()
     {
-
         $pending_query = Order::where(['order_status' => 'pending']);
         $pending = self::common_query_order_stats($pending_query);
 
@@ -203,7 +198,7 @@ class DashboardController extends Controller
         $customer_query = new User();
         $customer = self::common_query_order_stats($customer_query);
 
-        $store_query = Shop::whereHas('seller', function($query){
+        $store_query = Shop::whereHas('seller', function ($query) {
             return $query;
         });
         $store = self::common_query_order_stats($store_query);
@@ -221,13 +216,14 @@ class DashboardController extends Controller
             'delivered' => $delivered,
             'canceled' => $canceled,
             'returned' => $returned,
-            'failed' => $failed
+            'failed' => $failed,
         ];
 
         return $data;
     }
 
-    public function common_query_order_stats($query){
+    public function common_query_order_stats($query)
+    {
         $today = session()->has('statistics_type') && session('statistics_type') == 'today' ? 1 : 0;
         $this_month = session()->has('statistics_type') && session('statistics_type') == 'this_month' ? 1 : 0;
 
@@ -243,18 +239,19 @@ class DashboardController extends Controller
     /**
      * get earning statistics by ajax
      */
-    public function get_earning_statitics(Request $request){
+    public function get_earning_statitics(Request $request)
+    {
         $dateType = $request->type;
 
-        $inhouse_data = array();
-        if($dateType == 'yearEarn') {
+        $inhouse_data = [];
+        if ($dateType == 'yearEarn') {
             $number = 12;
             $from = Carbon::now()->startOfYear()->format('Y-m-d');
             $to = Carbon::now()->endOfYear()->format('Y-m-d');
 
             $inhouse_earnings = OrderTransaction::where([
-                'seller_is'=>'admin',
-                'status'=>'disburse'
+                'seller_is' => 'admin',
+                'status' => 'disburse',
             ])->select(
                 DB::raw('IFNULL(sum(seller_amount),0) as sums'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -268,17 +265,16 @@ class DashboardController extends Controller
                     }
                 }
             }
-            $key_range = array("Jan","Feb","Mar","April","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
-
-        }elseif($dateType == 'MonthEarn') {
+            $key_range = ['Jan', 'Feb', 'Mar', 'April', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        } elseif ($dateType == 'MonthEarn') {
             $from = date('Y-m-01');
             $to = date('Y-m-t');
-            $number = date('d',strtotime($to));
+            $number = date('d', strtotime($to));
             $key_range = range(1, $number);
 
             $inhouse_earnings = OrderTransaction::where([
                 'seller_is' => 'admin',
-                'status' => 'disburse'
+                'status' => 'disburse',
             ])->select(
                 DB::raw('seller_amount'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month, DAY(created_at) day')
@@ -292,20 +288,19 @@ class DashboardController extends Controller
                     }
                 }
             }
-
-        }elseif($dateType == 'WeekEarn') {
+        } elseif ($dateType == 'WeekEarn') {
             Carbon::setWeekStartsAt(Carbon::SUNDAY);
             Carbon::setWeekEndsAt(Carbon::SATURDAY);
 
             $from = Carbon::now()->startOfWeek()->format('Y-m-d');
             $to = Carbon::now()->endOfWeek()->format('Y-m-d');
 
-            $number_start =date('d',strtotime($from));
-            $number_end =date('d',strtotime($to));
+            $number_start = date('d', strtotime($from));
+            $number_end = date('d', strtotime($to));
 
             $inhouse_earnings = OrderTransaction::where([
                 'seller_is' => 'admin',
-                'status' => 'disburse'
+                'status' => 'disburse',
             ])->select(
                 DB::raw('seller_amount'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month, DAY(created_at) day')
@@ -320,22 +315,22 @@ class DashboardController extends Controller
                 }
             }
 
-            $key_range = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+            $key_range = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         }
 
         $inhouse_label = $key_range;
 
         $inhouse_data_final = $inhouse_data;
 
-        $seller_data = array();
-        if($dateType == 'yearEarn') {
+        $seller_data = [];
+        if ($dateType == 'yearEarn') {
             $number = 12;
             $from = Carbon::now()->startOfYear()->format('Y-m-d');
             $to = Carbon::now()->endOfYear()->format('Y-m-d');
 
             $seller_earnings = OrderTransaction::where([
-                'seller_is'=>'seller',
-                'status'=>'disburse'
+                'seller_is' => 'seller',
+                'status' => 'disburse',
             ])->select(
                 DB::raw('IFNULL(sum(seller_amount),0) as sums'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -349,17 +344,16 @@ class DashboardController extends Controller
                     }
                 }
             }
-            $key_range = array("Jan","Feb","Mar","April","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
-
-        }elseif($dateType == 'MonthEarn') {
+            $key_range = ['Jan', 'Feb', 'Mar', 'April', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        } elseif ($dateType == 'MonthEarn') {
             $from = date('Y-m-01');
             $to = date('Y-m-t');
-            $number = date('d',strtotime($to));
+            $number = date('d', strtotime($to));
             $key_range = range(1, $number);
 
             $seller_earnings = OrderTransaction::where([
                 'seller_is' => 'seller',
-                'status' => 'disburse'
+                'status' => 'disburse',
             ])->select(
                 DB::raw('seller_amount'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month, DAY(created_at) day')
@@ -373,20 +367,19 @@ class DashboardController extends Controller
                     }
                 }
             }
-
-        }elseif($dateType == 'WeekEarn') {
+        } elseif ($dateType == 'WeekEarn') {
             Carbon::setWeekStartsAt(Carbon::SUNDAY);
             Carbon::setWeekEndsAt(Carbon::SATURDAY);
 
             $from = Carbon::now()->startOfWeek()->format('Y-m-d');
             $to = Carbon::now()->endOfWeek()->format('Y-m-d');
 
-            $number_start =date('d',strtotime($from));
-            $number_end =date('d',strtotime($to));
+            $number_start = date('d', strtotime($from));
+            $number_end = date('d', strtotime($to));
 
             $seller_earnings = OrderTransaction::where([
                 'seller_is' => 'seller',
-                'status' => 'disburse'
+                'status' => 'disburse',
             ])->select(
                 DB::raw('seller_amount'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month, DAY(created_at) day')
@@ -401,21 +394,21 @@ class DashboardController extends Controller
                 }
             }
 
-            $key_range = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+            $key_range = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         }
 
         $seller_label = $key_range;
 
         $seller_data_final = $seller_data;
 
-        $commission_data = array();
-        if($dateType == 'yearEarn') {
+        $commission_data = [];
+        if ($dateType == 'yearEarn') {
             $number = 12;
             $from = Carbon::now()->startOfYear()->format('Y-m-d');
             $to = Carbon::now()->endOfYear()->format('Y-m-d');
 
             $commission_earnings = OrderTransaction::where([
-                'status'=>'disburse'
+                'status' => 'disburse',
             ])->select(
                 DB::raw('IFNULL(sum(admin_commission),0) as sums'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month')
@@ -430,17 +423,16 @@ class DashboardController extends Controller
                 }
             }
 
-            $key_range = array("Jan","Feb","Mar","April","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
-
-        }elseif($dateType == 'MonthEarn') {
+            $key_range = ['Jan', 'Feb', 'Mar', 'April', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        } elseif ($dateType == 'MonthEarn') {
             $from = date('Y-m-01');
             $to = date('Y-m-t');
-            $number = date('d',strtotime($to));
+            $number = date('d', strtotime($to));
             $key_range = range(1, $number);
 
             $commission_earnings = OrderTransaction::where([
                 'seller_is' => 'seller',
-                'status' => 'disburse'
+                'status' => 'disburse',
             ])->select(
                 DB::raw('admin_commission'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month, DAY(created_at) day')
@@ -454,19 +446,18 @@ class DashboardController extends Controller
                     }
                 }
             }
-
-        }elseif($dateType == 'WeekEarn') {
+        } elseif ($dateType == 'WeekEarn') {
             Carbon::setWeekStartsAt(Carbon::SUNDAY);
             Carbon::setWeekEndsAt(Carbon::SATURDAY);
 
             $from = Carbon::now()->startOfWeek()->format('Y-m-d');
             $to = Carbon::now()->endOfWeek()->format('Y-m-d');
 
-            $number_start =date('d',strtotime($from));
-            $number_end =date('d',strtotime($to));
+            $number_start = date('d', strtotime($from));
+            $number_end = date('d', strtotime($to));
 
             $commission_earnings = OrderTransaction::where([
-                'status' => 'disburse'
+                'status' => 'disburse',
             ])->select(
                 DB::raw('admin_commission'),
                 DB::raw('YEAR(created_at) year, MONTH(created_at) month, DAY(created_at) day')
@@ -480,21 +471,21 @@ class DashboardController extends Controller
                     }
                 }
             }
-            $key_range = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+            $key_range = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         }
 
         $commission_label = $key_range;
 
         $commission_data_final = $commission_data;
 
-        $data = array(
+        $data = [
             'inhouse_label' => $inhouse_label,
             'inhouse_earn' => array_values($inhouse_data_final),
             'seller_label' => $seller_label,
             'seller_earn' => array_values($seller_data_final),
             'commission_label' => $commission_label,
-            'commission_earn' => array_values($commission_data_final)
-        );
+            'commission_earn' => array_values($commission_data_final),
+        ];
 
         return response()->json($data);
     }

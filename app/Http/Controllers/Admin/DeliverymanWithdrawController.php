@@ -46,12 +46,14 @@ class DeliverymanWithdrawController extends Controller
     public function withdraw_view($withdraw_id)
     {
         $details = WithdrawRequest::with(['delivery_men'])->where('delivery_man_id', '<>', null)->where(['id' => $withdraw_id])->first();
+
         return view('admin-views.delivery-man.withdraw.withdraw-view', compact('details'));
     }
 
     public function status_filter(Request $request)
     {
         session()->put('delivery_withdraw_status_filter', $request['delivery_withdraw_status_filter']);
+
         return response()->json(session('delivery_withdraw_status_filter'));
     }
 
@@ -63,14 +65,14 @@ class DeliverymanWithdrawController extends Controller
 
         $wallet = DeliverymanWallet::where('delivery_man_id', $withdraw->delivery_man_id)->first();
         if ($request->approved == 1) {
-            $wallet->total_withdraw   += Convert::usd($withdraw['amount']);
+            $wallet->total_withdraw += Convert::usd($withdraw['amount']);
             $wallet->pending_withdraw -= Convert::usd($withdraw['amount']);
-            $wallet->current_balance  -= Convert::usd($withdraw['amount']);
+            $wallet->current_balance -= Convert::usd($withdraw['amount']);
             $wallet->save();
 
             $withdraw->save();
             Toastr::success('Delivery man payment has been approved successfully');
-        }else{
+        } else {
             $wallet->pending_withdraw -= Convert::usd($withdraw['amount']);
             $wallet->save();
             $withdraw->save();
@@ -78,7 +80,6 @@ class DeliverymanWithdrawController extends Controller
         }
 
         return redirect()->route('admin.delivery-man.withdraw-list');
-
     }
 
     /**
@@ -111,10 +112,11 @@ class DeliverymanWithdrawController extends Controller
 
         if ($withdraw_req->count() == 0) {
             Toastr::warning(\App\CPU\translate('No_data_available!'));
+
             return back();
         }
 
-        $data = array();
+        $data = [];
 
         foreach ($withdraw_req as $withdraw) {
             $status = '';
@@ -126,13 +128,13 @@ class DeliverymanWithdrawController extends Controller
                 $status = 'Denied';
             }
 
-            $data[] = array(
-                'Name' => $withdraw->delivery_men->f_name . ' ' .$withdraw->delivery_men->l_name,
+            $data[] = [
+                'Name' => $withdraw->delivery_men->f_name.' '.$withdraw->delivery_men->l_name,
                 'Phone' => $withdraw->delivery_men->phone,
                 'Amount' => BackEndHelper::set_symbol(BackEndHelper::usd_to_currency($withdraw->amount)),
                 'Submitted Date' => $withdraw->created_at->format('d/m/y h:i:s A'),
                 'Status' => $status,
-            );
+            ];
         }
 
         return (new FastExcel($data))->download('withdraw_requests_of_delivery_men.xlsx');

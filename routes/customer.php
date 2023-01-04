@@ -17,13 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('authentication-failed', function () {
     $errors = [];
     array_push($errors, ['code' => 'auth-001', 'message' => 'Unauthorized.']);
+
     return response()->json([
-        'errors' => $errors
+        'errors' => $errors,
     ], 401);
 })->name('authentication-failed');
 
 Route::group(['namespace' => 'Customer', 'prefix' => 'customer', 'as' => 'customer.'], function () {
-
     Route::group(['namespace' => 'Auth', 'prefix' => 'auth', 'as' => 'auth.'], function () {
         Route::get('/code/captcha/{tmp}', 'LoginController@captcha')->name('default-captcha');
         Route::get('login', 'LoginController@login')->name('login');
@@ -66,4 +66,3 @@ Route::group(['namespace' => 'Customer', 'prefix' => 'customer', 'as' => 'custom
         });
     });
 });
-

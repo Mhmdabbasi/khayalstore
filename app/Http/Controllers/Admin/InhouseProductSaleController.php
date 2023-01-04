@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Model\Category;
 use App\Model\Product;
 use Illuminate\Http\Request;
-use App\Model\OrderDetail;
 
 class InhouseProductSaleController extends Controller
 {
@@ -18,7 +17,7 @@ class InhouseProductSaleController extends Controller
 
         $products = Product::where(['added_by' => 'admin'])
             ->when($request->has('category_id') && $request['category_id'] != 'all', function ($query) use ($request) {
-                $query->whereJsonContains('category_ids', [[['id' => (string)$request['category_id']]]]);
+                $query->whereJsonContains('category_ids', [[['id' => (string) $request['category_id']]]]);
             })->with(['order_details'])->paginate(Helpers::pagination_limit())->appends($query_param);
         $category_id = $request['category_id'];
 

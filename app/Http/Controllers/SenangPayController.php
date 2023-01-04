@@ -3,13 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\CPU\CartManager;
-use App\CPU\Helpers;
 use App\CPU\OrderManager;
-use App\Http\Controllers\Controller;
-use App\Model\Order;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class SenangPayController extends Controller
 {
@@ -25,7 +21,7 @@ class SenangPayController extends Controller
                     'payment_status' => 'paid',
                     'transaction_ref' => $unique_id,
                     'order_group_id' => $unique_id,
-                    'cart_group_id' => $group_id
+                    'cart_group_id' => $group_id,
                 ];
                 $order_id = OrderManager::generate_order($data);
                 array_push($order_ids, $order_id);
@@ -45,6 +41,7 @@ class SenangPayController extends Controller
         }
 
         Toastr::error('Payment process failed');
+
         return back();
     }
 }

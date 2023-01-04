@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class DeliveryZipCode extends Model
 {
     use HasFactory;
-    protected $fillable = ['zipcode'];
 
+    protected $fillable = ['zipcode'];
 }

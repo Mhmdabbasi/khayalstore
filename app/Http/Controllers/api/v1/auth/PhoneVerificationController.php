@@ -4,14 +4,13 @@ namespace App\Http\Controllers\api\v1\auth;
 
 use App\CPU\Helpers;
 use App\CPU\SMS_module;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\PhoneOrEmailVerification;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use function App\CPU\translate;
 
 class PhoneVerificationController extends Controller
 {
@@ -19,7 +18,7 @@ class PhoneVerificationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'temporary_token' => 'required',
-            'phone' => 'required|min:11|max:14'
+            'phone' => 'required|min:11|max:14',
         ]);
 
         if ($validator->fails()) {
@@ -42,9 +41,10 @@ class PhoneVerificationController extends Controller
             'updated_at' => now(),
         ]);
         $response = SMS_module::send($request['phone'], $token);
+
         return response()->json([
             'message' => $response,
-            'token' => 'active'
+            'token' => 'active',
         ], 200);
     }
 
@@ -76,14 +76,15 @@ class PhoneVerificationController extends Controller
             }
 
             $token = $user->createToken('LaravelAuthApp')->accessToken;
+
             return response()->json([
                 'message' => translate('otp_verified'),
-                'token' => $token
+                'token' => $token,
             ], 200);
         }
 
         return response()->json(['errors' => [
-            ['code' => 'token', 'message' => translate('otp_not_found')]
+            ['code' => 'token', 'message' => translate('otp_not_found')],
         ]], 404);
     }
 }

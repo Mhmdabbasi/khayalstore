@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\CPU\Helpers;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Chatting;
 use App\Model\DeliveryMan;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use function App\CPU\translate;
 
 class ChattingController extends Controller
 {
@@ -24,10 +23,9 @@ class ChattingController extends Controller
             ->first();
 
         if (isset($last_chat)) {
-            Chatting::where(['admin_id'=>0, 'delivery_man_id'=> $last_chat->delivery_man_id])->update([
-                'seen_by_admin' => 1
+            Chatting::where(['admin_id' => 0, 'delivery_man_id' => $last_chat->delivery_man_id])->update([
+                'seen_by_admin' => 1,
             ]);
-
 
             $chattings = Chatting::join('delivery_men', 'delivery_men.id', '=', 'chattings.delivery_man_id')
                 ->select('chattings.*', 'delivery_men.f_name', 'delivery_men.l_name', 'delivery_men.image')
@@ -54,10 +52,9 @@ class ChattingController extends Controller
      */
     public function ajax_message_by_delivery_man(Request $request)
     {
-
         Chatting::where(['admin_id' => 0, 'delivery_man_id' => $request->delivery_man_id])
             ->update([
-                'seen_by_admin' => 1
+                'seen_by_admin' => 1,
             ]);
 
         $sellers = Chatting::join('delivery_men', 'delivery_men.id', '=', 'chattings.delivery_man_id')
@@ -77,6 +74,7 @@ class ChattingController extends Controller
     {
         if ($request->message == '') {
             Toastr::warning('Type Something!');
+
             return response()->json(['message' => 'type something!']);
         }
 
@@ -94,7 +92,7 @@ class ChattingController extends Controller
 
         $dm = DeliveryMan::find($request->delivery_man_id);
 
-        if(!empty($dm->fcm_token)) {
+        if (! empty($dm->fcm_token)) {
             $data = [
                 'title' => translate('message'),
                 'description' => $request->message,

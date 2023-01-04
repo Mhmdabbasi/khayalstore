@@ -11,8 +11,8 @@ class SupportTicket extends Model
         'customer_id' => 'integer',
         'status' => 'string',
 
-        'created_at'  => 'datetime',
-        'updated_at'  => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function conversations()

@@ -11,7 +11,6 @@ class HelpTopicController extends Controller
 {
     public function add_new()
     {
-
         return view('admin-views.help-topics.add-new');
     }
 
@@ -19,40 +18,41 @@ class HelpTopicController extends Controller
     {
         $request->validate([
             'question' => 'required',
-            'answer'   => 'required',
-            'ranking'   => 'required',
+            'answer' => 'required',
+            'ranking' => 'required',
         ], [
             'question.required' => 'Question name is required!',
-            'answer.required'   => 'Question answer is required!',
+            'answer.required' => 'Question answer is required!',
 
         ]);
         $helps = new HelpTopic;
         $helps->question = $request->question;
         $helps->answer = $request->answer;
-        $request->has('status')? $helps->status = 1 : $helps->status = 0;
+        $request->has('status') ? $helps->status = 1 : $helps->status = 0;
         $helps->ranking = $request->ranking;
         $helps->save();
 
         Toastr::success('FAQ added successfully!');
+
         return back();
     }
+
     public function status($id)
     {
-
         $helps = HelpTopic::findOrFail($id);
         if ($helps->status == 1) {
-            $helps->update(["status" => 0]);
-
+            $helps->update(['status' => 0]);
         } else {
-            $helps->update(["status" => 1]);
-
+            $helps->update(['status' => 1]);
         }
-        return response()->json(['success' => 'Status Change']);
 
+        return response()->json(['success' => 'Status Change']);
     }
+
     public function edit($id)
     {
         $helps = HelpTopic::findOrFail($id);
+
         return response()->json($helps);
     }
 
@@ -60,10 +60,10 @@ class HelpTopicController extends Controller
     {
         $request->validate([
             'question' => 'required',
-            'answer'   => 'required',
+            'answer' => 'required',
         ], [
             'question.required' => 'Question name is required!',
-            'answer.required'   => 'Question answer is required!',
+            'answer.required' => 'Question answer is required!',
 
         ]);
         $helps = HelpTopic::find($id);
@@ -72,20 +72,22 @@ class HelpTopicController extends Controller
         $helps->ranking = $request->ranking;
         $helps->update();
         Toastr::success('FAQ Update successfully!');
+
         return back();
     }
 
-    function list() {
+    public function list()
+    {
         $helps = HelpTopic::latest()->get();
+
         return view('admin-views.help-topics.list', compact('helps'));
     }
 
     public function destroy(Request $request)
     {
-
         $helps = HelpTopic::find($request->id);
         $helps->delete();
+
         return response()->json();
     }
-
 }

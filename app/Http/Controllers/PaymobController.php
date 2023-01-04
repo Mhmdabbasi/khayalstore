@@ -6,10 +6,10 @@ use App\CPU\CartManager;
 use App\CPU\Convert;
 use App\CPU\Helpers;
 use App\CPU\OrderManager;
+use function App\CPU\translate;
 use App\Model\Currency;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use function App\CPU\translate;
 
 class PaymobController extends Controller
 {
@@ -19,7 +19,7 @@ class PaymobController extends Controller
         $ch = curl_init($url);
 
         // Request headers
-        $headers = array();
+        $headers = [];
         $headers[] = 'Content-Type: application/json';
 
         // Return the transfer as a string
@@ -33,6 +33,7 @@ class PaymobController extends Controller
 
         // Close curl resource to free up system resources
         curl_close($ch);
+
         return json_decode($output);
     }
 
@@ -42,7 +43,7 @@ class PaymobController extends Controller
         $ch = curl_init($url);
 
         // Request headers
-        $headers = array();
+        $headers = [];
         $headers[] = 'Content-Type: application/json';
 
         // Return the transfer as a string
@@ -54,6 +55,7 @@ class PaymobController extends Controller
 
         // Close curl resource to free up system resources
         curl_close($ch);
+
         return json_decode($output);
     }
 
@@ -62,6 +64,7 @@ class PaymobController extends Controller
         $currency_code = Currency::where(['code' => 'EGP'])->first();
         if (isset($currency_code) == false) {
             Toastr::error(translate('paymob_supports_EGP_currency'));
+
             return back();
         }
 
@@ -70,11 +73,13 @@ class PaymobController extends Controller
             $token = $this->getToken();
             $order = $this->createOrder($token);
             $paymentToken = $this->getPaymentToken($order, $token);
-        }catch (\Exception $exception){
+        } catch (\Exception $exception) {
             Toastr::error(translate('country_permission_denied_or_misconfiguration'));
+
             return back();
         }
-        return \Redirect::away('https://portal.weaccept.co/api/acceptance/iframes/' . $config['iframe_id'] . '?payment_token=' . $paymentToken);
+
+        return \Redirect::away('https://portal.weaccept.co/api/acceptance/iframes/'.$config['iframe_id'].'?payment_token='.$paymentToken);
     }
 
     public function getToken()
@@ -98,18 +103,18 @@ class PaymobController extends Controller
         foreach (CartManager::get_cart() as $detail) {
             array_push($items, [
                 'name' => $detail->product['name'],
-                'amount_cents' => round(Convert::usdToegp($detail['price']),2) * 100,
+                'amount_cents' => round(Convert::usdToegp($detail['price']), 2) * 100,
                 'description' => $detail->product['name'],
-                'quantity' => $detail['quantity']
+                'quantity' => $detail['quantity'],
             ]);
         }
 
         $data = [
-            "auth_token" => $token,
-            "delivery_needed" => "false",
-            "amount_cents" => round($value,2) * 100,
-            "currency" => "EGP",
-            "items" => $items,
+            'auth_token' => $token,
+            'delivery_needed' => 'false',
+            'amount_cents' => round($value, 2) * 100,
+            'currency' => 'EGP',
+            'items' => $items,
 
         ];
         $response = $this->cURL(
@@ -129,28 +134,28 @@ class PaymobController extends Controller
 
         $config = Helpers::get_business_settings('paymob_accept');
         $billingData = [
-            "apartment" => "NA",
-            "email" => $user['email'],
-            "floor" => "NA",
-            "first_name" => $user['f_name'],
-            "street" => "NA",
-            "building" => "NA",
-            "phone_number" => $user['phone'],
-            "shipping_method" => "PKG",
-            "postal_code" => "NA",
-            "city" => "NA",
-            "country" => "NA",
-            "last_name" => $user['l_name'],
-            "state" => "NA",
+            'apartment' => 'NA',
+            'email' => $user['email'],
+            'floor' => 'NA',
+            'first_name' => $user['f_name'],
+            'street' => 'NA',
+            'building' => 'NA',
+            'phone_number' => $user['phone'],
+            'shipping_method' => 'PKG',
+            'postal_code' => 'NA',
+            'city' => 'NA',
+            'country' => 'NA',
+            'last_name' => $user['l_name'],
+            'state' => 'NA',
         ];
         $data = [
-            "auth_token" => $token,
-            "amount_cents" => round($value,2) * 100,
-            "expiration" => 3600,
-            "order_id" => $order->id,
-            "billing_data" => $billingData,
-            "currency" => "EGP",
-            "integration_id" => $config['integration_id']
+            'auth_token' => $token,
+            'amount_cents' => round($value, 2) * 100,
+            'expiration' => 3600,
+            'order_id' => $order->id,
+            'billing_data' => $billingData,
+            'currency' => 'EGP',
+            'integration_id' => $config['integration_id'],
         ];
 
         $response = $this->cURL(
@@ -205,9 +210,9 @@ class PaymobController extends Controller
                     'payment_method' => 'paymob_accept',
                     'order_status' => 'confirmed',
                     'payment_status' => 'paid',
-                    'transaction_ref' => 'tran-' . $unique_id,
+                    'transaction_ref' => 'tran-'.$unique_id,
                     'order_group_id' => $unique_id,
-                    'cart_group_id' => $group_id
+                    'cart_group_id' => $group_id,
                 ];
                 $order_id = OrderManager::generate_order($data);
                 array_push($order_ids, $order_id);
@@ -215,15 +220,19 @@ class PaymobController extends Controller
             CartManager::cart_clean();
             if (auth('customer')->check()) {
                 Toastr::success('Payment success.');
+
                 return view('web-views.checkout-complete');
             }
+
             return response()->json(['message' => 'Payment succeeded'], 200);
         }
 
         if (auth('customer')->check()) {
             Toastr::error('Payment failed.');
+
             return redirect('/account-order');
         }
+
         return response()->json(['message' => 'Payment failed'], 403);
     }
 }

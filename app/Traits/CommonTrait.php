@@ -2,22 +2,17 @@
 
 namespace App\Traits;
 
-
-use App\CPU\Helpers;
 use App\Model\DeliveryCountryCode;
 use App\Model\DeliverymanNotification;
 use App\Model\DeliverymanWallet;
 use App\Model\DeliveryZipCode;
 use App\Model\OrderExpectedDeliveryHistory;
 use App\Model\OrderStatusHistory;
-use App\Model\WithdrawRequest;
-use function App\CPU\translate;
 
 trait CommonTrait
 {
     public static function add_expected_delivery_date_history($order_id, $user_id, $value, $user_type, $cause = null)
     {
-
         if ($order_id && $user_id && $value && $user_type) {
             $delivery_history = new OrderExpectedDeliveryHistory();
             $delivery_history->order_id = $order_id;
@@ -32,7 +27,7 @@ trait CommonTrait
 
     public static function add_order_status_history($order_id, $user_id, $status, $user_type, $cause = null)
     {
-        if ($order_id && ($user_id || $user_id=='0') && $status && $user_type) {
+        if ($order_id && ($user_id || $user_id == '0') && $status && $user_type) {
             $delivery_history = new OrderStatusHistory();
             $delivery_history->order_id = $order_id;
             $delivery_history->user_id = $user_id;
@@ -83,7 +78,7 @@ trait CommonTrait
 
     public function get_delivery_country_array()
     {
-        $data = array();
+        $data = [];
         foreach (DeliveryCountryCode::all() as $delivery_country_code) {
             foreach (COUNTRIES as $key => $country) {
                 if ($country['code'] == $delivery_country_code->country_code) {
@@ -91,18 +86,17 @@ trait CommonTrait
                     $data[$key]['name'] = $country['name'];
                 }
             }
-
         }
+
         return $data;
     }
 
     public function delivery_country_exist_check($input_country)
     {
-        $data = array();
-        foreach (DeliveryCountryCode::pluck('country_code') as $code)
-        {
+        $data = [];
+        foreach (DeliveryCountryCode::pluck('country_code') as $code) {
             foreach (COUNTRIES as $country) {
-                $country['code'] == $code ?  $data[] = $country['name'] : '';
+                $country['code'] == $code ? $data[] = $country['name'] : '';
             }
         }
         $country_exists = in_array($input_country, $data);
@@ -116,6 +110,4 @@ trait CommonTrait
 
         return $zip_exists;
     }
-
-
 }

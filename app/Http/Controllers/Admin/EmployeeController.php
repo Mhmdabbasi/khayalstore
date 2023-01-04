@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class EmployeeController extends Controller
 {
-
     public function add_new()
     {
         $rls = AdminRole::whereNotIn('id', [1])->get();
+
         return view('admin-views.employee.add-new', compact('rls'));
     }
 
@@ -27,8 +27,8 @@ class EmployeeController extends Controller
             'role_id' => 'required',
             'image' => 'required',
             'email' => 'required|email|unique:admins',
-            'password'=>'required',
-            'phone'=>'required'
+            'password' => 'required',
+            'phone' => 'required',
 
         ], [
             'name.required' => 'Role name is required!',
@@ -40,6 +40,7 @@ class EmployeeController extends Controller
 
         if ($request->role_id == 1) {
             Toastr::warning('Access Denied!');
+
             return back();
         }
 
@@ -49,22 +50,23 @@ class EmployeeController extends Controller
             'email' => $request->email,
             'admin_role_id' => $request->role_id,
             'password' => bcrypt($request->password),
-            'status'=>1,
+            'status' => 1,
             'image' => ImageManager::upload('admin/', 'png', $request->file('image')),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         Toastr::success('Employee added successfully!');
+
         return redirect()->route('admin.employee.list');
     }
 
-    function list(Request $request)
+    public function list(Request $request)
     {
         $search = $request['search'];
         $key = explode(' ', $request['search']);
         $em = Admin::with(['role'])->whereNotIn('id', [1])
-                    ->when($search!=null, function($query) use($key){
+                    ->when($search != null, function ($query) use ($key) {
                         foreach ($key as $value) {
                             $query->where('name', 'like', "%{$value}%")
                                 ->orWhere('phone', 'like', "%{$value}%")
@@ -72,13 +74,15 @@ class EmployeeController extends Controller
                         }
                     })
                     ->paginate(Helpers::pagination_limit());
-        return view('admin-views.employee.list', compact('em','search'));
+
+        return view('admin-views.employee.list', compact('em', 'search'));
     }
 
     public function edit($id)
     {
         $e = Admin::where(['id' => $id])->first();
         $rls = AdminRole::whereNotIn('id', [1])->get();
+
         return view('admin-views.employee.edit', compact('rls', 'e'));
     }
 
@@ -94,6 +98,7 @@ class EmployeeController extends Controller
 
         if ($request->role_id == 1) {
             Toastr::warning('Access Denied!');
+
             return back();
         }
 
@@ -103,6 +108,7 @@ class EmployeeController extends Controller
         } else {
             if (strlen($request['password']) < 7) {
                 Toastr::warning('Password length must be 8 character.');
+
                 return back();
             }
             $pass = bcrypt($request['password']);
@@ -123,15 +129,18 @@ class EmployeeController extends Controller
         ]);
 
         Toastr::success('Employee updated successfully!');
+
         return back();
     }
+
     public function status(Request $request)
     {
         $employee = Admin::find($request->id);
         $employee->status = $request->status;
         $employee->save();
-    
+
         Toastr::success('Employee status updated!');
+
         return back();
     }
 }

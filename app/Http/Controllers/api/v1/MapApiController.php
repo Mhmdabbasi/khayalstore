@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\api\v1;
 
+use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Model\BusinessSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use App\CPU\Helpers;
 
 class MapApiController extends Controller
 {
@@ -20,7 +19,8 @@ class MapApiController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $api_key = Helpers::get_business_settings('map_api_key_server');
-        $response = Http::get('https://maps.googleapis.com/maps/api/place/autocomplete/json?input=' . $request['search_text'] . '&key=' . $api_key);
+        $response = Http::get('https://maps.googleapis.com/maps/api/place/autocomplete/json?input='.$request['search_text'].'&key='.$api_key);
+
         return $response->json();
     }
 
@@ -36,7 +36,8 @@ class MapApiController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $api_key = Helpers::get_business_settings('map_api_key_server');
-        $response = Http::get('https://maps.googleapis.com/maps/api/distancematrix/json?origins=' . $request['origin_lat'] . ',' . $request['origin_lng'] . '&destinations=' . $request['destination_lat'] . ',' . $request['destination_lng'] . '&key=' . $api_key);
+        $response = Http::get('https://maps.googleapis.com/maps/api/distancematrix/json?origins='.$request['origin_lat'].','.$request['origin_lng'].'&destinations='.$request['destination_lat'].','.$request['destination_lng'].'&key='.$api_key);
+
         return $response->json();
     }
 
@@ -49,7 +50,8 @@ class MapApiController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $api_key = Helpers::get_business_settings('map_api_key_server');
-        $response = Http::get('https://maps.googleapis.com/maps/api/place/details/json?placeid=' . $request['placeid'] . '&key=' . $api_key);
+        $response = Http::get('https://maps.googleapis.com/maps/api/place/details/json?placeid='.$request['placeid'].'&key='.$api_key);
+
         return $response->json();
     }
 
@@ -63,7 +65,8 @@ class MapApiController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $api_key = Helpers::get_business_settings('map_api_key_server');
-        $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $request->lat . ',' . $request->lng . '&key=' . $api_key);
+        $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json?latlng='.$request->lat.','.$request->lng.'&key='.$api_key);
+
         return $response->json();
     }
 }

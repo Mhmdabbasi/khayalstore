@@ -6,9 +6,11 @@ use App\CPU\BackEndHelper;
 use App\CPU\Convert;
 use App\CPU\Helpers;
 use App\CPU\ImageManager;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\Brand;
 use App\Model\BusinessSetting;
+use App\Model\Cart;
 use App\Model\Category;
 use App\Model\Color;
 use App\Model\DealOfTheDay;
@@ -18,14 +20,10 @@ use App\Model\Review;
 use App\Model\Translation;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Rap2hpoutre\FastExcel\FastExcel;
-use App\Model\Cart;
-use function App\CPU\translate;
 
 class ProductController extends Controller
 {
@@ -35,6 +33,7 @@ class ProductController extends Controller
         $br = Brand::orderBY('name', 'ASC')->get();
         $brand_setting = BusinessSetting::where('type', 'product_brand')->first()->value;
         $digital_product_setting = BusinessSetting::where('type', 'digital_product')->first()->value;
+
         return view('seller-views.product.add-new', compact('cat', 'br', 'brand_setting', 'digital_product_setting'));
     }
 
@@ -44,6 +43,7 @@ class ProductController extends Controller
             Product::where(['id' => $request['id'], 'added_by' => 'seller', 'user_id' => \auth('seller')->id()])->update([
                 'status' => $request['status'],
             ]);
+
             return response()->json([
                 'success' => 1,
             ], 200);
@@ -52,6 +52,7 @@ class ProductController extends Controller
                 Product::where(['id' => $request['id']])->update([
                     'status' => $request['status'],
                 ]);
+
                 return response()->json([
                     'success' => 1,
                 ], 200);
@@ -70,6 +71,7 @@ class ProductController extends Controller
             $product->featured_status = $request->status;
             $product->save();
             $data = $request->status;
+
             return response()->json($data);
         }
     }
@@ -77,36 +79,36 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'                  => 'required',
-            'category_id'           => 'required',
-            'product_type'          => 'required',
-            'digital_product_type'  => 'required_if:product_type,==,digital',
-            'digital_file_ready'    => 'required_if:digital_product_type,==,ready_product|mimes:jpg,jpeg,png,gif,zip,pdf',
-            'unit'                  => 'required_if:product_type,==,physical',
-            'images'                => 'required',
-            'image'                 => 'required',
-            'tax'                   => 'required|min:0',
-            'unit_price'            => 'required|numeric|min:1',
-            'purchase_price'        => 'required|numeric|min:1',
-            'discount'              => 'required|gt:-1',
-            'shipping_cost'         => 'required_if:product_type,==,physical|gt:-1',
-            'code'                  => 'required|numeric|min:1|digits_between:6,20|unique:products',
-            'minimum_order_qty'     => 'required|numeric|min:1',
+            'name' => 'required',
+            'category_id' => 'required',
+            'product_type' => 'required',
+            'digital_product_type' => 'required_if:product_type,==,digital',
+            'digital_file_ready' => 'required_if:digital_product_type,==,ready_product|mimes:jpg,jpeg,png,gif,zip,pdf',
+            'unit' => 'required_if:product_type,==,physical',
+            'images' => 'required',
+            'image' => 'required',
+            'tax' => 'required|min:0',
+            'unit_price' => 'required|numeric|min:1',
+            'purchase_price' => 'required|numeric|min:1',
+            'discount' => 'required|gt:-1',
+            'shipping_cost' => 'required_if:product_type,==,physical|gt:-1',
+            'code' => 'required|numeric|min:1|digits_between:6,20|unique:products',
+            'minimum_order_qty' => 'required|numeric|min:1',
 
         ], [
-            'name.required'                     => 'Product name is required!',
-            'category_id.required'              => 'category  is required!',
-            'images.required'                   => 'Product images is required!',
-            'image.required'                    => 'Product thumbnail is required!',
-            'unit.required_if'                  => 'Unit is required!',
-            'code.min'                          => 'The code must be positive!',
-            'code.digits_between'               => 'The code must be minimum 6 digits!',
-            'minimum_order_qty.required'        => 'The minimum order quantity is required!',
-            'minimum_order_qty.min'             => 'The minimum order quantity must be positive!',
-            'digital_file_ready.required_if'    => 'Ready product upload is required!',
-            'digital_file_ready.mimes'          => 'Ready product upload must be a file of type: pdf, zip, jpg, jpeg, png, gif.',
-            'digital_product_type.required_if'  => 'Digital product type is required!',
-            'shipping_cost.required_if'         => 'Shipping Cost is required!',
+            'name.required' => 'Product name is required!',
+            'category_id.required' => 'category  is required!',
+            'images.required' => 'Product images is required!',
+            'image.required' => 'Product thumbnail is required!',
+            'unit.required_if' => 'Unit is required!',
+            'code.min' => 'The code must be positive!',
+            'code.digits_between' => 'The code must be minimum 6 digits!',
+            'minimum_order_qty.required' => 'The minimum order quantity is required!',
+            'minimum_order_qty.min' => 'The minimum order quantity must be positive!',
+            'digital_file_ready.required_if' => 'Ready product upload is required!',
+            'digital_file_ready.mimes' => 'Ready product upload must be a file of type: pdf, zip, jpg, jpeg, png, gif.',
+            'digital_product_type.required_if' => 'Digital product type is required!',
+            'shipping_cost.required_if' => 'Shipping Cost is required!',
         ]);
 
         $brand_setting = BusinessSetting::where('type', 'product_brand')->first()->value;
@@ -142,9 +144,9 @@ class ProductController extends Controller
 
         $product = new Product();
         $product->user_id = auth('seller')->id();
-        $product->added_by = "seller";
+        $product->added_by = 'seller';
         $product->name = $request->name[array_search('en', $request->lang)];
-        $product->slug = Str::slug($request->name[array_search('en', $request->lang)], '-') . '-' . Str::random(6);
+        $product->slug = Str::slug($request->name[array_search('en', $request->lang)], '-').'-'.Str::random(6);
 
         $category = [];
 
@@ -167,14 +169,14 @@ class ProductController extends Controller
             ]);
         }
 
-        $product->category_ids          = json_encode($category);
-        $product->brand_id              = $request->brand_id;
-        $product->unit                  = $request->product_type == 'physical' ? $request->unit : null;
-        $product->digital_product_type  = $request->product_type == 'digital' ? $request->digital_product_type : null;
-        $product->product_type          = $request->product_type;
-        $product->code                  = $request->code;
-        $product->minimum_order_qty     = $request->minimum_order_qty;
-        $product->details               = $request->description[array_search('en', $request->lang)];
+        $product->category_ids = json_encode($category);
+        $product->brand_id = $request->brand_id;
+        $product->unit = $request->product_type == 'physical' ? $request->unit : null;
+        $product->digital_product_type = $request->product_type == 'digital' ? $request->digital_product_type : null;
+        $product->product_type = $request->product_type;
+        $product->code = $request->code;
+        $product->minimum_order_qty = $request->minimum_order_qty;
+        $product->details = $request->description[array_search('en', $request->lang)];
 
         if ($request->has('colors_active') && $request->has('colors') && count($request->colors) > 0) {
             $product->colors = $request->product_type == 'physical' ? json_encode($request->colors) : json_encode([]);
@@ -185,8 +187,8 @@ class ProductController extends Controller
         $choice_options = [];
         if ($request->has('choice')) {
             foreach ($request->choice_no as $key => $no) {
-                $str = 'choice_options_' . $no;
-                $item['name'] = 'choice_' . $no;
+                $str = 'choice_options_'.$no;
+                $item['name'] = 'choice_'.$no;
                 $item['title'] = $request->choice[$key];
                 $item['options'] = explode(',', implode('|', $request[$str]));
                 array_push($choice_options, $item);
@@ -201,7 +203,7 @@ class ProductController extends Controller
         }
         if ($request->has('choice_no')) {
             foreach ($request->choice_no as $key => $no) {
-                $name = 'choice_options_' . $no;
+                $name = 'choice_options_'.$no;
                 $my_str = implode('|', $request[$name]);
                 array_push($options, explode(',', $my_str));
             }
@@ -215,7 +217,7 @@ class ProductController extends Controller
                 $str = '';
                 foreach ($combination as $k => $item) {
                     if ($k > 0) {
-                        $str .= '-' . str_replace(' ', '', $item);
+                        $str .= '-'.str_replace(' ', '', $item);
                     } else {
                         if ($request->has('colors_active') && $request->has('colors') && count($request->colors) > 0) {
                             $color_name = Color::where('code', $item)->first()->name;
@@ -227,14 +229,14 @@ class ProductController extends Controller
                 }
                 $item = [];
                 $item['type'] = $str;
-                $item['price'] = Convert::usd(abs($request['price_' . str_replace('.', '_', $str)]));
-                $item['sku'] = $request['sku_' . str_replace('.', '_', $str)];
-                $item['qty'] = abs($request['qty_' . str_replace('.', '_', $str)]);
+                $item['price'] = Convert::usd(abs($request['price_'.str_replace('.', '_', $str)]));
+                $item['sku'] = $request['sku_'.str_replace('.', '_', $str)];
+                $item['qty'] = abs($request['qty_'.str_replace('.', '_', $str)]);
                 array_push($variations, $item);
                 $stock_count += $item['qty'];
             }
         } else {
-            $stock_count = (integer)$request['current_stock'];
+            $stock_count = (int) $request['current_stock'];
         }
 
         if ($validator->errors()->count() > 0) {
@@ -242,21 +244,21 @@ class ProductController extends Controller
         }
 
         //combinations end
-        $product->variation      = $request->product_type == 'physical' ? json_encode($variations) : json_encode([]);
-        $product->unit_price     = Convert::usd($request->unit_price);
+        $product->variation = $request->product_type == 'physical' ? json_encode($variations) : json_encode([]);
+        $product->unit_price = Convert::usd($request->unit_price);
         $product->purchase_price = Convert::usd($request->purchase_price);
-        $product->tax            = $request->tax;
-        $product->tax_type       = $request->tax_type;
-        $product->discount       = $request->discount_type == 'flat' ? Convert::usd($request->discount) : $request->discount;
-        $product->discount_type  = $request->discount_type;
-        $product->attributes     = $request->product_type == 'physical' ? json_encode($request->choice_attributes) : json_encode([]);
-        $product->current_stock  = $request->product_type == 'physical' ? abs($stock_count) : 0;
+        $product->tax = $request->tax;
+        $product->tax_type = $request->tax_type;
+        $product->discount = $request->discount_type == 'flat' ? Convert::usd($request->discount) : $request->discount;
+        $product->discount_type = $request->discount_type;
+        $product->attributes = $request->product_type == 'physical' ? json_encode($request->choice_attributes) : json_encode([]);
+        $product->current_stock = $request->product_type == 'physical' ? abs($stock_count) : 0;
         $product->video_provider = 'youtube';
-        $product->video_url      = $request->video_link;
-        $product->request_status = Helpers::get_business_settings('new_product_approval')==1?0:1;
-        $product->status         = 0;
-        $product->shipping_cost  = $request->product_type == 'physical' ? Convert::usd($request->shipping_cost) : 0;
-        $product->multiply_qty   = ($request->product_type == 'physical') ? ($request->multiplyQTY=='on'?1:0) : 0;
+        $product->video_url = $request->video_link;
+        $product->request_status = Helpers::get_business_settings('new_product_approval') == 1 ? 0 : 1;
+        $product->status = 0;
+        $product->shipping_cost = $request->product_type == 'physical' ? Convert::usd($request->shipping_cost) : 0;
+        $product->multiply_qty = ($request->product_type == 'physical') ? ($request->multiplyQTY == 'on' ? 1 : 0) : 0;
 
         if ($request->ajax()) {
             return response()->json([], 200);
@@ -269,7 +271,7 @@ class ProductController extends Controller
             }
             $product->thumbnail = ImageManager::upload('product/thumbnail/', 'png', $request->file('image'));
 
-            if($request->product_type == 'digital' && $request->digital_product_type == 'ready_product') {
+            if ($request->product_type == 'digital' && $request->digital_product_type == 'ready_product') {
                 $product->digital_file_ready = ImageManager::upload('product/digital-product/', $request->digital_file_ready->getClientOriginalExtension(), $request->digital_file_ready);
             }
 
@@ -281,31 +283,32 @@ class ProductController extends Controller
             $data = [];
             foreach ($request->lang as $index => $key) {
                 if ($request->name[$index] && $key != 'en') {
-                    array_push($data, array(
+                    array_push($data, [
                         'translationable_type' => 'App\Model\Product',
                         'translationable_id' => $product->id,
                         'locale' => $key,
                         'key' => 'name',
                         'value' => $request->name[$index],
-                    ));
+                    ]);
                 }
                 if ($request->description[$index] && $key != 'en') {
-                    array_push($data, array(
+                    array_push($data, [
                         'translationable_type' => 'App\Model\Product',
                         'translationable_id' => $product->id,
                         'locale' => $key,
                         'key' => 'description',
                         'value' => $request->description[$index],
-                    ));
+                    ]);
                 }
             }
             Translation::insert($data);
             Toastr::success('Product added successfully!');
+
             return redirect()->route('seller.product.list');
         }
     }
 
-    function list(Request $request)
+    public function list(Request $request)
     {
         $query_param = [];
         $search = $request['search'];
@@ -332,8 +335,8 @@ class ProductController extends Controller
         $sort_oqrderQty = $request['sort_oqrderQty'];
         $query_param = $request->all();
         $search = $request['search'];
-        $pro = Product::where(['added_by' => 'seller', 'product_type'=>'physical', 'user_id' => auth('seller')->id()])
-            ->where('request_status',1)
+        $pro = Product::where(['added_by' => 'seller', 'product_type' => 'physical', 'user_id' => auth('seller')->id()])
+            ->where('request_status', 1)
             ->when($request->has('status') && $request->status != null, function ($query) use ($request) {
                 $query->where('request_status', $request->status);
             });
@@ -350,58 +353,60 @@ class ProductController extends Controller
 
         $request_status = $request['status'];
 
-        $pro = $pro->withCount('order_details')->when($request->sort_oqrderQty == 'quantity_asc', function ($q) use ($request) {
+        $pro = $pro->withCount('order_details')->when($request->sort_oqrderQty == 'quantity_asc', function ($q) {
             return $q->orderBy('current_stock', 'asc');
         })
-            ->when($request->sort_oqrderQty == 'quantity_desc', function ($q) use ($request) {
+            ->when($request->sort_oqrderQty == 'quantity_desc', function ($q) {
                 return $q->orderBy('current_stock', 'desc');
             })
-            ->when($request->sort_oqrderQty == 'order_asc', function ($q) use ($request) {
+            ->when($request->sort_oqrderQty == 'order_asc', function ($q) {
                 return $q->orderBy('order_details_count', 'asc');
             })
-            ->when($request->sort_oqrderQty == 'order_desc', function ($q) use ($request) {
+            ->when($request->sort_oqrderQty == 'order_desc', function ($q) {
                 return $q->orderBy('order_details_count', 'desc');
             })
-            ->when($request->sort_oqrderQty == 'default', function ($q) use ($request) {
+            ->when($request->sort_oqrderQty == 'default', function ($q) {
                 return $q->orderBy('id');
             })->where('current_stock', '<', $stock_limit);
 
-
         $products = $pro->orderBy('id', 'DESC')->paginate(Helpers::pagination_limit())->appends(['status' => $request['status']])->appends($query_param);
+
         return view('seller-views.product.stock-limit-list', compact('products', 'search', 'request_status', 'sort_oqrderQty'));
     }
 
     /**
      * Product total stock report export by excel
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return string|\Symfony\Component\HttpFoundation\StreamedResponse
+     *
      * @throws \Box\Spout\Common\Exception\IOException
      * @throws \Box\Spout\Common\Exception\InvalidArgumentException
      * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
      * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
      */
-    public function stock_limit_export(Request $request){
-
+    public function stock_limit_export(Request $request)
+    {
         $sort = $request['sort'] ?? 'ASC';
 
-        $products = Product::when(empty($request['seller_id']) || $request['seller_id'] == 'all',function ($query){
+        $products = Product::when(empty($request['seller_id']) || $request['seller_id'] == 'all', function ($query) {
             $query->whereIn('added_by', ['admin', 'seller']);
         })
-            ->when($request['seller_id'] == 'in_house',function ($query){
+            ->when($request['seller_id'] == 'in_house', function ($query) {
                 $query->where(['added_by' => 'admin']);
             })
-            ->when($request['seller_id'] != 'in_house' && isset($request['seller_id']) && $request['seller_id'] != 'all',function ($query) use($request){
+            ->when($request['seller_id'] != 'in_house' && isset($request['seller_id']) && $request['seller_id'] != 'all', function ($query) use ($request) {
                 $query->where(['added_by' => 'seller', 'user_id' => $request['seller_id']]);
             })
             ->orderBy('current_stock', $sort)->get();
 
-        $data = array();
-        foreach($products as $product){
-            $data[] = array(
-                'Product Name'   => $product->name,
-                'Date'           => date('d M Y',strtotime($product->created_at)),
-                'Total Stock'    => $product->current_stock,
-            );
+        $data = [];
+        foreach ($products as $product) {
+            $data[] = [
+                'Product Name' => $product->name,
+                'Date' => date('d M Y', strtotime($product->created_at)),
+                'Total Stock' => $product->current_stock,
+            ];
         }
 
         return (new FastExcel($data))->download('total_product_stock.xlsx');
@@ -415,9 +420,9 @@ class ProductController extends Controller
             foreach ($request['type'] as $key => $str) {
                 $item = [];
                 $item['type'] = $str;
-                $item['price'] = BackEndHelper::currency_to_usd(abs($request['price_' . str_replace('.', '_', $str)]));
-                $item['sku'] = $request['sku_' . str_replace('.', '_', $str)];
-                $item['qty'] = abs($request['qty_' . str_replace('.', '_', $str)]);
+                $item['price'] = BackEndHelper::currency_to_usd(abs($request['price_'.str_replace('.', '_', $str)]));
+                $item['sku'] = $request['sku_'.str_replace('.', '_', $str)];
+                $item['qty'] = abs($request['qty_'.str_replace('.', '_', $str)]);
                 array_push($variations, $item);
             }
         }
@@ -428,9 +433,11 @@ class ProductController extends Controller
             $product->variation = json_encode($variations);
             $product->save();
             Toastr::success(\App\CPU\translate('product_quantity_updated_successfully!'));
+
             return back();
         } else {
             Toastr::warning(\App\CPU\translate('product_quantity_can_not_be_less_than_0_!'));
+
             return back();
         }
     }
@@ -438,14 +445,15 @@ class ProductController extends Controller
     public function get_categories(Request $request)
     {
         $cat = Category::where(['parent_id' => $request->parent_id])->get();
-        $res = '<option value="' . 0 . '" disabled selected>---Select---</option>';
+        $res = '<option value="'. 0 .'" disabled selected>---Select---</option>';
         foreach ($cat as $row) {
             if ($row->id == $request->sub_category) {
-                $res .= '<option value="' . $row->id . '" selected >' . $row->name . '</option>';
+                $res .= '<option value="'.$row->id.'" selected >'.$row->name.'</option>';
             } else {
-                $res .= '<option value="' . $row->id . '">' . $row->name . '</option>';
+                $res .= '<option value="'.$row->id.'">'.$row->name.'</option>';
             }
         }
+
         return response()->json([
             'select_tag' => $res,
         ]);
@@ -454,8 +462,9 @@ class ProductController extends Controller
     public function get_variations(Request $request)
     {
         $product = Product::find($request['id']);
+
         return response()->json([
-            'view' => view('seller-views.product.partials._update_stock', compact('product'))->render()
+            'view' => view('seller-views.product.partials._update_stock', compact('product'))->render(),
         ]);
     }
 
@@ -474,13 +483,14 @@ class ProductController extends Controller
 
         if ($request->has('choice_no')) {
             foreach ($request->choice_no as $key => $no) {
-                $name = 'choice_options_' . $no;
+                $name = 'choice_options_'.$no;
                 $my_str = implode('', $request[$name]);
                 array_push($options, explode(',', $my_str));
             }
         }
 
         $combinations = Helpers::combinations($options);
+
         return response()->json([
             'view' => view('admin-views.product.partials._sku_combinations', compact('combinations', 'unit_price', 'colors_active', 'product_name'))->render(),
         ]);
@@ -497,37 +507,36 @@ class ProductController extends Controller
         $digital_product_setting = BusinessSetting::where('type', 'digital_product')->first()->value;
 
         return view('seller-views.product.edit', compact('categories', 'br', 'product', 'product_category', 'brand_setting', 'digital_product_setting'));
-
     }
 
     public function update(Request $request, $id)
     {
         $product = Product::find($id);
         $validator = Validator::make($request->all(), [
-            'name'                  => 'required',
-            'category_id'           => 'required',
-            'product_type'          => 'required',
-            'digital_product_type'  => 'required_if:product_type,==,digital',
-            'digital_file_ready'    => 'mimes:jpg,jpeg,png,gif,zip,pdf',
-            'unit'                  => 'required_if:product_type,==,physical',
-            'tax'                   => 'required|min:0',
-            'unit_price'            => 'required|numeric|min:1',
-            'purchase_price'        => 'required|numeric|min:1',
-            'discount'              => 'required|gt:-1',
-            'shipping_cost'         => 'required_if:product_type,==,physical|gt:-1',
-            'code'                  => 'required|numeric|min:1|digits_between:6,20|unique:products,code,'.$product->id,
-            'minimum_order_qty'     => 'required|numeric|min:1',
+            'name' => 'required',
+            'category_id' => 'required',
+            'product_type' => 'required',
+            'digital_product_type' => 'required_if:product_type,==,digital',
+            'digital_file_ready' => 'mimes:jpg,jpeg,png,gif,zip,pdf',
+            'unit' => 'required_if:product_type,==,physical',
+            'tax' => 'required|min:0',
+            'unit_price' => 'required|numeric|min:1',
+            'purchase_price' => 'required|numeric|min:1',
+            'discount' => 'required|gt:-1',
+            'shipping_cost' => 'required_if:product_type,==,physical|gt:-1',
+            'code' => 'required|numeric|min:1|digits_between:6,20|unique:products,code,'.$product->id,
+            'minimum_order_qty' => 'required|numeric|min:1',
         ], [
-            'name.required'                     => 'Product name is required!',
-            'category_id.required'              => 'Category is required!',
-            'unit.required_if'                  => 'Unit is required!',
-            'code.min'                          => 'Code must be positive!',
-            'code.digits_between'               => 'Code must be minimum 6 digits!',
-            'minimum_order_qty.required'        => 'Minimum order quantity is required!',
-            'minimum_order_qty.min'             => 'Minimum order quantity must be positive!',
-            'digital_file_ready.mimes'          => 'Ready product upload must be a file of type: pdf, zip, jpg, jpeg, png, gif.',
-            'digital_product_type.required_if'  => 'Digital product type is required!',
-            'shipping_cost.required_if'         => 'Shipping Cost is required!',
+            'name.required' => 'Product name is required!',
+            'category_id.required' => 'Category is required!',
+            'unit.required_if' => 'Unit is required!',
+            'code.min' => 'Code must be positive!',
+            'code.digits_between' => 'Code must be minimum 6 digits!',
+            'minimum_order_qty.required' => 'Minimum order quantity is required!',
+            'minimum_order_qty.min' => 'Minimum order quantity must be positive!',
+            'digital_file_ready.mimes' => 'Ready product upload must be a file of type: pdf, zip, jpg, jpeg, png, gif.',
+            'digital_product_type.required_if' => 'Digital product type is required!',
+            'shipping_cost.required_if' => 'Shipping Cost is required!',
         ]);
 
         $brand_setting = BusinessSetting::where('type', 'product_brand')->first()->value;
@@ -581,12 +590,12 @@ class ProductController extends Controller
             ]);
         }
 
-        $product->product_type          = $request->product_type;
-        $product->category_ids          = json_encode($category);
-        $product->brand_id              = isset($request->brand_id) ? $request->brand_id : null;
-        $product->unit                  = $request->product_type == 'physical' ? $request->unit : null;
-        $product->digital_product_type  = $request->product_type == 'digital' ? $request->digital_product_type : null;
-        $product->details               = $request->description[array_search('en', $request->lang)];
+        $product->product_type = $request->product_type;
+        $product->category_ids = json_encode($category);
+        $product->brand_id = isset($request->brand_id) ? $request->brand_id : null;
+        $product->unit = $request->product_type == 'physical' ? $request->unit : null;
+        $product->digital_product_type = $request->product_type == 'digital' ? $request->digital_product_type : null;
+        $product->details = $request->description[array_search('en', $request->lang)];
 
         if ($request->has('colors_active') && $request->has('colors') && count($request->colors) > 0) {
             $product->colors = $request->product_type == 'physical' ? json_encode($request->colors) : json_encode([]);
@@ -597,8 +606,8 @@ class ProductController extends Controller
         $choice_options = [];
         if ($request->has('choice')) {
             foreach ($request->choice_no as $key => $no) {
-                $str = 'choice_options_' . $no;
-                $item['name'] = 'choice_' . $no;
+                $str = 'choice_options_'.$no;
+                $item['name'] = 'choice_'.$no;
                 $item['title'] = $request->choice[$key];
                 $item['options'] = explode(',', implode('|', $request[$str]));
                 array_push($choice_options, $item);
@@ -614,7 +623,7 @@ class ProductController extends Controller
         }
         if ($request->has('choice_no')) {
             foreach ($request->choice_no as $key => $no) {
-                $name = 'choice_options_' . $no;
+                $name = 'choice_options_'.$no;
                 $my_str = implode('|', $request[$name]);
                 array_push($options, explode(',', $my_str));
             }
@@ -628,7 +637,7 @@ class ProductController extends Controller
                 $str = '';
                 foreach ($combination as $k => $item) {
                     if ($k > 0) {
-                        $str .= '-' . str_replace(' ', '', $item);
+                        $str .= '-'.str_replace(' ', '', $item);
                     } else {
                         if ($request->has('colors_active') && $request->has('colors') && count($request->colors) > 0) {
                             $color_name = Color::where('code', $item)->first()->name;
@@ -640,14 +649,14 @@ class ProductController extends Controller
                 }
                 $item = [];
                 $item['type'] = $str;
-                $item['price'] = Convert::usd(abs($request['price_' . str_replace('.', '_', $str)]));
-                $item['sku'] = $request['sku_' . str_replace('.', '_', $str)];
-                $item['qty'] = abs($request['qty_' . str_replace('.', '_', $str)]);
+                $item['price'] = Convert::usd(abs($request['price_'.str_replace('.', '_', $str)]));
+                $item['sku'] = $request['sku_'.str_replace('.', '_', $str)];
+                $item['qty'] = abs($request['qty_'.str_replace('.', '_', $str)]);
                 array_push($variations, $item);
                 $stock_count += $item['qty'];
             }
         } else {
-            $stock_count = (integer)$request['current_stock'];
+            $stock_count = (int) $request['current_stock'];
         }
 
         if ($validator->errors()->count() > 0) {
@@ -655,25 +664,23 @@ class ProductController extends Controller
         }
 
         //combinations end
-        $product->variation         = $request->product_type == 'physical' ? json_encode($variations) : json_encode([]);
-        $product->unit_price        = Convert::usd($request->unit_price);
-        $product->purchase_price    = Convert::usd($request->purchase_price);
-        $product->tax               = $request->tax;
-        $product->code              = $request->code;
+        $product->variation = $request->product_type == 'physical' ? json_encode($variations) : json_encode([]);
+        $product->unit_price = Convert::usd($request->unit_price);
+        $product->purchase_price = Convert::usd($request->purchase_price);
+        $product->tax = $request->tax;
+        $product->code = $request->code;
         $product->minimum_order_qty = $request->minimum_order_qty;
-        $product->tax_type          = $request->tax_type;
-        $product->discount          = $request->discount_type == 'flat' ? Convert::usd($request->discount) : $request->discount;
-        $product->attributes        = $request->product_type == 'physical' ? json_encode($request->choice_attributes) : json_encode([]);
-        $product->discount_type     = $request->discount_type;
-        $product->current_stock     = $request->product_type == 'physical' ? abs($stock_count) : 0;
-        $product->shipping_cost     = $request->product_type == 'physical' ? (Helpers::get_business_settings('product_wise_shipping_cost_approval')==1?$product->shipping_cost:Convert::usd($request->shipping_cost)) : 0;
-        $product->multiply_qty      = ($request->product_type == 'physical') ? ($request->multiplyQTY=='on'?1:0) : 0;
+        $product->tax_type = $request->tax_type;
+        $product->discount = $request->discount_type == 'flat' ? Convert::usd($request->discount) : $request->discount;
+        $product->attributes = $request->product_type == 'physical' ? json_encode($request->choice_attributes) : json_encode([]);
+        $product->discount_type = $request->discount_type;
+        $product->current_stock = $request->product_type == 'physical' ? abs($stock_count) : 0;
+        $product->shipping_cost = $request->product_type == 'physical' ? (Helpers::get_business_settings('product_wise_shipping_cost_approval') == 1 ? $product->shipping_cost : Convert::usd($request->shipping_cost)) : 0;
+        $product->multiply_qty = ($request->product_type == 'physical') ? ($request->multiplyQTY == 'on' ? 1 : 0) : 0;
 
-        if(Helpers::get_business_settings('product_wise_shipping_cost_approval')==1 && $product->shipping_cost != Convert::usd($request->shipping_cost))
-        {
+        if (Helpers::get_business_settings('product_wise_shipping_cost_approval') == 1 && $product->shipping_cost != Convert::usd($request->shipping_cost)) {
             $product->temp_shipping_cost = Convert::usd($request->shipping_cost);
             $product->is_shipping_cost_updated = 0;
-
         }
 
         $product->video_provider = 'youtube';
@@ -697,14 +704,14 @@ class ProductController extends Controller
                 $product->thumbnail = ImageManager::update('product/thumbnail/', $product->thumbnail, 'png', $request->file('image'));
             }
 
-            if($request->product_type == 'digital') {
-                if($request->digital_product_type == 'ready_product' && $request->hasFile('digital_file_ready')){
+            if ($request->product_type == 'digital') {
+                if ($request->digital_product_type == 'ready_product' && $request->hasFile('digital_file_ready')) {
                     $product->digital_file_ready = ImageManager::update('product/digital-product/', $product->digital_file_ready, $request->digital_file_ready->getClientOriginalExtension(), $request->file('digital_file_ready'));
-                }elseif(($request->digital_product_type == 'ready_after_sell') && $product->digital_file_ready){
+                } elseif (($request->digital_product_type == 'ready_after_sell') && $product->digital_file_ready) {
                     ImageManager::delete('product/digital-product/'.$product->digital_file_ready);
                     $product->digital_file_ready = null;
                 }
-            }elseif($request->product_type == 'physical' && $product->digital_file_ready){
+            } elseif ($request->product_type == 'physical' && $product->digital_file_ready) {
                 ImageManager::delete('product/digital-product/'.$product->digital_file_ready);
                 $product->digital_file_ready = null;
             }
@@ -722,7 +729,7 @@ class ProductController extends Controller
                         ['translationable_type' => 'App\Model\Product',
                             'translationable_id' => $product->id,
                             'locale' => $key,
-                            'key' => 'name'],
+                            'key' => 'name', ],
                         ['value' => $request->name[$index]]
                     );
                 }
@@ -731,12 +738,13 @@ class ProductController extends Controller
                         ['translationable_type' => 'App\Model\Product',
                             'translationable_id' => $product->id,
                             'locale' => $key,
-                            'key' => 'description'],
+                            'key' => 'description', ],
                         ['value' => $request->description[$index]]
                     );
                 }
             }
             Toastr::success('Product updated successfully.');
+
             return back();
         }
     }
@@ -745,16 +753,18 @@ class ProductController extends Controller
     {
         $product = Product::with(['reviews'])->where(['id' => $id])->first();
         $reviews = Review::where(['product_id' => $id])->paginate(Helpers::pagination_limit());
+
         return view('seller-views.product.view', compact('product', 'reviews'));
     }
 
     public function remove_image(Request $request)
     {
-        ImageManager::delete('/product/' . $request['image']);
+        ImageManager::delete('/product/'.$request['image']);
         $product = Product::find($request['id']);
         $array = [];
         if (count(json_decode($product['images'])) < 2) {
             Toastr::warning('You cannot delete all images!');
+
             return back();
         }
         foreach (json_decode($product['images']) as $image) {
@@ -766,6 +776,7 @@ class ProductController extends Controller
             'images' => json_encode($array),
         ]);
         Toastr::success('Product image removed successfully!');
+
         return back();
     }
 
@@ -774,13 +785,14 @@ class ProductController extends Controller
         $product = Product::find($id);
         Cart::where('product_id', $product->id)->delete();
         foreach (json_decode($product['images'], true) as $image) {
-            ImageManager::delete('/product/' . $image);
+            ImageManager::delete('/product/'.$image);
         }
-        ImageManager::delete('/product/thumbnail/' . $product['thumbnail']);
+        ImageManager::delete('/product/thumbnail/'.$product['thumbnail']);
         $product->delete();
         FlashDealProduct::where(['product_id' => $id])->delete();
         DealOfTheDay::where(['product_id' => $id])->delete();
         Toastr::success('Product removed successfully!');
+
         return back();
     }
 
@@ -795,6 +807,7 @@ class ProductController extends Controller
             $collections = (new FastExcel)->import($request->file('products_file'));
         } catch (\Exception $exception) {
             Toastr::error('You have uploaded a wrong format file, please upload the right file.');
+
             return back();
         }
         $data = [];
@@ -802,13 +815,15 @@ class ProductController extends Controller
         $skip = ['youtube_video_url', 'details', 'thumbnail'];
         foreach ($collections as $collection) {
             foreach ($collection as $key => $value) {
-                if ($key!="" && !in_array($key, $col_key)) {
+                if ($key != '' && ! in_array($key, $col_key)) {
                     Toastr::error('Please upload the correct format file.');
+
                     return back();
                 }
 
-                if ($key!="" && $value === "" && !in_array($key, $skip)) {
-                    Toastr::error('Please fill ' . $key . ' fields');
+                if ($key != '' && $value === '' && ! in_array($key, $skip)) {
+                    Toastr::error('Please fill '.$key.' fields');
+
                     return back();
                 }
             }
@@ -817,8 +832,8 @@ class ProductController extends Controller
 
             array_push($data, [
                 'name' => $collection['name'],
-                'slug' => Str::slug($collection['name'], '-') . '-' . Str::random(6),
-                'category_ids' => json_encode([['id' => (string)$collection['category_id'], 'position' => 1], ['id' => (string)$collection['sub_category_id'], 'position' => 2], ['id' => (string)$collection['sub_sub_category_id'], 'position' => 3]]),
+                'slug' => Str::slug($collection['name'], '-').'-'.Str::random(6),
+                'category_ids' => json_encode([['id' => (string) $collection['category_id'], 'position' => 1], ['id' => (string) $collection['sub_category_id'], 'position' => 2], ['id' => (string) $collection['sub_sub_category_id'], 'position' => 3]]),
                 'brand_id' => $collection['brand_id'],
                 'unit' => $collection['unit'],
                 'min_qty' => $collection['min_qty'],
@@ -845,7 +860,8 @@ class ProductController extends Controller
             ]);
         }
         DB::table('products')->insert($data);
-        Toastr::success(count($data) . ' - Products imported successfully!');
+        Toastr::success(count($data).' - Products imported successfully!');
+
         return back();
     }
 
@@ -861,9 +877,9 @@ class ProductController extends Controller
             foreach (json_decode($item->category_ids, true) as $category) {
                 if ($category['position'] == 1) {
                     $category_id = $category['id'];
-                } else if ($category['position'] == 2) {
+                } elseif ($category['position'] == 2) {
                     $sub_category_id = $category['id'];
-                } else if ($category['position'] == 3) {
+                } elseif ($category['position'] == 3) {
                     $sub_sub_category_id = $category['id'];
                 }
             }
@@ -884,10 +900,11 @@ class ProductController extends Controller
                 'discount_type' => $item->discount_type,
                 'current_stock' => $item->current_stock,
                 'details' => $item->details,
-                'thumbnail' => 'thumbnail/' . $item->thumbnail
+                'thumbnail' => 'thumbnail/'.$item->thumbnail,
 
             ];
         }
+
         return (new FastExcel($storage))->download('products.xlsx');
     }
 
@@ -895,11 +912,12 @@ class ProductController extends Controller
     {
         if ($request->limit > 270) {
             Toastr::warning(translate('You can not generate more than 270 barcode'));
-             return back();
+
+            return back();
         }
         $product = Product::findOrFail($id);
-        $limit =  $request->limit ?? 4;
+        $limit = $request->limit ?? 4;
+
         return view('seller-views.product.barcode', compact('product', 'limit'));
     }
-
 }

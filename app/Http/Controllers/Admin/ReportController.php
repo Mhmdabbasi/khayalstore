@@ -23,12 +23,13 @@ class ReportController extends Controller
 
     public function earning_index(Request $request)
     {
-        if (!$request->has('from_date')) {
+        if (! $request->has('from_date')) {
             $from = $to = date('Y-m-01');
         } else {
             $from = $request['from_date'];
             $to = $request['to_date'];
         }
+
         return view('admin-views.report.earning-index', compact('from', 'to'));
     }
 
@@ -41,6 +42,7 @@ class ReportController extends Controller
         session()->put('to_date', $to);
 
         $previousUrl = strtok(url()->previous(), '?');
-        return redirect()->to($previousUrl . '?' . http_build_query(['from_date' => $request['from'], 'to_date' => $request['to']]))->with(['from' => $from, 'to' => $to]);
+
+        return redirect()->to($previousUrl.'?'.http_build_query(['from_date' => $request['from'], 'to_date' => $request['to']]))->with(['from' => $from, 'to' => $to]);
     }
 }

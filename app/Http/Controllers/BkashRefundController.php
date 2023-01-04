@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 class BkashRefundController extends Controller
 {
     private $base_url;
+
     private $app_key;
 
     public function __construct()
@@ -35,7 +36,7 @@ class BkashRefundController extends Controller
             'amount' => 'required',
             'trx_id' => 'required',
             'sku' => 'required|max:255',
-            'reason' => 'required|max:255'
+            'reason' => 'required|max:255',
         ]);
 
         $post_fields = [
@@ -63,14 +64,14 @@ class BkashRefundController extends Controller
     public function refundCurl($token, $post_fields)
     {
         $url = curl_init("$this->base_url/checkout/payment/refund");
-        $header = array(
+        $header = [
             'Content-Type:application/json',
             "authorization:$token",
-            "x-app-key:$this->app_key"
-        );
+            "x-app-key:$this->app_key",
+        ];
 
         curl_setopt($url, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($url, CURLOPT_POSTFIELDS, json_encode($post_fields));
         curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($url, CURLOPT_FOLLOWLOCATION, 1);

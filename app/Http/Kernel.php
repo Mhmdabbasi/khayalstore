@@ -5,14 +5,12 @@ namespace App\Http;
 use App\Http\Middleware\ActivationCheckMiddleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\APILocalizationMiddleware;
-use App\Http\Middleware\CustomerIsActiveCheck;
 use App\Http\Middleware\CustomerMiddleware;
 use App\Http\Middleware\DeliveryManAuth;
 use App\Http\Middleware\InstallationMiddleware;
 use App\Http\Middleware\MaintenanceModeMiddleware;
 use App\Http\Middleware\ModulePermissionMiddleware;
 use App\Http\Middleware\SellerMiddleware;
-use App\Model\Seller;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -46,7 +44,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\Localization::class
+            \App\Http\Middleware\Localization::class,
         ],
 
         'api' => [
@@ -81,7 +79,7 @@ class Kernel extends HttpKernel
         'actch' => ActivationCheckMiddleware::class,
         'api_lang' => APILocalizationMiddleware::class,
         'maintenance_mode' => MaintenanceModeMiddleware::class,
-        'delivery_man_auth' => DeliveryManAuth::class
+        'delivery_man_auth' => DeliveryManAuth::class,
     ];
 
     /**

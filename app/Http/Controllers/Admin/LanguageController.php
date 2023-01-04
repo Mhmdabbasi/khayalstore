@@ -8,13 +8,11 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Validator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 class LanguageController extends Controller
 {
-
     public function index()
     {
         return view('admin-views.business-settings.language.index');
@@ -30,7 +28,7 @@ class LanguageController extends Controller
         $request->validate([
             'name' => 'required',
         ], [
-            'name.required'  => 'Language is required!',
+            'name.required' => 'Language is required!',
         ]);
 
         $language = BusinessSetting::where('type', 'language')->first();
@@ -38,8 +36,8 @@ class LanguageController extends Controller
         $codes = [];
         foreach (json_decode($language['value'], true) as $key => $data) {
             if ($data['code'] != $request['code']) {
-                if (!array_key_exists('default', $data)) {
-                    $default = array('default' => ($data['code'] == 'en') ? true : false);
+                if (! array_key_exists('default', $data)) {
+                    $default = ['default' => ($data['code'] == 'en') ? true : false];
                     $data = array_merge($data, $default);
                 }
                 array_push($lang_array, $data);
@@ -48,11 +46,11 @@ class LanguageController extends Controller
         }
         array_push($codes, $request['code']);
 
-        if (!file_exists(base_path('resources/lang/' . $request['code']))) {
-            mkdir(base_path('resources/lang/' . $request['code']), 0777, true);
+        if (! file_exists(base_path('resources/lang/'.$request['code']))) {
+            mkdir(base_path('resources/lang/'.$request['code']), 0777, true);
         }
 
-        $lang_file = fopen(base_path('resources/lang/' . $request['code'] . '/' . 'messages.php'), "w") or die("Unable to open file!");
+        $lang_file = fopen(base_path('resources/lang/'.$request['code'].'/'.'messages.php'), 'w') or exit('Unable to open file!');
         $read = file_get_contents(base_path('resources/lang/en/messages.php'));
         fwrite($lang_file, $read);
 
@@ -66,7 +64,7 @@ class LanguageController extends Controller
         ]);
 
         BusinessSetting::updateOrInsert(['type' => 'language'], [
-            'value' => $lang_array
+            'value' => $lang_array,
         ]);
 
         DB::table('business_settings')->updateOrInsert(['type' => 'pnc_language'], [
@@ -74,6 +72,7 @@ class LanguageController extends Controller
         ]);
 
         Toastr::success('Language Added!');
+
         return back();
     }
 
@@ -105,7 +104,7 @@ class LanguageController extends Controller
             }
         }
         $businessSetting = BusinessSetting::where('type', 'language')->update([
-            'value' => $lang_array
+            'value' => $lang_array,
         ]);
 
         return $businessSetting;
@@ -139,10 +138,11 @@ class LanguageController extends Controller
             }
         }
         BusinessSetting::where('type', 'language')->update([
-            'value' => $lang_array
+            'value' => $lang_array,
         ]);
 
         Toastr::success('Default Language Changed!');
+
         return back();
     }
 
@@ -151,7 +151,7 @@ class LanguageController extends Controller
         $request->validate([
             'name' => 'required',
         ], [
-            'name.required'  => 'Language is required!',
+            'name.required' => 'Language is required!',
         ]);
 
         $language = BusinessSetting::where('type', 'language')->first();
@@ -180,37 +180,39 @@ class LanguageController extends Controller
             }
         }
         BusinessSetting::where('type', 'language')->update([
-            'value' => $lang_array
+            'value' => $lang_array,
         ]);
         Toastr::success('Language updated!');
+
         return back();
     }
 
     public function translate($lang)
     {
-        $full_data = include(base_path('resources/lang/' . $lang . '/messages.php'));
+        $full_data = include base_path('resources/lang/'.$lang.'/messages.php');
         $lang_data = [];
         ksort($full_data);
         foreach ($full_data as $key => $data) {
             array_push($lang_data, ['key' => $key, 'value' => $data]);
         }
+
         return view('admin-views.business-settings.language.translate', compact('lang', 'lang_data'));
     }
 
     public function translate_key_remove(Request $request, $lang)
     {
-        $full_data = include(base_path('resources/lang/' . $lang . '/messages.php'));
+        $full_data = include base_path('resources/lang/'.$lang.'/messages.php');
         unset($full_data[$request['key']]);
-        $str = "<?php return " . var_export($full_data, true) . ";";
-        file_put_contents(base_path('resources/lang/' . $lang . '/messages.php'), $str);
+        $str = '<?php return '.var_export($full_data, true).';';
+        file_put_contents(base_path('resources/lang/'.$lang.'/messages.php'), $str);
     }
 
     public function translate_submit(Request $request, $lang)
     {
-        $full_data = include(base_path('resources/lang/' . $lang . '/messages.php'));
+        $full_data = include base_path('resources/lang/'.$lang.'/messages.php');
         $full_data[$request['key']] = $request['value'];
-        $str = "<?php return " . var_export($full_data, true) . ";";
-        file_put_contents(base_path('resources/lang/' . $lang . '/messages.php'), $str);
+        $str = '<?php return '.var_export($full_data, true).';';
+        file_put_contents(base_path('resources/lang/'.$lang.'/messages.php'), $str);
     }
 
     public function delete($lang)
@@ -240,11 +242,11 @@ class LanguageController extends Controller
         }
 
         BusinessSetting::where('type', 'language')->update([
-            'value' => $lang_array
+            'value' => $lang_array,
         ]);
 
-        $dir = base_path('resources/lang/' . $lang);
-        if(File::isDirectory($dir)) {
+        $dir = base_path('resources/lang/'.$lang);
+        if (File::isDirectory($dir)) {
             $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
             $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
             foreach ($files as $file) {
@@ -257,8 +259,7 @@ class LanguageController extends Controller
             rmdir($dir);
         }
 
-
-        $languages = array();
+        $languages = [];
         $pnc_language = BusinessSetting::where('type', 'pnc_language')->first();
         foreach (json_decode($pnc_language['value'], true) as $key => $data) {
             if ($data != $lang) {
@@ -275,6 +276,7 @@ class LanguageController extends Controller
         ]);
 
         Toastr::success('Removed Successfully!');
+
         return back();
     }
 }

@@ -13,6 +13,7 @@ class CategoryController extends Controller
     {
         try {
             $categories = Category::with(['childes.childes'])->where(['position' => 0])->priority()->get();
+
             return response()->json($categories, 200);
         } catch (\Exception $e) {
             return response()->json([], 200);

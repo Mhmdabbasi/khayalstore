@@ -3,18 +3,18 @@
 namespace App\Model;
 
 use App\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
     protected $casts = [
-        'product_id'  => 'integer',
+        'product_id' => 'integer',
         'customer_id' => 'integer',
-        'rating'      => 'integer',
-        'status'      => 'integer',
-        'created_at'  => 'datetime',
-        'updated_at'  => 'datetime',
+        'rating' => 'integer',
+        'status' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -30,12 +30,14 @@ class Review extends Model
 
     public function scopeActive($query)
     {
-        $query->where('status',1);
+        $query->where('status', 1);
     }
+
     public function user()
     {
         return $this->hasOne('App\User', 'id', 'customer_id');
     }
+
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
@@ -56,18 +58,14 @@ class Review extends Model
         return $this->belongsTo(Order::class, 'order_id');
     }
 
-
     protected static function boot()
     {
         parent::boot();
         static::addGlobalScope('active', function (Builder $builder) {
-            if(str_contains(url()->current(), url('/').'/admin') || str_contains(url()->current(), url('/').'/seller') || str_contains(url()->current(), url('/').'/api/v2'))
-            {
-                $builder;
-            }else{
-                $builder->where('status',1);
+            if (str_contains(url()->current(), url('/').'/admin') || str_contains(url()->current(), url('/').'/seller') || str_contains(url()->current(), url('/').'/api/v2')) {
+            } else {
+                $builder->where('status', 1);
             }
-
         });
     }
 }

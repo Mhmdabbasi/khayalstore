@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use KingFlamez\Rave\Facades\Rave as Flutterwave;
-use Illuminate\Support\Facades\DB;
 use App\CPU\CartManager;
 use App\CPU\Helpers;
 use App\CPU\OrderManager;
-use App\Model\BusinessSetting;
-use Illuminate\Support\Facades\Http;
-use Brian2694\Toastr\Facades\Toastr;
 use function App\CPU\translate;
+use Brian2694\Toastr\Facades\Toastr;
+use KingFlamez\Rave\Facades\Rave as Flutterwave;
 
 class FlutterwaveController extends Controller
 {
@@ -34,21 +30,23 @@ class FlutterwaveController extends Controller
             'redirect_url' => route('flutterwave_callback'),
             'customer' => [
                 'email' => $user_data['email'],
-                "phone_number" => $user_data['phone'],
-                "name" => $user_data['name']
+                'phone_number' => $user_data['phone'],
+                'name' => $user_data['name'],
             ],
 
-            "customizations" => [
-                "title" => Helpers::get_business_settings('company_name'),
-                "description" => 1,
-            ]
+            'customizations' => [
+                'title' => Helpers::get_business_settings('company_name'),
+                'description' => 1,
+            ],
         ];
 
         try {
             $payment = Flutterwave::initializePayment($data);
+
             return redirect($payment['data']['link']);
-        }catch (\Exception $exception){
+        } catch (\Exception $exception) {
             Toastr::error(translate('configuration_invalid'));
+
             return back();
         }
     }
@@ -70,7 +68,7 @@ class FlutterwaveController extends Controller
                     'payment_status' => 'paid',
                     'transaction_ref' => session('transaction_ref'),
                     'order_group_id' => $unique_id,
-                    'cart_group_id' => $group_id
+                    'cart_group_id' => $group_id,
                 ];
                 $order_id = OrderManager::generate_order($data);
                 array_push($order_ids, $order_id);
@@ -78,15 +76,19 @@ class FlutterwaveController extends Controller
             CartManager::cart_clean();
             if (auth('customer')->check()) {
                 Toastr::success('Payment success.');
+
                 return view('web-views.checkout-complete');
             }
+
             return response()->json(['message' => 'Payment succeeded'], 200);
         }
 
         if (auth('customer')->check()) {
             Toastr::error('Payment failed.');
+
             return redirect('/');
         }
+
         return response()->json(['message' => 'Payment failed'], 403);
     }
 }

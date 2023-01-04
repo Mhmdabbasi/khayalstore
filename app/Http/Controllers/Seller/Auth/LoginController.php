@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Seller\Auth;
 
+use App\CPU\Helpers;
 use App\Http\Controllers\Controller;
 use App\Model\Seller;
 use App\Model\SellerWallet;
 use Brian2694\Toastr\Facades\Toastr;
+use Gregwar\Captcha\CaptchaBuilder;
+use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Gregwar\Captcha\CaptchaBuilder;
-use App\CPU\Helpers;
 use Illuminate\Support\Facades\Session;
-use Gregwar\Captcha\PhraseBuilder;
 
 class LoginController extends Controller
 {
@@ -22,7 +22,6 @@ class LoginController extends Controller
 
     public function captcha($tmp)
     {
-
         $phrase = new PhraseBuilder;
         $code = $phrase->build(4);
         $builder = new CaptchaBuilder($code, $phrase);
@@ -33,12 +32,12 @@ class LoginController extends Controller
         $builder->build($width = 100, $height = 40, $font = null);
         $phrase = $builder->getPhrase();
 
-        if(Session::has('default_captcha_code')) {
+        if (Session::has('default_captcha_code')) {
             Session::forget('default_captcha_code');
         }
         Session::put('default_captcha_code', $phrase);
-        header("Cache-Control: no-cache, must-revalidate");
-        header("Content-Type:image/jpeg");
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Content-Type:image/jpeg');
         $builder->output();
     }
 
@@ -51,7 +50,7 @@ class LoginController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6',
         ]);
         //recaptcha validation
         $recaptcha = Helpers::get_business_settings('recaptcha');
@@ -62,19 +61,21 @@ class LoginController extends Controller
                         function ($attribute, $value, $fail) {
                             $secret_key = Helpers::get_business_settings('recaptcha')['secret_key'];
                             $response = $value;
-                            $url = 'https://www.google.com/recaptcha/api/siteverify?secret=' . $secret_key . '&response=' . $response;
+                            $url = 'https://www.google.com/recaptcha/api/siteverify?secret='.$secret_key.'&response='.$response;
                             $response = \file_get_contents($url);
                             $response = json_decode($response);
-                            if (!$response->success) {
+                            if (! $response->success) {
                                 $fail(\App\CPU\translate('ReCAPTCHA Failed'));
                             }
                         },
                     ],
                 ]);
-            } catch (\Exception $exception) {}
+            } catch (\Exception $exception) {
+            }
         } else {
             if (strtolower($request->default_captcha_value) != strtolower(Session('default_captcha_code'))) {
                 Session::forget('default_captcha_code');
+
                 return back()->withErrors(\App\CPU\translate('Captcha Failed'));
             }
         }
@@ -96,6 +97,7 @@ class LoginController extends Controller
                     'updated_at' => now(),
                 ]);
             }
+
             return redirect()->route('seller.dashboard.index');
         } elseif (isset($se) && $se['status'] == 'pending') {
             return redirect()->back()->withInput($request->only('email', 'remember'))

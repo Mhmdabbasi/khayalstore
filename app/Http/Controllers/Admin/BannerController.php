@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class BannerController extends Controller
 {
-    function list(Request $request)
+    public function list(Request $request)
     {
         $query_param = [];
         $search = $request['search'];
@@ -45,11 +45,12 @@ class BannerController extends Controller
         $banner = new Banner;
         $banner->banner_type = $request->banner_type;
         $banner->resource_type = $request->resource_type;
-        $banner->resource_id = $request[$request->resource_type . '_id'];
+        $banner->resource_id = $request[$request->resource_type.'_id'];
         $banner->url = $request->url;
         $banner->photo = ImageManager::upload('banner/', 'png', $request->file('image'));
         $banner->save();
         Toastr::success('Banner added successfully!');
+
         return back();
     }
 
@@ -60,6 +61,7 @@ class BannerController extends Controller
             $banner->published = $request->status;
             $banner->save();
             $data = $request->status;
+
             return response()->json($data);
         }
     }
@@ -67,6 +69,7 @@ class BannerController extends Controller
     public function edit($id)
     {
         $banner = Banner::where('id', $id)->first();
+
         return view('admin-views.banner.edit', compact('banner'));
     }
 
@@ -81,7 +84,7 @@ class BannerController extends Controller
         $banner = Banner::find($id);
         $banner->banner_type = $request->banner_type;
         $banner->resource_type = $request->resource_type;
-        $banner->resource_id = $request[$request->resource_type . '_id'];
+        $banner->resource_id = $request[$request->resource_type.'_id'];
         $banner->url = $request->url;
         if ($request->file('image')) {
             $banner->photo = ImageManager::update('banner/', $banner['photo'], 'png', $request->file('image'));
@@ -89,14 +92,16 @@ class BannerController extends Controller
         $banner->save();
 
         Toastr::success('Banner updated successfully!');
+
         return back();
     }
 
     public function delete(Request $request)
     {
         $br = Banner::find($request->id);
-        ImageManager::delete('/banner/' . $br['photo']);
+        ImageManager::delete('/banner/'.$br['photo']);
         Banner::where('id', $request->id)->delete();
+
         return response()->json();
     }
 }

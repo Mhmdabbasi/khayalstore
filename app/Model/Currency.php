@@ -8,10 +8,10 @@ class Currency extends Model
 {
     protected $casts = [
         'exchange_rate' => 'float',
-        'status'        => 'integer',
-        'created_at'    => 'datetime',
-        'updated_at'    => 'datetime',
+        'status' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
-    protected $table = 'currencies';
 
+    protected $table = 'currencies';
 }

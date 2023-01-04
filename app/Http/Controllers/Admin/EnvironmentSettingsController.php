@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\CPU\Helpers;
-use Brian2694\Toastr\Facades\Toastr;
 use function App\CPU\translate;
+use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Http\Request;
 
 class EnvironmentSettingsController extends Controller
 {
@@ -19,6 +19,7 @@ class EnvironmentSettingsController extends Controller
     {
         if (env('APP_MODE') == 'demo') {
             Toastr::info(translate('you_can_not_update_this_on_demo_mode'));
+
             return back();
         }
 
@@ -27,10 +28,12 @@ class EnvironmentSettingsController extends Controller
             Helpers::setEnvironmentValue('APP_MODE', $request['app_mode'] ?? env('APP_MODE'));
         } catch (\Exception $exception) {
             Toastr::error('Environment variables updated failed!');
+
             return back();
         }
 
         Toastr::success('Environment variables updated successfully!');
+
         return back();
     }
 }
