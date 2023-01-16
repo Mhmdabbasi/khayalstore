@@ -373,7 +373,7 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li class="navbar-vertical-aside-has-menu {{Request::is('admin/product/list/seller*')||Request::is('admin/product/updated-product-list')?'active':''}}">
+                           <!-- <li class="navbar-vertical-aside-has-menu {{Request::is('admin/product/list/seller*')||Request::is('admin/product/updated-product-list')?'active':''}}">
                                 <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle"
                                    href="javascript:"
                                    title="{{\App\CPU\translate('Seller')}} {{\App\CPU\translate('Products')}}">
@@ -423,7 +423,7 @@
                                         </a>
                                     </li>
                                 </ul>
-                            </li>
+                            </li>-->
                         @endif
                         <!--Product Management Ends-->
 
@@ -727,7 +727,7 @@
                             </ul>
                         </li>
 
-                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/seller*')?'active':''}}">
+                        <!-- <li class="navbar-vertical-aside-has-menu {{Request::is('admin/seller*')?'active':''}}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle"
                                href="javascript:" title="{{\App\CPU\translate('Sellers')}}">
                                 <i class="tio-users-switch nav-icon"></i>
@@ -762,7 +762,7 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li> 
+                        </li> -->
                         <li class="nav-item {{Request::is('admin/customer/subscriber-list')?'active':''}}">
                             <a class="nav-link " href="{{route('admin.customer.subscriber-list')}}"
                                title="{{\App\CPU\translate('subscribers')}}">

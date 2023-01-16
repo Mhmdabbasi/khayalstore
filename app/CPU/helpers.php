@@ -19,16 +19,16 @@ use Illuminate\Support\Facades\Session;
 
 class Helpers
 {
-    public static function status($id)
-    {
-        if ($id == 1) {
-            $x = 'active';
-        } elseif ($id == 0) {
-            $x = 'in-active';
-        }
+   /* public static function status($id)
+   // {
+   //     if ($id == 1) {
+   //         $x = 'active';
+   //     } elseif ($id == 0) {
+   //         $x = 'in-active';
+   //     }
 
-        return $x;
-    }
+   //     return $x;
+   // } */
 
     public static function transaction_formatter($transaction)
     {

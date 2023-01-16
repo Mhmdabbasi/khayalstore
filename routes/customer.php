@@ -62,4 +62,5 @@ Route::prefix('customer')->name('customer.')->group(function () {
 
     Route::prefix('reward-points')->name('reward-points.')->middleware('auth:customer')->group(function () {
         Route::get('convert', 'RewardPointController@convert')->name('convert');
+    });
 });
